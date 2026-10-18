@@ -4,9 +4,9 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 6 — Core database schema** (`MASTER-IMPLEMENTATION-INDEX.md`). **Schema, migration and development seed validated on disposable databases; committed for draft PR #4.** Plan approved (D-051 to D-059); compatibility test passed (D-060). Branch `phase-6-core-schema` from `14f2b35`, not committed or pushed. The migration has been applied only to disposable validation databases, since removed. Unit suite: 20 files, 376 tests passed. Database integration suite: 7 files, 131 tests passed, including the seed (`phase-6-plan.md`).
+**Phase 6 — Core database schema: gate passed (D-061).** Commit `56ef435` on `phase-6-core-schema`, in draft PR #4 into `phase-5-api-platform`, open and unmerged. Decisions D-051 to D-061. The migration has been applied only to disposable validation databases, since removed. CI run 39161267484: unit suite 21 files, 383 tests; database integration suite 7 files, 131 tests; Gitleaks no leaks. **Phase 7 not started**; its planning needs your go-ahead.
 
-## Phase 6 setup results (local, 2026-10-19)
+## Phase 6 setup results (gate passed 2026-10-19, D-061)
 
 | Check | Result |
 |-------|--------|
@@ -76,11 +76,12 @@ Review fixes (approved): phone separators limited to ASCII space, non-breaking s
 
 | Check | Result |
 |-------|--------|
-| Current branch | `phase-6-core-schema` (from `14f2b35`), draft PR #4 into `phase-5-api-platform` |
+| Current branch | `phase-6-core-schema` (from `14f2b35`) |
 | `main` on GitHub | `71576b7` ("phase 3 plan"), unchanged |
 | PR #1 `phase-3-foundation` → `main` | `619d175`; open, draft, unmerged |
 | PR #2 `phase-4-shared-contracts` → `phase-3-foundation` | `dc3e1da`; open, draft, unmerged |
-| PR #3 `phase-5-api-platform` → `phase-4-shared-contracts` | `5f55243` before this status commit; open, draft, unmerged |
+| PR #3 `phase-5-api-platform` → `phase-4-shared-contracts` | `14f2b35`; open, draft, unmerged |
+| PR #4 `phase-6-core-schema` → `phase-5-api-platform` | `56ef435` before this status commit; open, draft, unmerged |
 
 ## Git history
 
@@ -187,22 +188,24 @@ All of these need V14.
 | Live payments (Phase 18), infrastructure (Phase 19) | **Not approved** | — |
 | D-202, D-203 | **Open**; not blocking | `DECISION-LOG.md` |
 | Phase 6 plan, decisions, setup | **Approved; setup done** | D-051 to D-060 |
-| Phase 6 migration | **Validated on a disposable database** (`20261018193745_core_schema`); not applied to any kept database | `phase-6-plan.md` |
+| Phase 6 migration | **Validated on disposable databases** (`20261018193745_core_schema`); not applied to any kept database | `phase-6-plan.md` |
+| Commit, push, draft PR #4 for Phase 6 | **Done** | `56ef435`; PR #4 open, draft, unmerged |
+| Phase 6 completion gate | **Passed** | D-061 |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 6 gate | Now | Needs CI on draft PR #4 and your review |
+| Phase 7 planning | Now | Needs your go-ahead |
 | Merge PR #1, PR #2 and PR #3 | Only with your explicit authorisation | Not authorised |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
-## Blockers for Phase 6
+## Blockers for Phase 7
 
-- The migration cannot be applied until you approve the reviewed SQL. Seeding waits for the applied migration.
+- Phase 6 gate recorded (D-061). Phase 7 planning needs your go-ahead; implementation needs separate approval of its plan.
 
 ## Skills audit
 
@@ -210,6 +213,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review draft PR #4 and its CI results, then pass, change or reject the Phase 6 gate.
+**You:** authorise Phase 7 planning (admin authentication, roles and audit; API only), or decide on merging the stacked PRs first.
 
-**Me, after that:** record the gate; Phase 7 planning only after it is passed.
+**Me, after that:** the Phase 7 plan only, with no code or dependencies until you approve it.

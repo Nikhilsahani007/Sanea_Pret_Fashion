@@ -1,6 +1,6 @@
 # Phase 6 Plan — Core Database Schema
 
-Status: **Approved (D-051 to D-059); compatibility test passed (D-060); repository setup done on branch `phase-6-core-schema` from `14f2b35`.** Not committed. **Schema and migration written and validated on a disposable database (2026-10-19); not applied anywhere else.** Development seed and its tests done. Committed on `phase-6-core-schema` for draft PR #4. · Date: 2026-10-19
+Status: **Gate passed (D-061).** Commit `56ef435` on `phase-6-core-schema`, draft PR #4 into `phase-5-api-platform`, unmerged. The migration has been applied only to disposable validation databases. · Date: 2026-10-19
 
 ## Scope
 Prisma schema and first migration for the Phase 6 tables in `database-design.md` §6 (catalogue, inventory, admin users, admin sessions, audit, content), local PostgreSQL through Docker Compose, a development seed with obviously fake data, and integration tests. No customer, cart, order, payment, enquiry, GST-rule or search tables, and no API routes.
@@ -98,8 +98,13 @@ Findings:
 - **Tests:** `seed.test.ts` (7 tests, no database) and `seed.db-test.ts` (6 tests).
 - **Disposable database:** integration suite 7 files, 131 tests passed. Real `npm run db:seed`: the first run created 3 products and 22 variants, the second changed nothing; the production and remote-host runs exited 1. The database was removed afterwards.
 
-## Next milestones
-1. CI on draft PR #4, then your review of the Phase 6 gate.
+## Gate
+CI run 39161267484 on draft PR #4 at `56ef435`:
+- Format, lint, typecheck, test, audit: 21 files, 383 tests;
+- Database integration tests: 7 files, 131 tests, PostgreSQL 18.6 service;
+- Secret scan (Gitleaks): no leaks.
+
+All three jobs succeeded. Gate approved 2026-10-19 (D-061).
 2. After approval, apply it to the local Compose database. Add the development seed (refuses production; "Sample …" names, `TEST-` SKUs).
 3. Integration tests: one cloned database per file; constraints, triggers and publishing rules through direct SQL; the existence of every handwritten object; seed contents; role parity with `@sanea/shared`. Add `test:integration` and the CI job with a PostgreSQL 18 service.
 4. Gate report. Commit, push and draft PR #4 need separate approval.
