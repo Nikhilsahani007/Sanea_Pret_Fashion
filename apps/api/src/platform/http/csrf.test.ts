@@ -12,7 +12,8 @@ import {
 
 const echo = Router()
   .post("/api/v1/echo", (req, res) => res.json({ received: req.body }))
-  .post("/api/v1/admin/echo", (_req, res) => res.json({ ok: true }));
+  .post("/api/v1/admin/echo", (_req, res) => res.json({ ok: true }))
+  .post("/api/v1/administrator", (_req, res) => res.json({ ok: true }));
 
 async function session(app: ReturnType<typeof testApp>["app"]) {
   const res = await request(app).get("/api/v1/auth/csrf");
@@ -150,6 +151,43 @@ describe("CSRF protection on state-changing requests", () => {
         .send({});
     expect((await send(ADMIN)).status).toBe(200);
     expect((await send(STOREFRONT)).status).toBe(403);
+  });
+
+  // Express routes /API/V1/ADMIN/echo to /api/v1/admin/echo, so the
+  // Origin check must classify it as admin too.
+  it.each(["/API/V1/ADMIN/echo", "/Api/V1/Admin/echo"])(
+    "requires the admin origin on mixed-case admin path %s",
+    async (path) => {
+      const { app } = testApp({ routers: [echo] });
+      const { token, cookie } = await session(app);
+      const send = (origin: string) =>
+        request(app)
+          .post(path)
+          .set("Origin", origin)
+          .set("Cookie", cookie)
+          .set("X-CSRF-Token", token)
+          .send({});
+      const fromAdmin = await send(ADMIN);
+      expect(fromAdmin.status).toBe(200);
+      expect(fromAdmin.body).toEqual({ ok: true });
+      const fromShop = await send(STOREFRONT);
+      expect(fromShop.status).toBe(403);
+      expect(fromShop.body.error.code).toBe("CSRF_FAILED");
+    },
+  );
+
+  it("keeps a look-alike path public", async () => {
+    const { app } = testApp({ routers: [echo] });
+    const { token, cookie } = await session(app);
+    const send = (origin: string) =>
+      request(app)
+        .post("/api/v1/administrator")
+        .set("Origin", origin)
+        .set("Cookie", cookie)
+        .set("X-CSRF-Token", token)
+        .send({});
+    expect((await send(STOREFRONT)).status).toBe(200);
+    expect((await send(ADMIN)).status).toBe(403);
   });
 
   it("does not apply to safe methods", async () => {

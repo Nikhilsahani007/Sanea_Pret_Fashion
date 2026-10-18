@@ -2,9 +2,13 @@ import type { Config } from "../config.ts";
 
 export const ADMIN_PREFIX = "/api/v1/admin";
 
-/** True when the request path belongs to the admin surface. */
+/**
+ * True when the request path belongs to the admin surface. Case-insensitive,
+ * because Express routing is: /API/V1/ADMIN/x reaches /api/v1/admin/x routes.
+ */
 export function isAdminPath(path: string): boolean {
-  return path === ADMIN_PREFIX || path.startsWith(`${ADMIN_PREFIX}/`);
+  const lower = path.toLowerCase();
+  return lower === ADMIN_PREFIX || lower.startsWith(`${ADMIN_PREFIX}/`);
 }
 
 /**

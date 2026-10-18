@@ -133,6 +133,35 @@ describe("CORS", () => {
     );
   });
 
+  it.each(["/API/V1/ADMIN/anything", "/Api/V1/Admin", "/api/v1/ADMIN/x"])(
+    "treats mixed-case %s as an admin path",
+    async (path) => {
+      const { app } = testApp();
+      const admin = await request(app).get(path).set("Origin", ADMIN);
+      expect(admin.headers["access-control-allow-origin"]).toBe(ADMIN);
+      const fromShop = await request(app).get(path).set("Origin", STOREFRONT);
+      expect(fromShop.headers["access-control-allow-origin"]).toBeUndefined();
+      const preflightFromShop = await request(app)
+        .options(path)
+        .set("Origin", STOREFRONT)
+        .set("Access-Control-Request-Method", "POST");
+      expect(
+        preflightFromShop.headers["access-control-allow-origin"],
+      ).toBeUndefined();
+    },
+  );
+
+  it.each(["/api/v1/administrator", "/API/V1/ADMIN-OTHER"])(
+    "keeps look-alike path %s public",
+    async (path) => {
+      const { app } = testApp();
+      const fromShop = await request(app).get(path).set("Origin", STOREFRONT);
+      expect(fromShop.headers["access-control-allow-origin"]).toBe(STOREFRONT);
+      const admin = await request(app).get(path).set("Origin", ADMIN);
+      expect(admin.headers["access-control-allow-origin"]).toBeUndefined();
+    },
+  );
+
   it("sends no CORS headers to unknown origins", async () => {
     const res = await request(testApp().app)
       .get("/api/v1/health")
