@@ -56,6 +56,7 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-041 | Apps consume `@sanea/shared` through its package exports **without TypeScript project references** to it; the root `tsc -b` keeps listing every workspace. Reason: a reference to a `noEmit` project fails with TS6310 (sandbox check 1). Types still reach consumers (verified with deliberate type errors). | Approval of sandbox results, 2026-10-18 |
 | D-042 | Use classic `zod@4.6.7`, not `zod/mini`. Load checkout as a separate route chunk so the landing page does not carry Zod (about 24 kB gzipped in the sandbox; `zod/mini` measured 3.5 kB). | Approval of sandbox results, 2026-10-18 |
 | D-043 | **Phase 4 implementation authorised** on local branch `phase-4-shared-contracts`, under D-040 to D-042: install `zod@4.6.7` in `@sanea/shared`, implement and test the shared contracts. Not authorised: commit, push, PR #2, Phase 5. The completion gate needs your review. | Phase 4 implementation authorisation, 2026-10-18 |
+| D-044 | **Phase 4 gate passed (AC10).** Evidence: commit `dc52aad` on `phase-4-shared-contracts`; local gate 259 tests passed, 0 failed, 0 skipped; `npm audit` 0 vulnerabilities; format, lint and typecheck clean; plain Node 24 import works and deep imports are rejected; CI run 39122113132 on draft PR #2 ("Format, lint, typecheck, test, audit" and "Secret scan (Gitleaks)" both success). PR #1 and PR #2 stay open, draft and unmerged. | Phase 4 completion approval, 2026-10-18 |
 
 ## Proposals
 
@@ -119,3 +120,4 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Phase 3 approved (D-038) and implemented locally on `phase-3-foundation`; checks V1 to V13a recorded in `PROJECT-STATUS.md`. Not committed. |
 | 2026-10-18 | Phase 3 gate passed (D-039); Phase 4 design approved in principle (D-040); sandbox-based decisions D-041 and D-042 recorded. Phase 4 implementation not authorised. |
 | 2026-10-18 | Phase 4 implementation authorised (D-043) and carried out locally; results in `PROJECT-STATUS.md`, implementation notes in `phase-4-plan.md`. Not committed. |
+| 2026-10-18 | Phase 4 gate passed (D-044). Phase 5 planning may start; implementation needs separate approval. |
