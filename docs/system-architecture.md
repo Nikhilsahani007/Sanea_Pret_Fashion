@@ -152,7 +152,15 @@ Performance budgets for the storefront: initial JS ≤ 170 KB gzipped, hero imag
 | vite | 8.3.4 | Required peer of Vitest 5; used by the apps later. |
 | @playwright/test | 1.64.1 | End-to-end runner; no browsers installed yet (D-036). |
 
-No runtime dependencies are installed. Details and checks: `phase-3-plan.md`, `PROJECT-STATUS.md`.
+No runtime dependencies were installed in Phase 3. Details and checks: `phase-3-plan.md`, `PROJECT-STATUS.md`.
+
+### Installed in Phase 4 (runtime, pinned exactly)
+
+| Package | Version | Where | Reason |
+|---------|---------|-------|--------|
+| zod | 4.6.7 | `@sanea/shared` dependency | Validation schemas used by the API and the apps; classic API, not `zod/mini` (D-042) |
+
+Apps consume `@sanea/shared` through its package exports, without TypeScript project references to it (D-041).
 
 ### Planned for later phases
 
