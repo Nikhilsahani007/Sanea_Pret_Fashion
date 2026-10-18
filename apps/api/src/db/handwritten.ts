@@ -47,6 +47,15 @@ export const HANDWRITTEN_CHECKS = [
   { table: "page", name: "page_verified_by_check" },
   { table: "page", name: "page_rehma_requires_verification_check" },
   { table: "navigation_item", name: "navigation_item_target_check" },
+  // Phase 7 (admin authentication)
+  { table: "admin_user", name: "admin_user_mfa_required_check" },
+  { table: "admin_user", name: "admin_user_mfa_key_check" },
+  { table: "admin_user", name: "admin_user_mfa_last_used_step_check" },
+  { table: "admin_invite", name: "admin_invite_token_hash_check" },
+  { table: "admin_invite", name: "admin_invite_expiry_check" },
+  { table: "admin_invite", name: "admin_invite_outcome_check" },
+  { table: "admin_invite", name: "admin_invite_pending_mfa_check" },
+  { table: "admin_recovery_code", name: "admin_recovery_code_hash_check" },
 ] as const;
 
 /** Reference rows inserted by the migration (D-029, D-058), in order. */

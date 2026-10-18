@@ -187,6 +187,10 @@ Apps consume `@sanea/shared` through its package exports, without TypeScript pro
 
 No `dotenv`: `prisma.config.ts` uses Node's `process.loadEnvFile`.
 
+### Phase 7 (no new packages)
+
+Argon2id (`crypto.argon2`), TOTP (HMAC-SHA-1), AES-256-GCM and HMAC all use Node 24's built-in `crypto` (D-062, D-064, D-065). The common-password list is a data file from SecLists (MIT), not a package (D-063).
+
 ### Planned for later phases
 
 Not installed yet. Planned dependencies and the reason for each:
@@ -198,7 +202,6 @@ Not installed yet. Planned dependencies and the reason for each:
 | zod | shared, api, apps | Single validation contract. |
 | express, helmet, cors, cookie-parser | api | HTTP server and security headers. |
 | express-rate-limit | api | Rate limiting on auth, enquiries, checkout. |
-| argon2 | api | Password hashing. |
 | pino, pino-http | api | Structured logging. |
 | sharp | api | Image resizing and format conversion. |
 | vitest, supertest, @testing-library/react, playwright | dev | Tests. |

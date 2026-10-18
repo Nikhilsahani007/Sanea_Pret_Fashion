@@ -21,7 +21,8 @@
     "audit": "npm audit --audit-level=high",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

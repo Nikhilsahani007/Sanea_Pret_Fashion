@@ -3,8 +3,9 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { Router, type CookieOptions, type RequestHandler } from "express";
 
 import type { Config } from "../config.ts";
+import { adminContext } from "./admin-context.ts";
 import { AppError } from "./errors.ts";
-import { allowedOriginFor } from "./origins.ts";
+import { allowedOriginFor, isAdminPath } from "./origins.ts";
 
 /** Cookie name. The `__Host-` prefix forbids `Domain` and requires `Secure` and `Path=/`. */
 export const CSRF_COOKIE = "__Host-sp_csrf";
@@ -64,6 +65,16 @@ export function isValidCsrfToken(
   return equal(signature, sign(secret, nonce, issuedAt));
 }
 
+/**
+ * The CSRF token for an admin session (D-068): an HMAC of the session ID, so
+ * it is valid only with that session and needs no cookie of its own.
+ */
+export function sessionCsrfToken(secret: string, sessionId: string): string {
+  return createHmac("sha256", secret)
+    .update(`admin-csrf-v1:${sessionId}`)
+    .digest("base64url");
+}
+
 /** `GET /api/v1/auth/csrf`: sets the cookie and returns the same token. */
 export function csrfRouter(config: Config): Router {
   const router = Router();
@@ -77,22 +88,31 @@ export function csrfRouter(config: Config): Router {
 }
 
 /**
- * Verifies state-changing requests: the Origin must be the allowed origin for
- * the path, the header must equal the cookie, and the token must verify.
+ * Verifies state-changing requests. The Origin must be the allowed origin for
+ * the path. With an admin session, the header must be that session's token
+ * (D-068); otherwise the header must equal the cookie and the token verify.
  */
 export function csrfProtection(config: Config): RequestHandler {
-  return (req, _res, next) => {
+  return (req, res, next) => {
     if (SAFE_METHODS.has(req.method)) return next();
     const origin = req.get("origin");
     const header = req.get(CSRF_HEADER);
-    const cookie: unknown = req.cookies?.[CSRF_COOKIE];
-    const ok =
-      origin === allowedOriginFor(req.path, config) &&
-      typeof header === "string" &&
-      typeof cookie === "string" &&
-      equal(header, cookie) &&
-      isValidCsrfToken(config.csrfSecret, header);
-    if (!ok) return next(new AppError("CSRF_FAILED"));
+    const session = isAdminPath(req.path) ? adminContext(res) : undefined;
+    let tokenOk: boolean;
+    if (session) {
+      tokenOk =
+        typeof header === "string" &&
+        equal(header, sessionCsrfToken(config.csrfSecret, session.sessionId));
+    } else {
+      const cookie: unknown = req.cookies?.[CSRF_COOKIE];
+      tokenOk =
+        typeof header === "string" &&
+        typeof cookie === "string" &&
+        equal(header, cookie) &&
+        isValidCsrfToken(config.csrfSecret, header);
+    }
+    if (origin !== allowedOriginFor(req.path, config) || !tokenOk)
+      return next(new AppError("CSRF_FAILED"));
     next();
   };
 }

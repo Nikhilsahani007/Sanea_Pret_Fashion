@@ -166,5 +166,6 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-19 | PR #3 review: two admin-path classification fixes (`512fd88`, `5f55243`). Phase 5 gate passed (D-050). Phase 6 planning needs your go-ahead. |
 | 2026-10-19 | Phase 6 plan approved (D-051 to D-059); compatibility test passed (D-060); repository setup carried out on `phase-6-core-schema`. Schema, migration and seed not started. |
 | 2026-10-19 | Phase 6 gate passed (D-061). Phase 7 planning needs your go-ahead. |
-
 | 2026-10-19 | PRs #1–#4 merged into `main` using merge commits; Phase 7 decisions D-062–D-075 approved by you. Phase 7 implementation authorised up to the migration review stop. |
+| 2026-10-19 | Phase 7 migration `20261018202335_admin_auth` written, validated on disposable databases and approved by you. |
+| 2026-10-19 | Phase 7 auth, staff and audit modules implemented and verified locally (`phase-7-plan.md`). Gate pending. |

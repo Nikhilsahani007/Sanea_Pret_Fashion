@@ -38,13 +38,13 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 
 | HTTP | Typical codes |
 |------|---------------|
-| 400 | `VALIDATION_FAILED` (details list field paths), `MALFORMED_JSON` (body is not valid JSON) |
-| 401 | `UNAUTHENTICATED` |
+| 400 | `VALIDATION_FAILED` (details list field paths), `MALFORMED_JSON` (body is not valid JSON), `INVITE_INVALID` (invite or reset link unknown, used, revoked or expired), `PASSWORD_REJECTED` (details: `TOO_SHORT`, `TOO_LONG` or `TOO_COMMON`) |
+| 401 | `UNAUTHENTICATED`, `SIGN_IN_FAILED` (one generic answer for wrong email, password, code, locked or inactive account; D-066) |
 | 403 | `FORBIDDEN`, `CSRF_FAILED` |
 | 404 | `NOT_FOUND` |
 | 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB) |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`) |
-| 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT` |
+| 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
 | 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
 | 429 | `RATE_LIMITED` |
 | 500 | `INTERNAL_ERROR` (no stack traces) |
@@ -114,7 +114,11 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 
 | Method | Path | Roles |
 |--------|------|-------|
-| POST | `/admin/auth/sign-in` · `/admin/auth/sign-out` · GET `/admin/auth/me` | all |
+| POST | `/admin/auth/sign-in` `{ email, password }` → `{ challenge, expiresAt }` (no session yet) | public, rate-limited |
+| POST | `/admin/auth/mfa` `{ challenge, code }` or `{ challenge, recoveryCode }` → sets `__Host-sp_admin`, returns `{ admin, csrfToken }` | public, rate-limited |
+| POST | `/admin/auth/sign-out` · GET `/admin/auth/me` (→ `{ admin, csrfToken }`) | all |
+| POST | `/admin/auth/invites/inspect` · `/invites/enrol` (→ `{ otpauthUri, secret }`) · `/invites/accept` `{ token, name?, password, code }` (→ `{ recoveryCodes }`) | invite-link holder, rate-limited |
+| POST | `/admin/staff/invites` `{ email, role }` · `/admin/staff/:id/reset` (→ `{ inviteUrl, expiresAt }`); PATCH `/admin/staff/:id` `{ role?, isActive? }` | O |
 | GET | `/admin/dashboard` | O M C F (content tailored to role) |
 | GET/POST | `/admin/products` | GET: O M C F · POST: O M C |
 | GET/PATCH | `/admin/products/:id` | GET: all · PATCH: O M C (price fields: O M only) |

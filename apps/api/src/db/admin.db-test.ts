@@ -23,8 +23,8 @@ beforeAll(async () => {
 afterAll(() => drop());
 
 const adminSql = (email: string, role = "OWNER") =>
-  `INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "updated_at")
-   VALUES ('${email}', 'TEST', 'TEST-hash', '${role}', now())`;
+  `INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "mfa_secret_encrypted", "mfa_key_version", "mfa_enabled_at", "updated_at")
+   VALUES ('${email}', 'TEST', 'TEST-hash', '${role}', '\\x00'::bytea, 1, now(), now())`;
 
 const tokenHash = () =>
   createHash("sha256").update(randomBytes(32)).digest("hex");
@@ -53,6 +53,9 @@ describe("admin users", () => {
           name: "TEST",
           passwordHash: "TEST-hash",
           role: "OWNER",
+          mfaSecretEncrypted: new Uint8Array([0]),
+          mfaKeyVersion: 1,
+          mfaEnabledAt: new Date(),
         },
       })
       .then(

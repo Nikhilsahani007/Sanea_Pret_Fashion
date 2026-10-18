@@ -254,7 +254,7 @@ Staff invites, password-reset tokens and MFA recovery codes are designed with ad
 | Phase | Tables |
 |-------|--------|
 | **6** | Category, Collection, CollectionProduct, Product, Colour, Size (reference rows), SizeChart, ProductVariant, ProductImage, MediaAsset; InventoryLevel, StockMovement, StockReservation (without `orderId`); AdminUser, AdminSession, AuditLog; ContentBlock, Page, NavigationItem, StoreSetting |
-| 7 | Staff invites, password-reset tokens, MFA recovery codes |
+| 7 | AdminInvite, AdminRecoveryCode; `admin_user` 2FA columns (`mfa_key_version`, `mfa_enabled_at`, `mfa_last_used_step`). Admin password-reset tokens are replaced by Owner-issued reset invites (D-071) |
 | 8 | Search fields and indexes (`pg_trgm`) |
 | 9 | Low-stock view and its index |
 | 11 | Cart, CartItem |

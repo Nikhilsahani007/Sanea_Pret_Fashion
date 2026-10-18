@@ -7,6 +7,9 @@ const valid = {
   STOREFRONT_ORIGIN: "http://localhost:5173",
   ADMIN_ORIGIN: "http://localhost:5174",
   CSRF_SECRET: "a".repeat(32),
+  DATABASE_URL: "postgresql://u:p@127.0.0.1:5433/sanea_dev",
+  MFA_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64"),
+  IP_HASH_KEY: "i".repeat(32),
 };
 
 function problems(env: Record<string, string | undefined>): readonly string[] {
@@ -30,6 +33,10 @@ describe("loadConfig()", () => {
       adminOrigin: "http://localhost:5174",
       csrfSecret: "a".repeat(32),
       trustProxy: 0,
+      databaseUrl: "postgresql://u:p@127.0.0.1:5433/sanea_dev",
+      mfaEncryptionKey: Buffer.alloc(32, 7),
+      mfaKeyVersion: 1,
+      ipHashKey: "i".repeat(32),
     });
   });
 
@@ -53,6 +60,9 @@ describe("loadConfig()", () => {
       "STOREFRONT_ORIGIN is required",
       "ADMIN_ORIGIN is required",
       "CSRF_SECRET is required",
+      "DATABASE_URL is required",
+      "MFA_ENCRYPTION_KEY is required",
+      "IP_HASH_KEY is required",
     ]);
   });
 
@@ -65,6 +75,14 @@ describe("loadConfig()", () => {
     [{ STOREFRONT_ORIGIN: "http://localhost:5173/shop" }, "STOREFRONT_ORIGIN"],
     [{ ADMIN_ORIGIN: "localhost:5174" }, "ADMIN_ORIGIN"],
     [{ CSRF_SECRET: "short" }, "CSRF_SECRET"],
+    [{ DATABASE_URL: "mysql://x" }, "DATABASE_URL"],
+    [
+      { MFA_ENCRYPTION_KEY: Buffer.alloc(16).toString("base64") },
+      "MFA_ENCRYPTION_KEY",
+    ],
+    [{ MFA_ENCRYPTION_KEY: "not base64!" }, "MFA_ENCRYPTION_KEY"],
+    [{ MFA_ENCRYPTION_KEY_VERSION: "0" }, "MFA_ENCRYPTION_KEY_VERSION"],
+    [{ IP_HASH_KEY: "short" }, "IP_HASH_KEY"],
   ])("rejects %j", (override, name) => {
     const found = problems({ ...valid, ...override });
     expect(found).toHaveLength(1);
@@ -94,5 +112,8 @@ describe("loadConfig()", () => {
     } catch (error) {
       expect(String(error)).not.toContain(secret);
     }
+    const key = Buffer.alloc(16, 9).toString("base64");
+    const message = problems({ ...valid, MFA_ENCRYPTION_KEY: key }).join();
+    expect(message).not.toContain(key);
   });
 });

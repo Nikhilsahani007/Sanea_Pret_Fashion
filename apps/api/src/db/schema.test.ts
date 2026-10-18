@@ -99,9 +99,11 @@ describe("reference data", () => {
 });
 
 describe("Phase 6 scope and conventions", () => {
-  it("creates exactly the Phase 6 tables (database-design.md §6)", () => {
+  it("creates exactly the approved tables (database-design.md §6)", () => {
     expect(tables.sort()).toEqual(
       [
+        "admin_invite",
+        "admin_recovery_code",
         "admin_session",
         "admin_user",
         "audit_log",
