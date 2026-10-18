@@ -26,11 +26,46 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Generated Prisma client is not committed (D-053); no database needed.
+      - run: npm run db:generate
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run audit
+
+  database:
+    name: Database integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      # Throwaway service for this run only; not a reusable credential.
+      POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+    services:
+      postgres:
+        image: postgres:18.6-alpine
+        env:
+          POSTGRES_USER: sanea
+          POSTGRES_DB: sanea_test
+          POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sanea -d sanea_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      # Migrates a template database, checks drift, then runs *.db-test.ts.
+      - run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://sanea:${{ env.POSTGRES_PASSWORD }}@127.0.0.1:5432/sanea_test
 
   secrets:
     name: Secret scan (Gitleaks)

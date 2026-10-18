@@ -60,7 +60,7 @@ sanea-pret/                         (this repository root)
   prisma/
     schema.prisma
     migrations/                     (created only after approval)
-    seed.ts                         development-only fake data
+    (seed: apps/api/src/db/seed.ts, development-only fake data; `npm run db:seed`)
   docs/
   .env.example                      no secrets; documents every variable
   package.json                      npm workspaces
@@ -103,7 +103,7 @@ Each module owns its routes, validation, business logic and database access. A m
 
 No infrastructure is provisioned in this phase. The architecture assumes:
 
-- **Local development:** PostgreSQL 16 in Docker (Docker 28 is installed on this machine; PostgreSQL is not). API on port 4000, storefront on 5173, admin on 5174. Vite dev proxy forwards `/api` to the API to keep cookies same-origin.
+- **Local development:** PostgreSQL 18 in Docker through `compose.yaml` (D-051), bound to `127.0.0.1:5433` by default, password required from your local `.env`. API on port 4000, storefront on 5173, admin on 5174. Vite dev proxy forwards `/api` to the API to keep cookies same-origin.
 - **Production (later, separate approval):** API as a container, PostgreSQL as a managed service, images in object storage behind a CDN, both SPAs as static files on a CDN. AWS is named in the brief as a likely target. Nothing is provisioned until approved.
 - **Background jobs:** a small in-process job runner backed by a PostgreSQL table (or `pg-boss`) for reservation expiry, unconfirmed-COD expiry and email sending. No Redis or message broker in R1.
 
@@ -177,6 +177,16 @@ Apps consume `@sanea/shared` through its package exports, without TypeScript pro
 | supertest | 7.3.1 | dev | HTTP tests |
 | @types/express, @types/cors, @types/cookie-parser, @types/supertest | 5.0.6, 2.8.19, 1.4.10, 7.2.1 | dev | Types |
 
+### Installed in Phase 6 (pinned exactly)
+
+| Package | Version | Where | Reason |
+|---------|---------|-------|--------|
+| prisma | 7.10.1 | root, dev | CLI: generate, validate, migrations. npm's `latest` tag points to 8.0.0-rc.23, so the pin is deliberate (D-052) |
+| @prisma/client | 7.10.1 | `@sanea/api` | Generated client runtime; the client is generated into `apps/api/src/generated/prisma` and not committed (D-053) |
+| @prisma/adapter-pg | 7.10.1 | `@sanea/api` | PostgreSQL driver adapter; brings `pg` 8.23.1 |
+
+No `dotenv`: `prisma.config.ts` uses Node's `process.loadEnvFile`.
+
 ### Planned for later phases
 
 Not installed yet. Planned dependencies and the reason for each:
@@ -188,7 +198,6 @@ Not installed yet. Planned dependencies and the reason for each:
 | zod | shared, api, apps | Single validation contract. |
 | express, helmet, cors, cookie-parser | api | HTTP server and security headers. |
 | express-rate-limit | api | Rate limiting on auth, enquiries, checkout. |
-| @prisma/client, prisma | api | Database access and migrations. |
 | argon2 | api | Password hashing. |
 | pino, pino-http | api | Structured logging. |
 | sharp | api | Image resizing and format conversion. |

@@ -1,6 +1,6 @@
 # Sanéa Pret — Blockers
 
-Last updated: 2026-10-18
+Last updated: 2026-10-19
 
 A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEMENTATION-INDEX.md`. A safe default only clears a blocker once you accept it.
 
@@ -23,8 +23,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 
 | ID | Risk | Evidence | Impact |
 |----|------|----------|--------|
-| E-01 | Docker is installed, but the daemon has not been tested. | `docker --version` returned 28.0.4; no container started. | Phase 6 integration tests need a running daemon. |
-| E-02 | PostgreSQL client tools are not installed. | `psql` not found. | None if Docker is used. |
+| E-02 | A native Windows PostgreSQL 18 service (`postgresql-x64-18`) runs on this machine and listens on port 5432 on all interfaces. | `Get-NetTCPConnection` and `Get-Service`, 2026-10-19. | The Compose database uses `127.0.0.1:5433` instead. The native service is yours and was not changed; consider limiting it to localhost if you do not need it on the network. |
 | E-03 | Panchang's "É" glyph is unchecked (OD-15). | Not tested. | The wordmark may need another face (Phase 11). |
 | E-04 | `skills-lock.json` records only 2 of the 9 project skills. | Lock file lists `design-motion-principles` and `design-taste-frontend` only. | Source and version of the other 7 cannot be reproduced. |
 
@@ -39,3 +38,4 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | R-05 (was B-02) | Planning documents and index not approved. | You approved them as the baseline. | D-028 |
 | R-06 (was B-05) | Schema-shaping decisions unanswered (OD-04, OD-05, OD-10, OD-11, OD-25). | You accepted them. | D-029 to D-033 |
 | R-07 (was B-13) | Scope change OD-26 awaited approval. | You approved it. | D-034 |
+| R-08 (was E-01) | Docker daemon untested. | Containers ran for the Phase 5 shutdown test and the Phase 6 compatibility test. | `phase-5-plan.md`, `phase-6-plan.md` |

@@ -1,0 +1,28 @@
+# Local development database only (D-051). Not used in CI or production.
+# Start: docker compose up -d   Stop: docker compose down
+name: sanea-pret
+
+services:
+  db:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: sanea
+      POSTGRES_DB: ${POSTGRES_DB:-sanea_dev}
+      # Required, no default: set it in your local .env (never committed).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      # Loopback only: not reachable from other machines on the network.
+      # Host port 5433 by default, so a locally installed PostgreSQL on 5432
+      # does not clash; override with POSTGRES_PORT.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql/18.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sanea -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
