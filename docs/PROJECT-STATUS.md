@@ -1,10 +1,29 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
-**Phase 5 — API platform skeleton** (`MASTER-IMPLEMENTATION-INDEX.md`). **Not started:** planning only; implementation needs your approval of the Phase 5 plan.
+**Phase 5 — API platform skeleton: gate passed (D-050).** Commits `ab355d6`, `512fd88` and `5f55243` on `phase-5-api-platform`, in draft PR #3 into `phase-4-shared-contracts`, open and unmerged. Decisions D-045 to D-049, D-132, D-133. **Phase 6 not started**; its planning needs your go-ahead.
+
+## Phase 5 results (gate passed 2026-10-19, D-050)
+
+| Criterion | Result |
+|-----------|--------|
+| P5-AC1 Dependencies | **Pass**: only the 14 planned packages, exact versions (`system-architecture.md` §7); `npm audit` 0 vulnerabilities |
+| P5-AC2 Config fails fast | **Pass**: bad config exits 1, names each problem, prints no secret (unit tests and real `node src/main.ts`) |
+| P5-AC3 Error shape | **Pass**: documented shape with `requestId`; 500 hides messages and stacks |
+| P5-AC4 Security headers | **Pass**: CSP, nosniff, Referrer-Policy, Permissions-Policy, no X-Powered-By; HSTS only in production |
+| P5-AC5 CORS | **Pass**: storefront origin on public routes, admin origin only on `/api/v1/admin/*`, others get no CORS headers. PR #3 review fixes: path classified by pathname, not `req.url` (`512fd88`), and case-insensitively, as Express routes are (`5f55243`); applies to CORS and the CSRF Origin check |
+| P5-AC6 CSRF | **Pass**: Origin check, header equals cookie, HMAC signature, 12-hour expiry, forged and tampered tokens rejected; real-server round trip passed; cookie and flow verified in headless Edge 155 and Chrome 154 (`phase-5-plan.md`) |
+| P5-AC7 Rate limiting | **Pass**: `429 RATE_LIMITED`; spoofed X-Forwarded-For ignored; 300/min global, health exempt |
+| P5-AC8 Health | **Pass**: `200 {"status":"ok"}`, no internal details |
+| P5-AC9 Log redaction | **Pass**: authorization, cookie, CSRF header redacted (tests and real server log) |
+| P5-AC10 Quality gate | **Pass**: format, lint, typecheck; 19 files, 331 tests passed, 0 failed (at `5f55243`) |
+| P5-AC11 Scope | **Pass**: no business routes, database, sessions or authentication; no consumer project references |
+| Graceful shutdown (Linux) | **Pass**: SIGTERM and SIGINT in Docker `node:24.11.0-bookworm-slim`, exit 0 in 16 and 24 ms with an idle keep-alive connection open, stderr empty (`phase-5-plan.md`) |
+| P5-AC12 CI on draft PR #3 and your approval | **Pass**: CI run 39157064172 at `5f55243` (CI and Gitleaks success); gate approved 2026-10-19 (D-050) |
+
 
 **Phase 4 — Shared contracts: gate passed (D-044).** Commit `dc52aad` on `phase-4-shared-contracts`, in draft PR #2 into `phase-3-foundation`. The results below are the Phase 4 record.
 
@@ -38,14 +57,15 @@ Review fixes (approved): phone separators limited to ASCII space, non-breaking s
 - The Phase 3 gate passed on 2026-10-18 (D-039), after CI run 39117996687 on draft PR #1 succeeded (V14).
 - At the Phase 3 gate, no application features, runtime dependencies, database schema, migrations, payments or infrastructure existed.
 
-## Git state (verified 2026-10-18)
+## Git state (verified 2026-10-19)
 
 | Check | Result |
 |-------|--------|
-| Current branch | `phase-3-foundation`, created from `main` at `71576b7` |
-| `main`, `origin/main`, GitHub `main` | `71576b7f9bef788be6f55541adb5406cb2c840c7` ("phase 3 plan") |
-| `phase-3-foundation` local and GitHub | `567e27fa613c59b8b477dacb4d6a7d34f71300e2` ("phase 1 first commit"); working tree matches it |
-| Workflow runs and pull requests on GitHub | 0 and 0 (GitHub API, 2026-10-18) |
+| Current branch | `phase-5-api-platform` (from `dc3e1da`) |
+| `main` on GitHub | `71576b7` ("phase 3 plan"), unchanged |
+| PR #1 `phase-3-foundation` → `main` | `619d175`; open, draft, unmerged |
+| PR #2 `phase-4-shared-contracts` → `phase-3-foundation` | `dc3e1da`; open, draft, unmerged |
+| PR #3 `phase-5-api-platform` → `phase-4-shared-contracts` | `5f55243` before this status commit; open, draft, unmerged |
 
 ## Git history
 
@@ -136,6 +156,9 @@ All of these need V14.
 | Phase 4 design decisions | **Approved in principle** | D-040, D-041, D-042 |
 | Phase 4 implementation, Zod installation in the repository | **Authorised and done locally** | D-043 |
 | Phase 4 completion gate | **Passed** | D-044 |
+| Phase 5 plan and decisions | **Approved** | D-045 to D-049, D-132 |
+| Commit, push, draft PR #3 for Phase 5 | **Authorised** | D-133 |
+| Phase 5 completion gate | **Passed** | D-050 |
 | Commit, push, draft PR #2 for Phase 4 | **Done** | `dc52aad`; PR #2 open, draft, unmerged |
 | Branch `phase-4-shared-contracts` | **Pushed** | GitHub at the Phase 4 commits; PR #2 head |
 | Commit and push of the Phase 3 housekeeping | **Done** | `619d175` |
@@ -151,18 +174,16 @@ All of these need V14.
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 5 plan | Now | Being prepared; needs your approval |
-| Phase 5 implementation | After plan approval | Not started |
-| Merge PR #1 and PR #2 | Only with your explicit authorisation | Not authorised |
+| Phase 6 planning | Now | Needs your go-ahead |
+| Merge PR #1, PR #2 and PR #3 | Only with your explicit authorisation | Not authorised |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
-## Blockers for Phase 5
+## Blockers for Phase 6
 
-- Phase 5 implementation needs your approval of the Phase 5 plan.
-- No open business decision blocks Phase 5; its dependencies need approval with the plan.
+- Phase 5 gate recorded (D-050). Phase 6 planning needs your go-ahead; implementation needs separate approval of its plan.
 
 ## Skills audit
 
@@ -170,6 +191,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review the Phase 5 execution plan and approve it, change it, or reject it.
+**You:** authorise Phase 6 planning (core database schema), or decide on merging the stacked PRs first.
 
-**Then me:** implement Phase 5 only after approval, in milestones, with targeted checks and a final verification gate.
+**Then me:** Phase 6 plan only, with no schema, migrations or dependencies until you approve it.

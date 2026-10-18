@@ -162,6 +162,21 @@ No runtime dependencies were installed in Phase 3. Details and checks: `phase-3-
 
 Apps consume `@sanea/shared` through its package exports, without TypeScript project references to it (D-041).
 
+### Installed in Phase 5 (`@sanea/api`, pinned exactly)
+
+| Package | Version | Kind | Reason |
+|---------|---------|------|--------|
+| express | 5.3.0 | runtime | HTTP server |
+| helmet | 8.3.0 | runtime | Security headers |
+| cors | 2.8.6 | runtime | Origin allow-list |
+| cookie-parser | 1.4.7 | runtime | Reads the CSRF cookie |
+| express-rate-limit | 8.7.1 | runtime | Rate limiting; in-memory, single instance (D-047) |
+| pino | 10.4.0 | runtime | JSON logs with redaction |
+| pino-http | 11.0.0 | runtime | Request logs with request ID |
+| zod | 4.6.7 | runtime | Config schema; same version as `@sanea/shared`, deduplicated |
+| supertest | 7.3.1 | dev | HTTP tests |
+| @types/express, @types/cors, @types/cookie-parser, @types/supertest | 5.0.6, 2.8.19, 1.4.10, 7.2.1 | dev | Types |
+
 ### Planned for later phases
 
 Not installed yet. Planned dependencies and the reason for each:
