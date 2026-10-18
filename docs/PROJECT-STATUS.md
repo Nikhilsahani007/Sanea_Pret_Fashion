@@ -4,7 +4,22 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 5 — API platform skeleton: gate passed (D-050).** Commits `ab355d6`, `512fd88` and `5f55243` on `phase-5-api-platform`, in draft PR #3 into `phase-4-shared-contracts`, open and unmerged. Decisions D-045 to D-049, D-132, D-133. **Phase 6 not started**; its planning needs your go-ahead.
+**Phase 6 — Core database schema** (`MASTER-IMPLEMENTATION-INDEX.md`). **Schema, migration and development seed validated on disposable databases; committed for draft PR #4.** Plan approved (D-051 to D-059); compatibility test passed (D-060). Branch `phase-6-core-schema` from `14f2b35`, not committed or pushed. The migration has been applied only to disposable validation databases, since removed. Unit suite: 20 files, 376 tests passed. Database integration suite: 7 files, 131 tests passed, including the seed (`phase-6-plan.md`).
+
+## Phase 6 setup results (local, 2026-10-19)
+
+| Check | Result |
+|-------|--------|
+| Compatibility test (4 checks) | **Pass**, with the drift limitation recorded (`phase-6-plan.md`) |
+| Packages | `prisma` 7.10.1 (root, dev), `@prisma/client` 7.10.1 and `@prisma/adapter-pg` 7.10.1 (`@sanea/api`), exact pins; `npm audit` 0 vulnerabilities |
+| `prisma generate` without a database | Exit 0; database commands without `DATABASE_URL` fail with Prisma's own error |
+| Generated client | Ignored by Git, Prettier and ESLint; typechecks under the strict settings; CI generates it after `npm ci` |
+| Compose | Refuses to start without `POSTGRES_PASSWORD`; publishes only `127.0.0.1:5433`; PostgreSQL 18.6 healthy with 0 tables; removed with its volume afterwards |
+| Lint ban | Prisma imports rejected in storefront, admin and `packages/`; allowed in the API (probe files, removed) |
+| Quality gate | Format, lint, typecheck pass; 19 files, 331 tests passed, 0 failed |
+| Specifications | `database-design.md`, `security-design.md`, `system-architecture.md`, `testing-strategy.md` aligned with D-029 to D-034 and D-051 to D-059 |
+
+Phase 5 — API platform skeleton: gate passed (D-050). Commits `ab355d6`, `512fd88` and `5f55243` on `phase-5-api-platform`, in draft PR #3 into `phase-4-shared-contracts`, open and unmerged. The results below are the Phase 5 record.
 
 ## Phase 5 results (gate passed 2026-10-19, D-050)
 
@@ -61,7 +76,7 @@ Review fixes (approved): phone separators limited to ASCII space, non-breaking s
 
 | Check | Result |
 |-------|--------|
-| Current branch | `phase-5-api-platform` (from `dc3e1da`) |
+| Current branch | `phase-6-core-schema` (from `14f2b35`), draft PR #4 into `phase-5-api-platform` |
 | `main` on GitHub | `71576b7` ("phase 3 plan"), unchanged |
 | PR #1 `phase-3-foundation` → `main` | `619d175`; open, draft, unmerged |
 | PR #2 `phase-4-shared-contracts` → `phase-3-foundation` | `dc3e1da`; open, draft, unmerged |
@@ -98,6 +113,8 @@ All commits are by NikhilSahani007.
 | Documentation | `README.md`, `docs/system-architecture.md` §7, `docs/phase-3-plan.md`, `docs/DECISION-LOG.md` (D-038), this file |
 
 ## Installed packages
+
+This table is the Phase 3 record. Packages added in later phases: `system-architecture.md` §7.
 
 All are development dependencies, pinned exactly. `npm ls --depth=0` shows these 10 plus the 4 workspace links. `npm ls --omit=dev` shows no runtime dependencies.
 
@@ -169,12 +186,14 @@ All of these need V14.
 | ST-01 styling evaluation | **Not approved**; nothing installed | index |
 | Live payments (Phase 18), infrastructure (Phase 19) | **Not approved** | — |
 | D-202, D-203 | **Open**; not blocking | `DECISION-LOG.md` |
+| Phase 6 plan, decisions, setup | **Approved; setup done** | D-051 to D-060 |
+| Phase 6 migration | **Validated on a disposable database** (`20261018193745_core_schema`); not applied to any kept database | `phase-6-plan.md` |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 6 planning | Now | Needs your go-ahead |
+| Phase 6 gate | Now | Needs CI on draft PR #4 and your review |
 | Merge PR #1, PR #2 and PR #3 | Only with your explicit authorisation | Not authorised |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
@@ -183,7 +202,7 @@ All of these need V14.
 
 ## Blockers for Phase 6
 
-- Phase 5 gate recorded (D-050). Phase 6 planning needs your go-ahead; implementation needs separate approval of its plan.
+- The migration cannot be applied until you approve the reviewed SQL. Seeding waits for the applied migration.
 
 ## Skills audit
 
@@ -191,6 +210,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** authorise Phase 6 planning (core database schema), or decide on merging the stacked PRs first.
+**You:** review draft PR #4 and its CI results, then pass, change or reject the Phase 6 gate.
 
-**Then me:** Phase 6 plan only, with no schema, migrations or dependencies until you approve it.
+**Me, after that:** record the gate; Phase 7 planning only after it is passed.

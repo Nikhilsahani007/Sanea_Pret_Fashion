@@ -19,7 +19,7 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 ### Admin
 - Email and password. Passwords hashed with **Argon2id** (memory 64 MB, iterations 3, parallelism 1, tuned on target hardware).
 - Minimum 12 characters, checked against a breached-password list (k-anonymity range check or a bundled top-100k list). No composition rules.
-- **TOTP multi-factor authentication required** for Owner and Manager, optional for others in R1 (OD-11 recommends required for all).
+- **TOTP multi-factor authentication required for all four roles** (Owner, Manager, Catalogue Editor, Fulfilment; D-032).
 - Lockout: 5 failed attempts → 15-minute lock, plus IP rate limit. Generic error messages.
 - Staff are invited by the Owner. Invite links are single-use and expire in 48 hours. No public admin sign-up.
 
@@ -31,6 +31,7 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 
 ### Sessions
 - Server-side sessions in PostgreSQL. Cookie holds a random 256-bit token; the database stores only its SHA-256 hash.
+- Release one has admin sessions only: table `admin_session`, linked to `admin_user` by a foreign key with `ON DELETE CASCADE` (D-055). Customer sessions return with accounts (D-034).
 - Cookies: `HttpOnly`, `Secure`, `SameSite=Lax` (storefront) and `SameSite=Strict` (admin), `Path=/`, host-only with the `__Host-` prefix.
 - Admin sessions: 8-hour absolute, 30-minute idle timeout. Customer sessions: 30-day absolute, 7-day idle.
 - Session ID rotated on sign-in and privilege change. Sign-out deletes the server session.
@@ -111,6 +112,7 @@ Object-level checks: customers can read only their own orders, addresses and wis
 ## 9. Audit and monitoring
 
 - Every admin write is recorded in `AuditLog` with before and after values (secrets excluded).
+- The audit log is append-only in the database: a trigger rejects UPDATE, DELETE and TRUNCATE, so not even the API's own database user can rewrite it (D-057).
 - Alerts (once hosting exists): spike in failed sign-ins, webhook signature failures, orders flagged `needsAttention`, 5xx rate.
 - Admin sign-in notifications by email for new devices (Phase 16, master index).
 

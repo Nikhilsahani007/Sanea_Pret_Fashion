@@ -1,0 +1,506 @@
+// Sanéa Pret database schema (database-design.md). PostgreSQL 18 (D-051).
+// Tables and columns are snake_case through @@map and @map (D-056).
+// Handwritten SQL (extensions, CHECK constraints, triggers, reference rows)
+// lives in the migration files; Prisma does not model it, and its drift check
+// does not notice if it is removed (phase-6-plan.md). Every handwritten object
+// is listed in apps/api/src/db/handwritten.ts and checked by tests.
+//
+// Phase 6 tables only (database-design.md §6, D-054).
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "../apps/api/src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+/// Same values as `AdminRole` in @sanea/shared (parity test in apps/api).
+enum AdminRole {
+  OWNER
+  MANAGER
+  CATALOGUE_EDITOR
+  FULFILMENT
+
+  @@map("admin_role")
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("publish_status")
+}
+
+enum ImageRole {
+  PRIMARY
+  HOVER
+  GALLERY
+
+  @@map("image_role")
+}
+
+enum SizeChartUnit {
+  CM
+  IN
+
+  @@map("size_chart_unit")
+}
+
+enum StockMovementType {
+  RECEIVED
+  ADJUSTMENT
+  RESERVED
+  RELEASED
+  SHIPPED
+  RETURNED
+  RESTOCKED
+  CORRECTION
+
+  @@map("stock_movement_type")
+}
+
+enum StockReferenceType {
+  ORDER
+  RESERVATION
+  ADMIN
+  RETURN
+
+  @@map("stock_reference_type")
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CONVERTED
+  RELEASED
+  EXPIRED
+
+  @@map("reservation_status")
+}
+
+/// The seven block types in system-design.md §7.
+enum ContentBlockType {
+  ANNOUNCEMENT_BAR
+  HERO_SLIDE
+  CATEGORY_PILLS
+  PRODUCT_ROW
+  TABBED_GRID
+  EDITORIAL_BAND
+  FOOTER
+
+  @@map("content_block_type")
+}
+
+/// What a navigation item points to; URL items carry `url`, the others `targetId`.
+enum NavigationTargetType {
+  CATEGORY
+  COLLECTION
+  PRODUCT
+  PAGE
+  URL
+
+  @@map("navigation_target_type")
+}
+
+// ─── Catalogue ──────────────────────────────────────────────────────────────
+
+model Category {
+  id             String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name           String
+  slug           String        @unique
+  parentId       String?       @map("parent_id") @db.Uuid
+  position       Int           @default(0)
+  status         PublishStatus @default(DRAFT)
+  seoTitle       String?       @map("seo_title")
+  seoDescription String?       @map("seo_description")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+  @@map("category")
+}
+
+model Collection {
+  id             String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name           String
+  slug           String        @unique
+  description    String?
+  heroImageId    String?       @map("hero_image_id") @db.Uuid
+  status         PublishStatus @default(DRAFT)
+  startsAt       DateTime?     @map("starts_at") @db.Timestamptz(3)
+  endsAt         DateTime?     @map("ends_at") @db.Timestamptz(3)
+  seoTitle       String?       @map("seo_title")
+  seoDescription String?       @map("seo_description")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  heroImage MediaAsset?         @relation(fields: [heroImageId], references: [id], onDelete: Restrict)
+  products  CollectionProduct[]
+
+  @@index([heroImageId])
+  @@map("collection")
+}
+
+model CollectionProduct {
+  collectionId String @map("collection_id") @db.Uuid
+  productId    String @map("product_id") @db.Uuid
+  position     Int    @default(0)
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+  @@index([productId])
+  @@map("collection_product")
+}
+
+model Product {
+  id               String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name             String
+  slug             String        @unique
+  categoryId       String        @map("category_id") @db.Uuid
+  shortDescription String        @map("short_description")
+  /// Structured rich text (no HTML).
+  description      Json
+  fabric           String?
+  care             String?
+  fit              String?
+  /// For GST invoices (D-030). No GST rate here: rates come from the rules
+  /// model in Phase 15 (D-033).
+  hsnCode          String?       @map("hsn_code")
+  sizeChartId      String?       @map("size_chart_id") @db.Uuid
+  status           PublishStatus @default(DRAFT)
+  publishedAt      DateTime?     @map("published_at") @db.Timestamptz(3)
+  labels           String[]      @default([])
+  seoTitle         String?       @map("seo_title")
+  seoDescription   String?       @map("seo_description")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  category    Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  sizeChart   SizeChart?          @relation(fields: [sizeChartId], references: [id], onDelete: Restrict)
+  variants    ProductVariant[]
+  images      ProductImage[]
+  collections CollectionProduct[]
+
+  @@index([categoryId])
+  @@index([sizeChartId])
+  @@index([status, publishedAt(sort: Desc)])
+  @@map("product")
+}
+
+model Colour {
+  id        String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name      String
+  slug      String @unique
+  /// `#RRGGBB`, for UI swatches.
+  swatchHex String @map("swatch_hex")
+  position  Int    @default(0)
+
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@map("colour")
+}
+
+/// Reference rows only: S, M, L, XL, XXL, Free Size (D-029, D-058), inserted
+/// by the migration.
+model Size {
+  id       String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  label    String @unique
+  position Int    @unique
+
+  variants ProductVariant[]
+
+  @@map("size")
+}
+
+model SizeChart {
+  id        String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name      String
+  unit      SizeChartUnit
+  /// Structured measurement rows.
+  rows      Json
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  products Product[]
+
+  @@map("size_chart")
+}
+
+model ProductVariant {
+  id                  String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  productId           String   @map("product_id") @db.Uuid
+  colourId            String   @map("colour_id") @db.Uuid
+  sizeId              String   @map("size_id") @db.Uuid
+  sku                 String   @unique
+  /// Integer paise, > 0 (32-bit: at most 2,147,483,647).
+  pricePaise          Int      @map("price_paise")
+  compareAtPricePaise Int?     @map("compare_at_price_paise")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product      Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  colour       Colour             @relation(fields: [colourId], references: [id], onDelete: Restrict)
+  size         Size               @relation(fields: [sizeId], references: [id], onDelete: Restrict)
+  inventory    InventoryLevel?
+  movements    StockMovement[]
+  reservations StockReservation[]
+
+  @@unique([productId, colourId, sizeId])
+  @@index([colourId])
+  @@index([sizeId])
+  @@map("product_variant")
+}
+
+model ProductImage {
+  id           String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  productId    String    @map("product_id") @db.Uuid
+  /// Null: the image applies to all colours.
+  colourId     String?   @map("colour_id") @db.Uuid
+  mediaAssetId String    @map("media_asset_id") @db.Uuid
+  alt          String
+  position     Int       @default(0)
+  role         ImageRole @default(GALLERY)
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colour     Colour?    @relation(fields: [colourId], references: [id], onDelete: Restrict)
+  mediaAsset MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Restrict)
+
+  @@index([productId, position])
+  @@index([colourId])
+  @@index([mediaAssetId])
+  @@map("product_image")
+}
+
+model MediaAsset {
+  id                String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  storageKey        String   @unique @map("storage_key")
+  originalFilename  String   @map("original_filename")
+  mimeType          String   @map("mime_type")
+  width             Int
+  height            Int
+  bytes             Int
+  /// Derived sizes and formats.
+  variants          Json     @default("[]")
+  uploadedByAdminId String   @map("uploaded_by_admin_id") @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  uploadedBy  AdminUser      @relation(fields: [uploadedByAdminId], references: [id], onDelete: Restrict)
+  images      ProductImage[]
+  collections Collection[]
+
+  @@index([uploadedByAdminId])
+  @@map("media_asset")
+}
+
+// ─── Inventory ──────────────────────────────────────────────────────────────
+
+/// One row per variant. on_hand >= 0, 0 <= reserved <= on_hand (CHECKs).
+model InventoryLevel {
+  variantId         String   @id @map("variant_id") @db.Uuid
+  onHand            Int      @default(0) @map("on_hand")
+  reserved          Int      @default(0)
+  lowStockThreshold Int      @default(2) @map("low_stock_threshold")
+  /// Optimistic concurrency.
+  version           Int      @default(0)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@map("inventory_level")
+}
+
+/// Append-only: a trigger rejects UPDATE, DELETE and TRUNCATE (D-057).
+model StockMovement {
+  id            String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  variantId     String              @map("variant_id") @db.Uuid
+  type          StockMovementType
+  onHandDelta   Int                 @map("on_hand_delta")
+  reservedDelta Int                 @default(0) @map("reserved_delta")
+  /// Required for ADJUSTMENT and CORRECTION (CHECK).
+  reason        String?
+  referenceType StockReferenceType? @map("reference_type")
+  referenceId   String?             @map("reference_id") @db.Uuid
+  actorAdminId  String?             @map("actor_admin_id") @db.Uuid
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  actorAdmin AdminUser?     @relation(fields: [actorAdminId], references: [id], onDelete: Restrict)
+
+  @@index([variantId, createdAt])
+  @@index([actorAdminId])
+  @@map("stock_movement")
+}
+
+/// The link to orders is added in Phase 15 (D-054).
+model StockReservation {
+  id        String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  variantId String            @map("variant_id") @db.Uuid
+  quantity  Int
+  status    ReservationStatus @default(ACTIVE)
+  /// Required while ACTIVE, and later than createdAt (CHECK).
+  expiresAt DateTime?         @map("expires_at") @db.Timestamptz(3)
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@index([variantId])
+  @@map("stock_reservation")
+}
+
+// ─── Admin and security ─────────────────────────────────────────────────────
+
+model AdminUser {
+  id                 String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  /// Unique regardless of case (citext).
+  email              String    @unique @db.Citext
+  name               String
+  passwordHash       String    @map("password_hash")
+  role               AdminRole
+  /// TOTP secret, encrypted by the API before storage (scheme in Phase 7).
+  /// 2FA is mandatory for all four roles (D-032), enforced in Phase 7.
+  mfaSecretEncrypted Bytes?    @map("mfa_secret_encrypted")
+  isActive           Boolean   @default(true) @map("is_active")
+  lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz(3)
+  failedLoginCount   Int       @default(0) @map("failed_login_count")
+  lockedUntil        DateTime? @map("locked_until") @db.Timestamptz(3)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions        AdminSession[]
+  auditEntries    AuditLog[]
+  mediaUploads    MediaAsset[]
+  stockMovements  StockMovement[]
+  publishedBlocks ContentBlock[]
+  verifiedPages   Page[]
+  settingUpdates  StoreSetting[]
+
+  @@map("admin_user")
+}
+
+/// Only the SHA-256 hash of the session token is stored (32 bytes, CHECK).
+model AdminSession {
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  adminUserId String   @map("admin_user_id") @db.Uuid
+  tokenHash   Bytes    @unique @map("token_hash")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
+  ipHash      String?  @map("ip_hash")
+  userAgent   String?  @map("user_agent")
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+  @@map("admin_session")
+}
+
+/// Append-only: a trigger rejects UPDATE, DELETE and TRUNCATE (D-057).
+model AuditLog {
+  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  actorAdminId String   @map("actor_admin_id") @db.Uuid
+  /// For example `product.update`.
+  action       String
+  entityType   String   @map("entity_type")
+  entityId     String?  @map("entity_id")
+  before       Json?
+  after        Json?
+  ipHash       String?  @map("ip_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  actorAdmin AdminUser @relation(fields: [actorAdminId], references: [id], onDelete: Restrict)
+
+  @@index([actorAdminId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@map("audit_log")
+}
+
+// ─── Content ────────────────────────────────────────────────────────────────
+
+/// Typed blocks with draft and published versions; no raw HTML (D-109).
+model ContentBlock {
+  id                 String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  /// For example `home.hero`.
+  key                String           @unique
+  type               ContentBlockType
+  draft              Json
+  published          Json?
+  publishedAt        DateTime?        @map("published_at") @db.Timestamptz(3)
+  publishedByAdminId String?          @map("published_by_admin_id") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  publishedBy AdminUser? @relation(fields: [publishedByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([publishedByAdminId])
+  @@map("content_block")
+}
+
+/// Pages that require verification (Rehma Foundation) cannot be published
+/// until verified (CHECK).
+model Page {
+  id                   String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  slug                 String        @unique
+  title                String
+  draftBody            Json          @map("draft_body")
+  publishedBody        Json?         @map("published_body")
+  seoTitle             String?       @map("seo_title")
+  seoDescription       String?       @map("seo_description")
+  status               PublishStatus @default(DRAFT)
+  requiresVerification Boolean       @default(false) @map("requires_verification")
+  verifiedByAdminId    String?       @map("verified_by_admin_id") @db.Uuid
+  verifiedAt           DateTime?     @map("verified_at") @db.Timestamptz(3)
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  verifiedBy AdminUser? @relation(fields: [verifiedByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([verifiedByAdminId])
+  @@map("page")
+}
+
+model NavigationItem {
+  id         String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  /// `HEADER`, `CATEGORY_PILLS` or a footer menu (system-design.md).
+  menu       String
+  label      String
+  targetType NavigationTargetType @map("target_type")
+  targetId   String?              @map("target_id") @db.Uuid
+  url        String?
+  position   Int                  @default(0)
+  createdAt  DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([menu, position])
+  @@map("navigation_item")
+}
+
+/// WhatsApp number, contact details, COD and shipping rules.
+model StoreSetting {
+  key              String   @id
+  value            Json
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updatedByAdminId String?  @map("updated_by_admin_id") @db.Uuid
+
+  updatedBy AdminUser? @relation(fields: [updatedByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([updatedByAdminId])
+  @@map("store_setting")
+}

@@ -20,7 +20,7 @@ Status: Draft for approval · Date: 2026-10-18
 | Performance | Lighthouse CI on a throttled mobile profile | Landing, listing, product, checkout |
 | Security | `npm audit`, gitleaks, targeted tests for IDOR, CSRF, rate limits | CI |
 
-Integration tests get a fresh database per test file (template database clone) for speed and isolation.
+Integration tests get a fresh database per test file (template database clone) for speed and isolation. `npm test` needs no database; `npm run test:integration` runs the database tests, and CI runs them in a separate job with a PostgreSQL 18 service (D-059).
 
 ## 3. Critical test cases
 

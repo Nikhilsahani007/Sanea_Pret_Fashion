@@ -63,6 +63,16 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-048 | Global rate limit 300 requests per minute per IP, health endpoint exempt. Stricter route-specific limits come with sensitive routes in later phases. | Phase 5 plan review, 2026-10-18 |
 | D-049 | **Phase 5 approved** on branch `phase-5-api-platform` from `dc3e1da8be2f2ae5ea056b0db8af421ccb058e4f`. Not authorised: commit, push, PR #3. | Phase 5 plan review, 2026-10-18 |
 | D-050 | **Phase 5 gate passed (P5-AC12).** Evidence: commits `ab355d6` (platform), `512fd88` (CORS classifies by pathname, not `req.url`) and `5f55243` (admin paths matched case-insensitively) on `phase-5-api-platform`; local gate 19 test files, 331 tests passed, 0 failed; `npm audit` 0 vulnerabilities; format, lint and typecheck clean; graceful shutdown on Linux (SIGTERM and SIGINT, exit 0); CSRF cookie verified in Edge 155 and Chrome 154; CI run 39157064172 on draft PR #3 ("Format, lint, typecheck, test, audit" and "Secret scan (Gitleaks)" both success). PR #1, PR #2 and PR #3 stay open, draft and unmerged. Phase 6 not started. | Phase 5 completion approval, 2026-10-19 |
+| D-051 | PostgreSQL 18 (`postgres:18.6-alpine` locally) instead of 16; UUID v7 keys generated in the database with `uuidv7()`. Managed-host availability is checked at Phase 19 (OD-18). | Phase 6 plan approval, 2026-10-19 |
+| D-052 | Prisma 7.10.1, pinned exactly: `prisma` (root, dev), `@prisma/client` and `@prisma/adapter-pg` (`@sanea/api`). No `dotenv`. | Phase 6 plan approval, 2026-10-19 |
+| D-053 | Generated client in `apps/api/src/generated/prisma`, not committed, regenerated in CI before typecheck; lint forbids Prisma imports outside the API. | Phase 6 plan approval, 2026-10-19 |
+| D-054 | Phase 6 excludes: search fields (Phase 8), low-stock view (9), staff invites, password-reset tokens and recovery codes (7), `StockReservation.orderId` and GST rules (15), enquiries and WhatsApp clicks (13). Customer tables stay deferred (D-034). | Phase 6 plan approval, 2026-10-19 |
+| D-055 | Admin-only session table with a foreign key to the admin user, `ON DELETE CASCADE`; only token hashes stored. Customer sessions deferred. | Phase 6 plan approval, 2026-10-19 |
+| D-056 | Tables and columns in snake_case in the database (`@@map`, `@map`). | Phase 6 plan approval, 2026-10-19 |
+| D-057 | Stock-movement and audit logs are append-only through database triggers rejecting UPDATE, DELETE and TRUNCATE. | Phase 6 plan approval, 2026-10-19 |
+| D-058 | Only the approved sizes S, M, L, XL, XXL and Free Size are inserted by the migration as reference data; colours and products exist only in the development seed. | Phase 6 plan approval, 2026-10-19 |
+| D-059 | `npm test` runs without a database; `npm run test:integration` uses a cloned database per test file; CI runs it in a separate job with a PostgreSQL service. | Phase 6 plan approval, 2026-10-19 |
+| D-060 | **Phase 6 compatibility test passed** (2026-10-19, throwaway folder outside the repository, PostgreSQL 18.6 container): generated client runs under Node 24 type stripping and the strict compiler settings; no false drift with handwritten constraints and triggers; database-generated UUID v7 works through Prisma; one client per process connects at start-up and shuts down cleanly on SIGTERM and SIGINT on Linux. Limitation: Prisma does not detect removed CHECK constraints or triggers, so integration tests must assert them. Repository setup authorised on that condition. | Phase 6 plan approval, 2026-10-19 |
 
 ## Proposals
 
@@ -77,7 +87,7 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | D-105 | Stock reserved atomically at checkout, 15-minute hold for prepaid, immediate hold for COD, DB check constraints as last guard. | Prevents overselling. | `system-design.md` §2 | Approved (D-028) |
 | D-106 | Orders confirmed only from verified webhooks or server status queries. | Prevents fake confirmations. | `system-design.md` §6 | Approved (D-028) |
 | D-107 | Mock payment provider until gateway approval; it cannot load in production. | D-005. | `system-design.md` §6.1 | Approved (D-028) |
-| D-108 | Server-side sessions in PostgreSQL, Argon2id passwords, MFA for Owner and Manager. | ASVS Level 2 target. | `security-design.md` §2 | Approved (D-028) |
+| D-108 | Server-side sessions in PostgreSQL, Argon2id passwords, MFA for Owner and Manager. | ASVS Level 2 target. | `security-design.md` §2 | Approved (D-028); MFA scope superseded by D-032 (all four roles) |
 | D-109 | CMS content as typed blocks with draft and published versions; no raw HTML. | Safe editing; XSS prevention. | `system-design.md` §7 | Approved (D-028) |
 | D-110 | Search with PostgreSQL full-text and trigram; no external search engine in R1. | Catalogue size. | `system-design.md` §8 | Approved (D-028) |
 | D-111 | Storefront starts as a single-page app with a link-preview meta endpoint; SSR evaluated later. | Effort versus SEO benefit. | `system-architecture.md` §6, OD-14 | Approved (D-028) |
@@ -132,3 +142,4 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Phase 5 plan approved with decisions D-045 to D-049; cookie strategy D-132 proposed for review at the gate. |
 | 2026-10-19 | Phase 5 review: D-132 confirmed; commit, push and draft PR #3 authorised (D-133). Phase 5 completion needs a separate approval. |
 | 2026-10-19 | PR #3 review: two admin-path classification fixes (`512fd88`, `5f55243`). Phase 5 gate passed (D-050). Phase 6 planning needs your go-ahead. |
+| 2026-10-19 | Phase 6 plan approved (D-051 to D-059); compatibility test passed (D-060); repository setup carried out on `phase-6-core-schema`. Schema, migration and seed not started. |

@@ -8,7 +8,7 @@ const prismaBan = {
     {
       group: ["@prisma/client", "@prisma/*", "**/generated/prisma/**"],
       message:
-        "Frontends must not import Prisma. Use the API (system-architecture.md §2).",
+        "Only the API may import Prisma (D-102, D-053). Use the API instead.",
     },
   ],
 };
@@ -24,12 +24,17 @@ export default defineConfig(
       "blob-report/**",
       ".claude/**",
       ".taste-skill/**",
+      "apps/api/src/generated/**",
     ],
   },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
-    files: ["apps/storefront/**/*.{ts,tsx}", "apps/admin/**/*.{ts,tsx}"],
+    files: [
+      "apps/storefront/**/*.{ts,tsx}",
+      "apps/admin/**/*.{ts,tsx}",
+      "packages/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-imports": ["error", prismaBan],
     },
