@@ -48,6 +48,8 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-033 | OD-25: configurable, effective-dated, rules-based GST model representing thresholds and tax components; no hard-coded rates; actual rates and compliance rules need accountant verification. | Phase 2 decisions, 2026-10-18 |
 | D-034 | **Approved scope change (OD-26):** customer accounts and wishlist are deferred from release one; guest checkout stays fully functional. Changes the D-028 baseline in `project-requirements.md` §2, §3.1, §3.3, §5; index Phases 12, 14, 15; and the related specification sections listed in OD-26. | Phase 2 scope approval, 2026-10-18 |
 | D-035 | **Phase 2 gate passed.** Covers D-029 to D-034. Not covered: brand inputs (OD-01, OD-02, B-06), which may arrive later and block Phases 11 and 12; accountant verification (B-14) before live sales; alignment of the specifications with D-029 to D-033. | Phase 2 gate approval, 2026-10-18 |
+| D-036 | Phase 3 keeps `@playwright/test` and its configuration, with no browser downloads until the first end-to-end test exists. | Pre-Phase 3 instruction, 2026-10-18 |
+| D-037 | Phase 3 includes Dependabot: weekly update pull requests for npm and GitHub Actions, with no automatic merging. | Pre-Phase 3 instruction, 2026-10-18 |
 
 ## Proposals
 
@@ -107,3 +109,4 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Phase 2: your proposed defaults for OD-04, OD-05, OD-10, OD-11 recorded as D-127 to D-130, not accepted. OD-25 and OD-26 added. Specifications not changed. |
 | 2026-10-18 | Phase 2: D-029 to D-033 accepted by you (OD-04, OD-05, OD-10, OD-11, OD-25); D-127 to D-130 superseded; D-131 (OD-26) proposed. Specifications not yet aligned. |
 | 2026-10-18 | OD-26 approved (D-034) and its references updated across the specifications; Phase 2 gate passed (D-035); Phase 3 plan proposed in `phase-3-plan.md`. |
+| 2026-10-18 | Pre-Phase 3: D-036 (Playwright kept, no browsers) and D-037 (weekly Dependabot, no auto-merge) recorded; `PROJECT-STATUS.md` reconciled with commit `0fdb74c`. Phase 3 itself not approved. |

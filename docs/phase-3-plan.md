@@ -1,6 +1,6 @@
 # Phase 3 Plan — Repository Foundation and CI
 
-Status: **Proposed, awaiting your approval.** Nothing in this plan has been installed or created. · Date: 2026-10-18
+Status: **Proposed, awaiting your Phase 3 approval.** Nothing in this plan has been installed or created. · Date: 2026-10-18
 
 Scope comes from `MASTER-IMPLEMENTATION-INDEX.md` Phase 3: npm workspaces with empty packages, TypeScript, ESLint, Prettier, Vitest and Playwright configuration, CI with lint, typecheck, test, `npm audit` and secret scanning, `.env.example` and an `e2e/` folder. No features, no React, no Express, no Prisma.
 
@@ -25,9 +25,8 @@ All are **root development dependencies**. No runtime dependency is added in Pha
 
 **Total: 10 packages.** Their transitive dependencies are recorded in the lock file and reported after installation.
 
-### Alternative for your decision
-- **Defer `@playwright/test` to Phase 8**, the first UI phase. This avoids a package with no tests to run. It is a small deviation from the approved Phase 3 scope, which lists Playwright configuration.
-- **Recommendation:** keep it in Phase 3, as approved, without browsers.
+### Playwright (decided, D-036)
+- `@playwright/test` stays in Phase 3 with its configuration. **No browsers are downloaded** until the first end-to-end test exists (Phase 8 or later).
 
 ### Not installed in Phase 3
 These come with the phase that needs them, each with its own reason and approval:
@@ -87,7 +86,10 @@ The work happens on a branch, `phase-3-foundation`, not on `main`. Nothing is co
     - Steps: checkout, set up Node 24 with the npm cache, `npm ci`, `format:check`, `lint`, `typecheck`, `test`, `audit`, then secret scan.
     - Third-party actions are pinned to commit SHAs.
     - The secret scan uses Gitleaks. Its GitHub Action needs a licence key only for organisation accounts, and this repository belongs to a personal account. Running the Gitleaks CLI directly is the fallback.
-11. **Optional:** `.github/dependabot.yml` for weekly npm and GitHub Actions update pull requests. It adds no dependency, and `security-design.md` §7 already plans for it. **Your choice:** include or skip.
+11. **Dependabot** (decided, D-037): `.github/dependabot.yml` with two update entries, `npm` (root workspace) and `github-actions`, each on a **weekly** schedule.
+    - It opens pull requests only. **No automatic merging**: no auto-merge workflow, no auto-approve, and GitHub auto-merge stays off. Every update goes through CI and your review.
+    - An open pull request limit keeps the queue small. Minor and patch npm updates are grouped into one weekly pull request; major updates arrive separately.
+    - It adds no dependency. `security-design.md` §7 already plans for it.
 12. **Documentation**
     - `system-architecture.md` §7 lists the installed tooling with versions.
     - `README.md` gains setup commands.
@@ -112,13 +114,13 @@ Each is run and its real output recorded in `PROJECT-STATUS.md`.
 | V11 | `npm audit --audit-level=high` | 0 high or critical findings. Lower findings reported |
 | V12 | `git check-ignore node_modules .env` and `git status` | `node_modules` and `.env` ignored; only planned files appear |
 | V13 | No application code | Outside the placeholders and the smoke test, there are no `.ts`, `.tsx` or `.css` files under `apps/` or `packages/` |
+| V13a | `.github/dependabot.yml` | Valid YAML; exactly two entries (`npm`, `github-actions`); both `interval: weekly`; no auto-merge workflow or setting in the repository |
 | V14 | CI on GitHub | Green run on the branch. **Requires you to approve pushing the branch** |
 
 ## 4. Approvals this plan needs
 
-1. **Phase 3 and this dependency list,** including the Playwright choice (keep, as recommended, or defer).
-2. **Dependabot:** include or skip.
-3. **Later and separate:** committing, pushing the branch and opening a pull request for the CI run (V14).
+1. **Phase 3 and this dependency list.** (Playwright and Dependabot choices are already decided: D-036, D-037.)
+2. **Later and separate:** committing, pushing the branch and opening a pull request for the CI run (V14).
 
 ## 5. Out of scope for Phase 3
 - Application code.
