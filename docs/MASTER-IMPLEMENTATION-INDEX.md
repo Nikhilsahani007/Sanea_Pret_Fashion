@@ -38,8 +38,8 @@ The 19 phases were derived from the old roadmap and the planning documents, and 
 | 11 | Storefront shell, search and cart | 8, 9, 10; TD-001 and TD-002 decided for UI deliverables | Review of screenshots and tests |
 | 12 | Landing page | 11 | **Your visual approval** |
 | 13 | Browsing, product detail and enquiries | 12 | Review of tests and screenshots |
-| 14 | Customer accounts and wishlist | 11 | Review of test evidence |
-| 15 | Checkout, orders, COD and mock payments | 9, 13, 14, decisions in B-07 | Review of end-to-end evidence |
+| 14 | Customer accounts and wishlist: **deferred, not in release one (D-034)** | — | Needs a new approval before it is scheduled |
+| 15 | Checkout, orders, COD and mock payments | 9, 13, decisions in B-07 | Review of end-to-end evidence |
 | 16 | Admin operations and notifications | 15 | Review of end-to-end evidence |
 | 17 | Hardening and legal content | 16 | Review of audit results |
 | 18 | Live payment gateway | 17, OD-06 | **Your gateway approval** |
@@ -129,7 +129,7 @@ The 19 phases were derived from the old roadmap and the planning documents, and 
 ### Phase 12 — Landing page
 - **Scope:** the mandatory Nishorama composition, in this order:
   1. announcement bar
-  2. minimal header with search, account, wishlist and bag
+  2. minimal header with search and bag (account and wishlist controls are not shown in release one, D-034)
   3. category pills
   4. full-width hero with the oversized "SANÉA PRET" wordmark overlaid, campaign line, one CTA, slide indicators and a pause control
   5. New Ins, immediately below the hero
@@ -137,7 +137,7 @@ The 19 phases were derived from the old roadmap and the planning documents, and 
   7. tabbed products
   8. footer
 
-  Sections outside this list (editorial band, Rehma Foundation teaser) are off unless you approve them (OD-23). Account and wishlist behaviour at this gate follows OD-24.
+  Sections outside this list (editorial band, Rehma Foundation teaser) are off unless you approve them (OD-23). OD-24 is superseded by D-034: account and wishlist controls are not shown.
 - **Depends on:** Phase 11. Real campaign photography, at least eight real product photographs and the screen recording (B-03, B-06).
 - **Deliverables:** landing page; screenshots under `docs/reviews/landing/<date>/`.
 - **Verification:** all six gates in `design-system.md` §10 and the landing tests in `testing-strategy.md` §5. Screenshots:
@@ -160,16 +160,18 @@ The 19 phases were derived from the old roadmap and the planning documents, and 
 - **Verification:** end-to-end journey E2E-4 and the browsing steps of E2E-1 pass on desktop and mobile; `design-system.md` §10 gates.
 - **Gate:** you review tests and screenshots.
 
-### Phase 14 — Customer accounts and wishlist
-- **Scope:** customer tables migration, sign-up, sign-in, password reset, addresses, wishlist, guest cart merge.
-- **Depends on:** Phase 11.
-- **Deliverables:** `customers` module; account routes.
-- **Verification:** E2E-8 and the cross-account access tests pass.
-- **Gate:** you review the test output.
+### Phase 14 — Customer accounts and wishlist (deferred)
+- **Status:** **Deferred to a later release (D-034).** Approved scope change OD-26. Not part of release one; it needs a new approval before it is scheduled. Phase 15 no longer depends on it.
+- **Original scope, kept for the later release:**
+  - **Scope:** customer tables migration, sign-up, sign-in, password reset, addresses, wishlist, guest cart merge.
+  - **Depends on:** Phase 11.
+  - **Deliverables:** `customers` module; account routes.
+  - **Verification:** E2E-8 and the cross-account access tests pass.
+  - **Gate:** you review the test output.
 
 ### Phase 15 — Checkout, orders, COD and mock payments
 - **Scope:** order and payment tables migration, checkout steps, server pricing, shipping and COD rules, reservations at checkout, order state machine, mock payment provider, webhook pipeline, reservation and COD expiry jobs.
-- **Depends on:** Phases 9, 13 and 14, and the decisions in B-07.
+- **Depends on:** Phases 9 and 13, and the decisions in B-07. (Phase 14 is deferred, D-034.)
 - **Deliverables:** `checkout`, `orders` and `payments` modules; checkout routes.
 - **Verification:** E2E-1, E2E-2 (storefront part) and E2E-3 pass; payment, COD and order-lifecycle tests in `testing-strategy.md` §3 pass.
 - **Gate:** you review the end-to-end output.

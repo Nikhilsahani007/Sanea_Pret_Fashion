@@ -35,7 +35,7 @@ Mandatory structure first, then the Taste direction fitted around it.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ Announcement bar (optional, admin-edited, hidden when empty)          32px  │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ SANÉA PRET (small wordmark)   New in  Shop  Collections   ⌕  ♡  ◯  Bag (2) │ 64px
+│ SANÉA PRET (small wordmark)   New in  Shop  Collections         ⌕  Bag (2) │ 64px
 │ ( Kurtas ) ( Co-ord sets ) ( Suits ) ( Dupattas ) ( Festive ) ( All )       │ 48px pills
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │

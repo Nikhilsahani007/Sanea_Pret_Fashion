@@ -4,7 +4,7 @@ Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 2 — Business decisions and brand inputs** (`MASTER-IMPLEMENTATION-INDEX.md`). In progress: your proposed defaults recorded, not accepted.
+**Phase 3 — Repository foundation and CI** (`MASTER-IMPLEMENTATION-INDEX.md`). **Not started:** the plan in `phase-3-plan.md` awaits your approval. Phase 2 gate passed on 2026-10-18 (D-035).
 
 Phase 1 gate passed on 2026-10-18 (D-028): the 19-phase index is canonical and the planning documents are the approved baseline. No application source code, dependencies, migrations or infrastructure exist.
 
@@ -15,6 +15,7 @@ Phase 1 gate passed on 2026-10-18 (D-028): the 19-phase index is canonical and t
 | `cb1cbf7` | NikhilSahani007 | Initial commit | `README.md`, `.gitattributes` |
 | `3be7523` | NikhilSahani007 | Requirement docs | Ten planning documents, `.claude/skills/` (nine skills), `.taste-skill/direction.json`, `skills-lock.json` |
 | `9f63e88` | NikhilSahani007 | updated docs | `MASTER-IMPLEMENTATION-INDEX.md`, `PROJECT-STATUS.md`, `DECISION-LOG.md`, `BLOCKERS.md`; edits to `implementation-roadmap.md` and `open-decisions.md` |
+| `624a2dd` | NikhilSahani007 | doc changes | Technology-policy patch, Phase 1 approval records, Phase 2 proposed defaults |
 | `1e52d81` | NikhilSahani007 | updated files | Repository preparation: `CLAUDE.md`, `.gitignore`, `README.md`, reconciled index, historical roadmap, re-mapped phase references, tracking documents (12 files) |
 
 Before the technology-policy edits: `HEAD`, `origin/main` and the GitHub `main` branch were all `1e52d81`, and the working tree was clean.
@@ -70,13 +71,15 @@ Committing is treated as saving, not approval (D-201).
 | Commit the working-tree changes | Not done; awaits your instruction |
 | Confirm D-202 (keep `direction.json` tracked) and D-203 (keep skills in git) | Open; does not block Phase 2 |
 
-## Phase 2 work
+## Phase 2 result
 
 | Task | Status |
 |------|--------|
-| Answers or accepted defaults for OD-04, OD-05, OD-10, OD-11 (needed before Phase 6) | Your proposed defaults recorded (D-127 to D-130); **not accepted** |
-| GST rate model and seller registration (OD-25, needed before Phase 6) | Open; needs your answer or accepted default, and accountant confirmation before live sales |
-| R1 scope if guest-only checkout is accepted (OD-26) | Open |
+| Answers for OD-04, OD-05, OD-10, OD-11 (needed before Phase 6) | **Done**: accepted (D-029 to D-032) |
+| GST rate model (OD-25, needed before Phase 6) | **Done**: accepted (D-033); actual rates need accountant verification before live sales (B-14) |
+| Scope change OD-26: defer accounts and wishlist | **Done**: approved (D-034); references updated in the specifications |
+| Phase 2 gate | **Passed** (D-035) |
+| Align specifications with D-029 to D-033 (`database-design.md` sizes and tax model; `security-design.md` 2FA for all roles; `project-requirements.md` guest-only checkout) | Not done; documentation task before Phase 6 |
 | Logo decision (OD-02), screen recording (OD-01), first real photography (B-06) | Not started; may arrive later, blocks Phases 11 and 12 |
 
 ## Remaining phases and tasks
@@ -87,7 +90,7 @@ Phases 3 to 19 in `MASTER-IMPLEMENTATION-INDEX.md`, none started. Task ST-01 run
 
 | Needed before | Decisions |
 |---------------|-----------|
-| Database (Phase 6) | Acceptance of D-127 to D-130 (OD-04, OD-05, OD-10, OD-11); OD-25 GST rate model |
+| Database (Phase 6) | None outstanding from you. Specification alignment with D-029 to D-033 is pending (documentation). |
 | UI deliverables (admin shell and screens in Phases 8 to 10; storefront from Phase 11) | TD-001 styling and TD-002 tokens, via ST-01 (B-12). Backend work is not blocked. |
 | Checkout (Phase 15) | OD-07 COD, OD-08 shipping, OD-09 returns text, OD-17 launch offer; OD-05 again for invoices |
 | Production launch (Phases 17–19) | OD-06 gateway, OD-22 launch mode, OD-12 legal, OD-13 Rehma content, OD-14 SEO, OD-16 WhatsApp number, OD-18 hosting, OD-19 email, OD-20 analytics, OD-02 brand, real photography |
@@ -146,6 +149,8 @@ No skill was removed and `skills-lock.json` was not changed (D-018).
 
 ## Next exact task
 
-**You (Phase 2):** accept or change your proposed defaults D-127 to D-130, and answer or accept the default for OD-25 (GST rate model) and OD-26 (R1 scope of accounts and wishlist).
+**You (Phase 3 gate):** approve Phase 3 and its dependency list in `phase-3-plan.md`, including two choices: keep Playwright in Phase 3 (recommended) or defer it to Phase 8, and include or skip Dependabot.
 
-**Then me:** record acceptance, update the affected specifications (`database-design.md`, `security-design.md`, `project-requirements.md` and the index if OD-26 changes scope), then prepare the Phase 3 dependency list for its own gate.
+**Then me:** create branch `phase-3-foundation`, carry out the setup steps, run checks V1 to V13 and record the results. Committing, pushing and the CI run (V14) wait for your separate instruction.
+
+**Pending documentation task, before Phase 6:** align `database-design.md` (sizes, rules-based tax model), `security-design.md` (2FA for all roles) and `project-requirements.md` with D-029 to D-033.

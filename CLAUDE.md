@@ -24,6 +24,7 @@ Premium Indian women's eastern-wear ecommerce. Tagline: "Effortless Elegance". I
 - A provisional recommendation is not a decision.
 
 ## Business rules that code must respect
+- Release one: guest checkout only; customer accounts and wishlist are deferred (D-034).
 - Money in integer paise; display with `en-IN` INR formatting.
 - Stock per variant (size × colour). Never oversell: atomic reservation plus database check constraints.
 - Prices, totals and order confirmation are decided by the server. Payments confirm only from verified webhooks or server status queries.

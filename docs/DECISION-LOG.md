@@ -41,6 +41,13 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-026 | Phase 7 (admin authentication, roles and audit) is backend security work and must not depend on the styling decision; the styling decision stays a prerequisite for UI work that needs it, including Phase 11. | Final-corrections request, 2026-10-18 |
 | D-027 | Apply the nine-file technology-policy documentation patch to the working tree, without committing. This approves the document edits only; TD-001, TD-002, ST-01, the 19-phase index and later phases keep their own gates. | Apply request, 2026-10-18 |
 | D-028 | **Phase 1 gate passed.** The 19-phase `MASTER-IMPLEMENTATION-INDEX.md` is the canonical implementation roadmap, and the current planning documents are the approved baseline. Not covered: TD-001 (unresolved), TD-002 (proposed), ST-01 (needs approval before execution), the Phase 3 gate, live payment integration and production infrastructure, the open business questions in `open-decisions.md`, and skill removal. | Phase 1 approval, 2026-10-18 |
+| D-029 | OD-04 sizes: standard range S, M, L, XL, XXL, plus Free Size for suitable one-size products; size charts configurable per product; inventory tracked by size and colour. | Phase 2 decisions, 2026-10-18 |
+| D-030 | OD-05 GST: customer-facing prices include GST; HSN and tax handling configurable; actual rates, classifications and invoice compliance verified by an accountant before live sales. | Phase 2 decisions, 2026-10-18 |
+| D-031 | OD-10: guest checkout for release one; customer accounts deferred. | Phase 2 decisions, 2026-10-18 |
+| D-032 | OD-11: mandatory 2FA for all four admin roles. | Phase 2 decisions, 2026-10-18 |
+| D-033 | OD-25: configurable, effective-dated, rules-based GST model representing thresholds and tax components; no hard-coded rates; actual rates and compliance rules need accountant verification. | Phase 2 decisions, 2026-10-18 |
+| D-034 | **Approved scope change (OD-26):** customer accounts and wishlist are deferred from release one; guest checkout stays fully functional. Changes the D-028 baseline in `project-requirements.md` §2, §3.1, §3.3, §5; index Phases 12, 14, 15; and the related specification sections listed in OD-26. | Phase 2 scope approval, 2026-10-18 |
+| D-035 | **Phase 2 gate passed.** Covers D-029 to D-034. Not covered: brand inputs (OD-01, OD-02, B-06), which may arrive later and block Phases 11 and 12; accountant verification (B-14) before live sales; alignment of the specifications with D-029 to D-033. | Phase 2 gate approval, 2026-10-18 |
 
 ## Proposals
 
@@ -74,10 +81,11 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | D-124 | TD-002: one token source in `packages/shared` (CSS custom properties) used by both apps; imported by each Vite app through package subpath exports; admin overrides semantic surface tokens only; a zero-dependency CI check flags hard-coded colours and font families, with registered exceptions. | Keeps one brand without changing the confirmed structure or adding a dependency. | `technology-decisions.md` TD-002 | Open |
 | D-125 | Plan task ST-01 (styling evaluation) after the Phase 3 gate, decided before the first UI deliverable (Phase 8 admin shell), with its own approvals. | D-023, D-026. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
 | D-126 | Move the admin app shell from Phase 7 to Phase 8, so Phase 7 is backend security work only. UI deliverables in any phase wait for TD-001 and TD-002; backend deliverables never do. Written into the index under D-027; binding since the index was approved (D-028). | D-026. A styling decision cannot hold back authentication. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
-| D-127 | OD-04 sizes: S, M, L, XL, XXL; product-specific size charts; stock by size and colour; availability matches supplier products. | Your proposed default, 2026-10-18. | `open-decisions.md` | Proposed by you, not accepted |
-| D-128 | OD-05 GST: GST-inclusive prices; product-level HSN and tax configuration; invoice tax breakdowns; no universal hard-coded rate; accountant verification before live sales. | Your proposed default, 2026-10-18. | `open-decisions.md`, OD-25 | Proposed by you, not accepted |
-| D-129 | OD-10 sign-in: guest checkout only in the initial release; optional accounts designed for later. | Your proposed default, 2026-10-18. | `open-decisions.md`, OD-26 | Proposed by you, not accepted |
-| D-130 | OD-11 MFA: required for the Owner and every role that can see customer or order data or change products, prices, inventory or orders; read-only exception documented for later approval. | Your proposed default, 2026-10-18. | `open-decisions.md` | Proposed by you, not accepted |
+| D-127 | OD-04 sizes, as you first proposed. | Your proposed default, 2026-10-18. | `open-decisions.md` | Superseded by D-029 (Free Size added) |
+| D-128 | OD-05 GST, as you first proposed. | Your proposed default, 2026-10-18. | `open-decisions.md` | Superseded by D-030 |
+| D-129 | OD-10 sign-in, as you first proposed. | Your proposed default, 2026-10-18. | `open-decisions.md` | Superseded by D-031 |
+| D-130 | OD-11 MFA, as you first proposed. | Your proposed default, 2026-10-18. | `open-decisions.md` | Superseded by D-032 |
+| D-131 | OD-26: defer customer accounts and wishlist from release one. **Scope change** to the approved baseline (D-028): `project-requirements.md` §2, §3.1 and §5 account routes; index Phase 14; OD-24 header controls. | Accounts already deferred by D-031; wishlist depends on accounts. | `open-decisions.md` OD-26 | Approved (D-034) |
 
 ## Observed (needs confirmation)
 
@@ -97,3 +105,5 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Documentation patch applied to the working tree (D-027). Not committed. |
 | 2026-10-18 | Phase 1 approved (D-028). D-101 to D-121, D-125 and D-126 approved as baseline; D-122 to D-124 stay open. |
 | 2026-10-18 | Phase 2: your proposed defaults for OD-04, OD-05, OD-10, OD-11 recorded as D-127 to D-130, not accepted. OD-25 and OD-26 added. Specifications not changed. |
+| 2026-10-18 | Phase 2: D-029 to D-033 accepted by you (OD-04, OD-05, OD-10, OD-11, OD-25); D-127 to D-130 superseded; D-131 (OD-26) proposed. Specifications not yet aligned. |
+| 2026-10-18 | OD-26 approved (D-034) and its references updated across the specifications; Phase 2 gate passed (D-035); Phase 3 plan proposed in `phase-3-plan.md`. |

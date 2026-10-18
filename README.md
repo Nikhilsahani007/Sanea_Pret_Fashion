@@ -14,7 +14,8 @@ Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, 
 | [Master implementation index](docs/MASTER-IMPLEMENTATION-INDEX.md) | The implementation sequence and approval gates |
 | [Decision log](docs/DECISION-LOG.md) | Confirmed, proposed and observed decisions |
 | [Blockers](docs/BLOCKERS.md) | What is blocking each phase |
-| [Open decisions](docs/open-decisions.md) | Unanswered business questions with safe defaults |
+| [Open decisions](docs/open-decisions.md) | Business questions, answers and defaults |
+| [Phase 3 plan](docs/phase-3-plan.md) | Proposed dependency list, setup steps and checks |
 | [Project requirements](docs/project-requirements.md) | Business rules, scope, sitemap, user flows |
 | [System architecture](docs/system-architecture.md) | Monorepo, modules, runtime |
 | [Technology decisions](docs/technology-decisions.md) | Technology policy and decision records |

@@ -24,6 +24,7 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 - Staff are invited by the Owner. Invite links are single-use and expire in 48 hours. No public admin sign-up.
 
 ### Customer
+**Deferred to a later release (D-034).** Release one has guest checkout only; the rules below apply when accounts are added.
 - Email and password with the same hashing. Guest checkout always available.
 - Password reset tokens: 256-bit random, hashed at rest, single use, 30-minute expiry. Reset revokes other sessions.
 - Phone OTP sign-in is a possible later addition (OD-10).
@@ -71,7 +72,7 @@ Role-based access control enforced in the API by middleware that reads the role 
 | Staff management | ✔ | | | |
 | Audit log | ✔ | | | |
 
-Object-level checks: customers can read only their own orders, addresses and wishlist. Guest order status requires an unguessable order access token, not just the order number.
+Object-level checks: customers can read only their own orders, addresses and wishlist (applies once accounts exist; deferred, D-034). Guest order status requires an unguessable order access token, not just the order number.
 
 ## 5. Payment and checkout integrity
 

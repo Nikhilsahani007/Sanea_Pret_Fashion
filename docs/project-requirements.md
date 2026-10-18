@@ -32,7 +32,7 @@ This document records the confirmed business rules, the first-release scope, the
 | Role | Description | Access summary |
 |------|-------------|----------------|
 | Visitor | Anonymous shopper. | Browse, search, filter, cart, guest checkout, enquiries. |
-| Customer | Shopper with an account. | Visitor access plus order history, saved addresses, wishlist. |
+| Customer | Shopper with an account. | Visitor access plus order history, saved addresses, wishlist. **Deferred to a later release (D-034).** |
 | Admin: Owner | Business owner. | Everything, including staff, payment settings and Rehma Foundation publishing. |
 | Admin: Manager | Operations lead. | Catalogue, content, inventory, orders, enquiries. No staff or payment settings. |
 | Admin: Catalogue editor | Merchandiser or content editor. | Products, collections, content. Read-only inventory. No orders. |
@@ -47,10 +47,10 @@ The permission matrix is in `security-design.md` §4.
 - Collection and category listing pages with filters (size, colour, price band, category, in-stock only) and sort (newest, price low to high, price high to low).
 - Search across product name, description, category, collection and colour, with typo tolerance (PostgreSQL trigram).
 - Product detail page: gallery, price, colour and size selectors that reflect per-variant stock, size guide, fabric and care, delivery and returns summary, "Enquire" and "Ask on WhatsApp" actions.
-- Cart, persisted for guests with a server-side cart token and merged on sign-in.
+- Cart, persisted for guests with a server-side cart token. (Merging into an account on sign-in is deferred with accounts, D-034.)
 - Checkout: contact, shipping address, delivery method, payment method (prepaid or COD), review, confirmation.
 - Order confirmation page and email.
-- Customer account: sign up, sign in, order history, order detail, addresses, wishlist.
+- ~~Customer account: sign up, sign in, order history, order detail, addresses, wishlist.~~ **Deferred to a later release (D-034).** Guest checkout stays fully functional; guests follow their order through the order access link on the confirmation page and in the confirmation email.
 - Admin-editable content pages: About, Rehma Foundation, Size Guide, Shipping, Returns and Exchanges, Privacy, Terms, Contact, FAQ.
 - WhatsApp click-to-chat links with a prefilled message containing product name, SKU, chosen variant and URL.
 
@@ -73,6 +73,7 @@ The permission matrix is in `security-design.md` §4.
 - Product reviews and ratings. Nothing is shown until real reviews exist.
 - Loyalty, gift cards and discount codes beyond one optional automatic discount rule.
 - Native mobile apps and marketplace sync.
+- Customer accounts and wishlist: deferred by an approved scope change (D-034, OD-26). Original scope: §2 Customer role, §3.1 account bullet, §5 `/account/*` routes.
 
 ## 4. Non-functional requirements
 
@@ -105,14 +106,14 @@ The permission matrix is in `security-design.md` §4.
 /cart                                Cart (also a drawer)
 /checkout                            Checkout
 /checkout/confirmation/:orderNumber  Order confirmation
-/account/sign-in                     Sign in
-/account/sign-up                     Sign up
-/account/forgot-password             Password reset
-/account                             Account overview
-/account/orders                      Order history
-/account/orders/:orderNumber         Order detail
-/account/addresses                   Saved addresses
-/account/wishlist                    Wishlist
+/account/sign-in                     Sign in   (D-034: deferred)
+/account/sign-up                     Sign up   (D-034: deferred)
+/account/forgot-password             Password reset   (D-034: deferred)
+/account                             Account overview   (D-034: deferred)
+/account/orders                      Order history   (D-034: deferred)
+/account/orders/:orderNumber         Order detail   (D-034: deferred)
+/account/addresses                   Saved addresses   (D-034: deferred)
+/account/wishlist                    Wishlist   (D-034: deferred)
 /rehma-foundation                    Rehma Foundation (verified content only)
 /about                               About Sanéa Pret
 /contact                             Contact and enquiry form
@@ -150,7 +151,7 @@ The live nishorama.com landing page was inspected as text on 2026-10-18. The scr
 | Order | Pattern observed on the reference | Sanéa Pret adaptation |
 |-------|----------------------------------|-----------------------|
 | 1 | Announcement bar with an offer message | Admin-editable announcement bar. Hidden when empty. Only real, approved offers. |
-| 2 | Minimal header: logo, main links, search, account, cart | Wordmark, search, account, wishlist, cart with live count. Menu button on mobile. |
+| 2 | Minimal header: logo, main links, search, account, cart | Wordmark, search and cart with live count. Menu button on mobile. Account and wishlist controls are not shown in release one (D-034), a deliberate difference from the reference. |
 | 3 | Pill-shaped category navigation (Kurtis, Dresses, Sets, Tops, Bottoms, Collections) | Admin-editable category pills linking to real categories and collections. |
 | 4 | Hero carousel of campaign banners with slide indicators; collection names act as CTAs | Full-bleed campaign hero with the oversized "SANÉA PRET" wordmark overlaid, a short campaign line and one CTA. Up to five admin-managed slides with indicators and a pause control. |
 | 5 | "New Ins" row: front and back image, name, price, "Add" button | "New Ins" horizontal row directly below the hero: image, second image on hover, name, price, compact label, quick-add that opens a size picker. |

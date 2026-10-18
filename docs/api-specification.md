@@ -7,7 +7,7 @@ Status: Draft for approval · Date: 2026-10-18 · Base path: `/api/v1`
 | Surface | Prefix | Callers | Auth |
 |---------|--------|---------|------|
 | Public storefront | `/api/v1/*` | Storefront, link-preview meta renderer | Optional customer session; cart token cookie |
-| Customer account | `/api/v1/account/*` | Storefront | Customer session required |
+| Customer account | `/api/v1/account/*` | Storefront | Customer session required **Deferred to a later release (D-034).** |
 | Admin | `/api/v1/admin/*` | Admin app only | Admin session required, role checked per route |
 | Webhooks | `/api/v1/webhooks/*` | Payment provider | Signature verification only, no session |
 | Health | `/api/v1/health` | Load balancer | None; returns no internal details |
@@ -91,6 +91,8 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | POST | `/events/whatsapp-click` | `{ productId?, variantId?, pagePath }`. Fire-and-forget, rate-limited. |
 
 ### Customer auth and account
+
+**Deferred to a later release (D-034).** These endpoints are not built in release one.
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/auth/customer/sign-up` | email, password, name, phone. |

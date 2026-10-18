@@ -57,7 +57,7 @@ Integration tests get a fresh database per test file (template database clone) f
 
 ### Auth and authorisation
 - Each role can and cannot reach the endpoints in the `security-design.md` §4 matrix (table-driven test).
-- Customer A cannot read customer B's order, address or wishlist.
+- Customer A cannot read customer B's order, address or wishlist. (Deferred with accounts, D-034.)
 - Guest order status requires the access token.
 - Lockout after failed attempts; reset tokens single-use and expiring.
 - CSRF token missing or wrong → 403.
@@ -82,14 +82,14 @@ Integration tests get a fresh database per test file (template database clone) f
 | E2E-5 | Admin edits hero slide, publishes, storefront shows it | Desktop |
 | E2E-6 | Admin adjusts stock to zero; storefront shows "Sold out" and blocks checkout | Desktop |
 | E2E-7 | Keyboard-only: landing carousel pause, pills, add to bag, checkout | Desktop |
-| E2E-8 | Guest cart merges on sign-in | Desktop |
+| E2E-8 | Guest cart merges on sign-in. **Deferred (D-034).** | Desktop |
 
 ## 5. Landing-page acceptance tests
 - Hero fills the first viewport below the header at 1440 × 900, 1024 × 768, 768 × 1024, 390 × 844 and 360 × 800.
 - Wordmark never wraps unexpectedly or overflows horizontally at any tested width.
 - Carousel: indicators change the slide, the pause button stops auto-advance, focus inside stops it, reduced motion disables auto-advance.
 - New Ins is the first section after the hero at every width.
-- Category pills, search, account, wishlist and bag are all keyboard-reachable and functional.
+- Category pills, search and bag are all keyboard-reachable and functional. (No account or wishlist controls in release one, D-034.)
 - No horizontal page scroll at any width.
 
 ## 6. Coverage targets

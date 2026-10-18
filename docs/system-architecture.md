@@ -84,7 +84,7 @@ Each module owns its routes, validation, business logic and database access. A m
 
 | Module | Responsibility | Owns tables |
 |--------|----------------|-------------|
-| auth | Admin and customer sign-in, sessions, password reset, CSRF tokens | AdminUser, Customer credentials, Session, PasswordResetToken |
+| auth | Admin sign-in (customer sign-in deferred, D-034), sessions, password reset, CSRF tokens | AdminUser, Customer credentials, Session, PasswordResetToken |
 | catalogue | Products, variants, categories, collections, attributes, publish state | Product, ProductVariant, ProductImage, Category, Collection, CollectionProduct, Colour, Size |
 | search | Text search and faceted filtering over published catalogue | (reads catalogue; owns search indexes) |
 | inventory | On-hand and reserved stock, reservations, movements, low-stock | InventoryLevel, StockReservation, StockMovement |
@@ -92,7 +92,7 @@ Each module owns its routes, validation, business logic and database access. A m
 | checkout | Pricing, shipping and COD eligibility, order placement orchestration | (orchestrates; owns CheckoutSession) |
 | orders | Order records, status machine, fulfilment, cancellation | Order, OrderItem, OrderStatusEvent, Shipment |
 | payments | Provider abstraction, payment intents, webhooks, refunds | Payment, PaymentEvent, Refund |
-| customers | Profiles, addresses, wishlists | Customer, Address, WishlistItem |
+| customers | Profiles, addresses, wishlists. **Deferred to a later release (D-034).** | Customer, Address, WishlistItem |
 | content | Homepage blocks, hero slides, navigation pills, pages, settings | ContentBlock, Page, NavigationItem, StoreSetting |
 | enquiries | Website enquiries and WhatsApp click logs | Enquiry, WhatsAppClick |
 | media | Image upload, validation, resizing, storage | MediaAsset |

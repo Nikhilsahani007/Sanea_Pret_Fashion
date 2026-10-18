@@ -24,7 +24,7 @@ Product  1──* ProductVariant *──1 Colour
 Product  1──* ProductImage *──0..1 Colour
 
 Customer 1──* Address
-Customer 1──* WishlistItem *──1 Product
+Customer 1──* WishlistItem *──1 Product      (Customer, Address, WishlistItem deferred: D-034)
 Customer 0..1──* Cart 1──* CartItem *──1 ProductVariant
 
 Order 1──* OrderItem *──1 ProductVariant      (with price/name snapshot)
@@ -137,6 +137,8 @@ ContentBlock, Page, NavigationItem, StoreSetting, MediaAsset
 | createdAt | timestamptz | |
 
 ### 3.3 Customers and carts
+
+Customer, Address and WishlistItem are **deferred to a later release (D-034).** Release one keeps only Cart and CartItem, with `customerId` left null; `Order.customerId` stays nullable so accounts can be added later without reworking orders.
 
 **Customer**: id, email (citext, unique), phone (E.164, `+91…`), firstName, lastName, passwordHash?, emailVerifiedAt?, marketingConsent (bool, with consentAt), codBlocked (bool), createdAt.
 

@@ -10,7 +10,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 |----|---------|--------|-------|--------------|
 | B-03 | The nishorama.com screen recording is not in the repository (OD-01). Motion timing, slide duration and hover behaviour are unverified. | Phase 12 gate | You | Build from the live site; motion stays provisional. |
 | B-04 | No logo, brand colours or brand fonts supplied (OD-02). | Phase 11 final tokens; Phase 12 gate | You | Typeset Panchang wordmark and dealt palette, replaceable through tokens. |
-| B-05 | Decisions that shape the core schema are not accepted: your proposed defaults for OD-04, OD-05, OD-10, OD-11 (D-127 to D-130) await acceptance; the GST rate model (OD-25) needs an answer or accepted default. | Phase 6 schema and migration approval | You (OD-25: with your accountant) | Defaults in `open-decisions.md`, once accepted. |
+| B-14 | Accountant verification of GST rates, thresholds, HSN classifications, seller GSTIN and state, and invoice compliance (D-030, D-033). | Live sales (Phase 19 launch). Not the schema. | You and your accountant | No rates are entered for production until verified. |
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |
 | B-08 | Email provider and sender domain (OD-19). | Phase 16 gate | You | Log-only provider in development. |
@@ -37,3 +37,5 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | R-03 | Two sequencing documents with colliding phase numbers. | Index made the single sequence; roadmap marked historical; spec references re-mapped (D-017). | `grep` results in `PROJECT-STATUS.md`; committed in `1e52d81`. |
 | R-04 (was B-01) | No canonical 19-phase list. | You approved `MASTER-IMPLEMENTATION-INDEX.md` as canonical. | D-028 |
 | R-05 (was B-02) | Planning documents and index not approved. | You approved them as the baseline. | D-028 |
+| R-06 (was B-05) | Schema-shaping decisions unanswered (OD-04, OD-05, OD-10, OD-11, OD-25). | You accepted them. | D-029 to D-033 |
+| R-07 (was B-13) | Scope change OD-26 awaited approval. | You approved it. | D-034 |
