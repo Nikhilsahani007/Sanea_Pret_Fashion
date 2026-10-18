@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Environment secrets (keep the documented template)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+.vite/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Taste skill: temporary inspector screenshots (direction.json stays tracked)
+.taste-skill/inspect/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

@@ -1,8 +1,8 @@
 # Sanéa Pret — Implementation Roadmap
 
-Status: Draft for approval · Date: 2026-10-18
+Status: **Historical reference, not authoritative** · Date: 2026-10-18
 
-> **Sequencing note (2026-10-18):** `MASTER-IMPLEMENTATION-INDEX.md` proposes a 19-phase sequence that replaces the phase order below once approved. This file is kept for its scope and acceptance detail. Differences are listed in the index's comparison section.
+> **Do not plan or implement from this file.** `MASTER-IMPLEMENTATION-INDEX.md` is the only implementation sequence. The phases below (numbered 0–6) are the earlier plan, kept unchanged for history. Their scope, acceptance criteria and gates now live in the index, which maps every old phase to its new phases and lists the old text it overrides (index section "Reconciliation with the old roadmap"). Where this file and the index differ, the index applies.
 
 Each phase ends with a review. The next phase starts only after approval. Durations are rough estimates for one full-time developer with AI assistance and will be revised after Phase 1.
 

@@ -29,6 +29,10 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-013 | The landing page needs its own desktop and mobile screenshot review and your explicit approval. | Review request |
 | D-014 | No application code, packages, migrations or infrastructure until you approve. | Kickoff brief; review request |
 | D-015 | Do not copy another site's code or assets; do not invent products, reviews or business claims. | Kickoff brief |
+| D-016 | Add a root `CLAUDE.md` and a root `.gitignore` protecting `node_modules`, environment secrets, build output, coverage, Playwright reports and temporary Taste screenshots, with `.env.example` tracked. | Repository-preparation request, 2026-10-18 |
+| D-017 | One authoritative implementation sequence; old phase references corrected or mapped to it. | Repository-preparation request, 2026-10-18 |
+| D-018 | No skill is uninstalled and `skills-lock.json` is not altered without evidence and your approval. | Repository-preparation request, 2026-10-18 |
+| D-019 | Changes are prepared but not committed or pushed until you approve. | Repository-preparation request, 2026-10-18 |
 
 ## Proposed (awaiting your approval)
 
@@ -49,22 +53,25 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-113 | Where the brief and Taste rules conflict (pills, overlaid wordmark, product card rows, header icons), the brief wins. | Your stated priority. | `design-system.md` §7 |
 | D-114 | UI UX Pro Max's "Liquid Glass" style recommendation rejected; its usability and accessibility rules kept. | Generic luxury default; conflicts with Taste no-glass rule. | `design-system.md` §1 |
 | D-115 | Guest checkout allowed; one warehouse; English only; max 10 units per cart line; order numbers `SP-YYMM-NNNNNN`. | Working assumptions. | `open-decisions.md` |
-| D-116 | Adopt the proposed 19-phase index in `MASTER-IMPLEMENTATION-INDEX.md`, pending reconciliation with your canonical list. | The canonical list was not found (B-01). | `MASTER-IMPLEMENTATION-INDEX.md` |
+| D-116 | Adopt the 19-phase `MASTER-IMPLEMENTATION-INDEX.md` as the canonical sequence; `implementation-roadmap.md` becomes historical. | The canonical list you mentioned was not found (B-01); D-017 asks for one authoritative sequence. | `MASTER-IMPLEMENTATION-INDEX.md` |
 | D-117 | Cart API and drawer, and header search, are built before the landing gate. | Bag and search must work at the landing gate. | `MASTER-IMPLEMENTATION-INDEX.md` |
 | D-118 | Live gateway (Phase 18) precedes launch (Phase 19). | BR-6 requires prepaid at launch. | `MASTER-IMPLEMENTATION-INDEX.md`, OD-22 |
 | D-119 | Database schema is migrated in stages: core in Phase 6, customers in Phase 14, orders and payments in Phase 15. | Order and tax columns depend on unanswered decisions. | `MASTER-IMPLEMENTATION-INDEX.md` |
 | D-120 | The landing gate cannot pass on placeholder imagery. | A visual review against the reference needs real photography. | `MASTER-IMPLEMENTATION-INDEX.md` Phase 12 |
+| D-121 | "Needed by" phases in `open-decisions.md` re-mapped to the index; OD-04, OD-05, OD-10, OD-11 needed before Phase 6. | They shape the core schema. | `open-decisions.md` |
+| D-122 | Skills: keep `design-taste-frontend`, `ui-ux-pro-max`, `design-motion-principles`; use `brand`, `design-system` selectively; consider removing `ui-styling`, `banner-design`, `design`, `slides`. No removal without approval. | Evidence in `PROJECT-STATUS.md` skills table. | `CLAUDE.md`, `PROJECT-STATUS.md` |
 
 ## Observed (needs confirmation)
 
 | ID | Observation | Evidence | Question |
 |----|-------------|----------|----------|
-| D-201 | The planning documents were committed and pushed. | Commit `3be7523` "Requirement docs" on `origin/main`. | Does this commit mean the plan is approved, or only saved? Treated as **saved, not approved**. |
-| D-202 | `.taste-skill/direction.json` is committed. | Present in `origin/main`. | Accept OD-21's default (commit `direction.json`, ignore screenshots)? |
+| D-201 | The planning and tracking documents were committed and pushed by you. | Commits `3be7523` "Requirement docs" and `9f63e88` "updated docs" on `origin/main`. | Do these commits mean the plan is approved, or only saved? Treated as **saved, not approved**. |
+| D-202 | `.taste-skill/direction.json` is committed. | Present in `origin/main` since `3be7523`. | Ignoring temporary screenshots is now confirmed (D-016). Keeping `direction.json` tracked still needs your confirmation (OD-21). |
 | D-203 | The whole `.claude/skills/` folder is committed to the repository. | 231 files in commit `3be7523`. | Keep project skills in git (reproducible) or ignore them? Recommended: keep, since `skills-lock.json` only covers two of the nine. |
 
 ## Change history
 
 | Date | Change |
 |------|--------|
-| 2026-10-18 | Log created. D-001 to D-015 recorded from briefs; D-101 to D-120 proposed; D-201 to D-203 observed. |
+| 2026-10-18 | Log created. D-001 to D-015 recorded from briefs; D-101 to D-120 proposed; D-201 to D-203 observed. Committed by you in `9f63e88`. |
+| 2026-10-18 | Repository preparation (uncommitted): D-016 to D-019 confirmed from your request; D-116 reworded; D-121, D-122 proposed; D-201, D-202 evidence updated. |

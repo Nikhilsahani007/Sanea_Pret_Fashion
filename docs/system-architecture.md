@@ -76,7 +76,7 @@ These are recommendations. None is applied without approval.
 | Use **npm workspaces** for the monorepo. | npm 11 is already installed. pnpm or Turborepo would be new tooling with little benefit at this size. | npm workspaces. |
 | Keep `prisma/` at the root, but only `apps/api` imports the Prisma client. | Matches the proposal. Frontends must never import Prisma, so a lint rule forbids it. | As stated. |
 | Add `packages/config` later only if lint and TS config duplication becomes painful. | Avoids an empty package on day one. | Not added. |
-| Add `e2e/` at the root for Playwright tests. | End-to-end tests cross both apps and the API, so they belong to no single app. | Added in Phase 1. |
+| Add `e2e/` at the root for Playwright tests. | End-to-end tests cross both apps and the API, so they belong to no single app. | Added in Phase 3 (master index). |
 
 ## 3. API modules (modular monolith)
 
@@ -131,7 +131,7 @@ A plain Vite SPA renders in the browser, so crawlers and link previews may see e
 | B. SPA plus pre-rendering of public routes at build time and on publish | Medium | Good for content pages; product pages change often and need re-rendering on publish. |
 | C. **Vite SSR for the storefront** using React's streaming server renderer, served by a small Node server | Medium-high | Best for SEO and link previews. Keeps React, Vite and TypeScript. |
 
-**Recommendation:** start with A plus a tiny API-side "meta" endpoint that serves correct Open Graph HTML to known link-preview bots for product and collection URLs. Move to C in Phase 5 if search traffic justifies it. Recorded as OD-14.
+**Recommendation:** start with A plus a tiny API-side "meta" endpoint that serves correct Open Graph HTML to known link-preview bots for product and collection URLs. Move to C in Phase 17 (master index) if search traffic justifies it. Recorded as OD-14.
 
 Performance budgets for the storefront: initial JS ≤ 170 KB gzipped, hero image served as AVIF/WebP with `srcset`, fonts self-hosted and subset, route-level code splitting, product images lazy-loaded below the fold.
 

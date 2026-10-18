@@ -110,7 +110,7 @@ Object-level checks: customers can read only their own orders, addresses and wis
 
 - Every admin write is recorded in `AuditLog` with before and after values (secrets excluded).
 - Alerts (once hosting exists): spike in failed sign-ins, webhook signature failures, orders flagged `needsAttention`, 5xx rate.
-- Admin sign-in notifications by email for new devices (Phase 4).
+- Admin sign-in notifications by email for new devices (Phase 16, master index).
 
 ## 10. Top risks and mitigations
 

@@ -201,7 +201,7 @@ Editable storefront content is modelled as typed blocks, not free HTML:
 
 - Website enquiry: stored with product and variant reference, contact details, message, consent flag, source page, status. Rate-limited per IP and per phone or email.
 - WhatsApp: the storefront builds `https://wa.me/<number>?text=<encoded message>` using the number from store settings. A click event (product, variant, timestamp, anonymous session ID) is logged with no personal data.
-- Admin inbox lists both, with filters and status changes. Email notification to staff on new enquiry is planned for Phase 3.
+- Admin inbox lists both, with filters and status changes. Email notification to staff on new enquiry is planned for Phase 16 (master index).
 
 ## 10. Media
 
