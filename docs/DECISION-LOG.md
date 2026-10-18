@@ -62,6 +62,7 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-047 | In-memory rate-limit storage, approved for a single API instance only. A shared store is a mandatory decision before multi-instance deployment (Phase 19). | Phase 5 plan review, 2026-10-18 |
 | D-048 | Global rate limit 300 requests per minute per IP, health endpoint exempt. Stricter route-specific limits come with sensitive routes in later phases. | Phase 5 plan review, 2026-10-18 |
 | D-049 | **Phase 5 approved** on branch `phase-5-api-platform` from `dc3e1da8be2f2ae5ea056b0db8af421ccb058e4f`. Not authorised: commit, push, PR #3. | Phase 5 plan review, 2026-10-18 |
+| D-050 | **Phase 5 gate passed (P5-AC12).** Evidence: commits `ab355d6` (platform), `512fd88` (CORS classifies by pathname, not `req.url`) and `5f55243` (admin paths matched case-insensitively) on `phase-5-api-platform`; local gate 19 test files, 331 tests passed, 0 failed; `npm audit` 0 vulnerabilities; format, lint and typecheck clean; graceful shutdown on Linux (SIGTERM and SIGINT, exit 0); CSRF cookie verified in Edge 155 and Chrome 154; CI run 39157064172 on draft PR #3 ("Format, lint, typecheck, test, audit" and "Secret scan (Gitleaks)" both success). PR #1, PR #2 and PR #3 stay open, draft and unmerged. Phase 6 not started. | Phase 5 completion approval, 2026-10-19 |
 
 ## Proposals
 
@@ -130,3 +131,4 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Phase 4 gate passed (D-044). Phase 5 planning may start; implementation needs separate approval. |
 | 2026-10-18 | Phase 5 plan approved with decisions D-045 to D-049; cookie strategy D-132 proposed for review at the gate. |
 | 2026-10-19 | Phase 5 review: D-132 confirmed; commit, push and draft PR #3 authorised (D-133). Phase 5 completion needs a separate approval. |
+| 2026-10-19 | PR #3 review: two admin-path classification fixes (`512fd88`, `5f55243`). Phase 5 gate passed (D-050). Phase 6 planning needs your go-ahead. |

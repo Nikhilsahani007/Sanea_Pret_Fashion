@@ -1,6 +1,6 @@
 # Phase 5 Plan — API Platform Skeleton
 
-Status: **Approved (D-049); implemented on branch `phase-5-api-platform`; commit and draft PR #3 authorised (D-133).** Completion gate pending. · Date: 2026-10-19
+Status: **Gate passed (D-050).** Commits `ab355d6`, `512fd88`, `5f55243` on `phase-5-api-platform`, draft PR #3 into `phase-4-shared-contracts`, unmerged. · Date: 2026-10-19
 
 ## Scope
 `apps/api` platform layer only: Express app, configuration validation, logging, standard error format, security headers, CORS, CSRF, body limits, rate limiting and the health endpoint. No business routes, database, sessions, authentication, checkout, payments, UI or infrastructure.
