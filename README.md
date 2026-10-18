@@ -2,7 +2,7 @@
 
 Ecommerce platform for Sanéa Pret, a premium Indian women's eastern-wear brand. Tagline: *Effortless Elegance*.
 
-**Status:** planning. No application code exists yet. See [Project status](docs/PROJECT-STATUS.md).
+**Status:** Phase 3, repository foundation. No application features exist yet. See [Project status](docs/PROJECT-STATUS.md).
 
 Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, a Node + Express API, PostgreSQL with Prisma, and a shared contracts package. Technology choices follow a documented, technology-flexible policy; the styling approach is not yet decided.
 
@@ -25,5 +25,20 @@ Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, 
 | [Security design](docs/security-design.md) | Authentication, authorisation, risks |
 | [Design system](docs/design-system.md) | Art direction, landing page, tokens, motion |
 | [Testing strategy](docs/testing-strategy.md) | Test layers and critical cases |
+
+## Local setup
+
+Requires Node 24 (see `.nvmrc`) and npm 11.
+
+```
+npm ci                 # install exactly what the lock file records
+npm run format:check   # Prettier
+npm run lint           # ESLint
+npm run typecheck      # TypeScript project build, no output
+npm test               # Vitest
+npm run audit          # npm audit, high and critical
+```
+
+Playwright browsers are not installed yet. Run `npx playwright install` when the first end-to-end test is added.
 
 Instructions for Claude Code are in [CLAUDE.md](CLAUDE.md).
