@@ -1,6 +1,13 @@
 # Phase 3 Plan — Repository Foundation and CI
 
-Status: **Proposed, awaiting your Phase 3 approval.** Nothing in this plan has been installed or created. · Date: 2026-10-18
+Status: **Approved (D-038); implemented locally on branch `phase-3-foundation`, not committed.** Results: `PROJECT-STATUS.md`. · Date: 2026-10-18
+
+### Differences from the plan, found during implementation
+- **V10:** `playwright test --list` exits with "No tests found" when there are no tests. The check is run with `--pass-with-no-tests`. The `test:e2e` script keeps the strict default, so a real run still fails if tests are missing.
+- **Prettier ignores Markdown** (`*.md`), so it does not reflow the documentation tables. It also ignores `.claude/`, `.taste-skill/`, `skills-lock.json` and the lock file.
+- **Dependabot** ignores TypeScript `>=6.1.0`, matching the typescript-eslint limit above.
+- **ESLint's Prisma guard** uses a single pattern rule, so each violation is reported once.
+- **`tsc -b`** uses `composite` with `noEmit`. Only `*.tsbuildinfo` files are written, and they are ignored.
 
 Scope comes from `MASTER-IMPLEMENTATION-INDEX.md` Phase 3: npm workspaces with empty packages, TypeScript, ESLint, Prettier, Vitest and Playwright configuration, CI with lint, typecheck, test, `npm audit` and secret scanning, `.env.example` and an `e2e/` folder. No features, no React, no Express, no Prisma.
 

@@ -1,0 +1,16 @@
+# Generated or third-party
+node_modules/
+**/dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+package-lock.json
+
+# Installed skills and design working files (not project source)
+.claude/
+.taste-skill/
+skills-lock.json
+
+# Documentation is formatted by hand; Prettier would reflow its tables
+*.md

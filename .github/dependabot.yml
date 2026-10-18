@@ -1,0 +1,22 @@
+# Weekly update pull requests (D-037). No automatic merging: every update goes
+# through CI and manual review.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # typescript-eslint 8.71.2 supports TypeScript >=4.8.4 <6.1.0 (phase-3-plan.md).
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

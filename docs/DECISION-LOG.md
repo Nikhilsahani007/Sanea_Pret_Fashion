@@ -50,6 +50,7 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-035 | **Phase 2 gate passed.** Covers D-029 to D-034. Not covered: brand inputs (OD-01, OD-02, B-06), which may arrive later and block Phases 11 and 12; accountant verification (B-14) before live sales; alignment of the specifications with D-029 to D-033. | Phase 2 gate approval, 2026-10-18 |
 | D-036 | Phase 3 keeps `@playwright/test` and its configuration, with no browser downloads until the first end-to-end test exists. | Pre-Phase 3 instruction, 2026-10-18 |
 | D-037 | Phase 3 includes Dependabot: weekly update pull requests for npm and GitHub Actions, with no automatic merging. | Pre-Phase 3 instruction, 2026-10-18 |
+| D-038 | **Phase 3 approved** with the dependency list in `phase-3-plan.md` (ten pinned development packages), on branch `phase-3-foundation`, without committing or pushing. The CI run on GitHub (V14) needs separate approval. | Phase 3 approval, 2026-10-18 |
 
 ## Proposals
 
@@ -110,3 +111,4 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-18 | Phase 2: D-029 to D-033 accepted by you (OD-04, OD-05, OD-10, OD-11, OD-25); D-127 to D-130 superseded; D-131 (OD-26) proposed. Specifications not yet aligned. |
 | 2026-10-18 | OD-26 approved (D-034) and its references updated across the specifications; Phase 2 gate passed (D-035); Phase 3 plan proposed in `phase-3-plan.md`. |
 | 2026-10-18 | Pre-Phase 3: D-036 (Playwright kept, no browsers) and D-037 (weekly Dependabot, no auto-merge) recorded; `PROJECT-STATUS.md` reconciled with commit `0fdb74c`. Phase 3 itself not approved. |
+| 2026-10-18 | Phase 3 approved (D-038) and implemented locally on `phase-3-foundation`; checks V1 to V13a recorded in `PROJECT-STATUS.md`. Not committed. |

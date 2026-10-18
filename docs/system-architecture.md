@@ -137,7 +137,26 @@ Performance budgets for the storefront: initial JS ≤ 170 KB gzipped, hero imag
 
 ## 7. Dependencies (planned, minimal)
 
-Nothing is installed yet. Planned dependencies and the reason for each:
+### Installed in Phase 3 (development only, pinned exactly)
+
+| Package | Version | Reason |
+|---------|---------|--------|
+| typescript | 6.0.3 | Type checking. Held below 6.1 because typescript-eslint 8.71.2 supports `<6.1.0`. |
+| @types/node | 26.6.5 | Node types for config files and scripts. |
+| eslint | 10.13.0 | Linting. |
+| @eslint/js | 10.0.1 | Recommended JavaScript rules. |
+| typescript-eslint | 8.71.2 | TypeScript parser and rules. |
+| eslint-config-prettier | 10.1.8 | Disables style rules that conflict with Prettier. |
+| prettier | 3.9.10 | Formatting. |
+| vitest | 5.0.5 | Unit and integration tests. |
+| vite | 8.3.4 | Required peer of Vitest 5; used by the apps later. |
+| @playwright/test | 1.64.1 | End-to-end runner; no browsers installed yet (D-036). |
+
+No runtime dependencies are installed. Details and checks: `phase-3-plan.md`, `PROJECT-STATUS.md`.
+
+### Planned for later phases
+
+Not installed yet. Planned dependencies and the reason for each:
 
 | Package | Where | Why |
 |---------|-------|-----|
