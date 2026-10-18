@@ -4,7 +4,7 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 6 — Core database schema: gate passed (D-061).** Commit `56ef435` on `phase-6-core-schema`, in draft PR #4 into `phase-5-api-platform`, open and unmerged. Decisions D-051 to D-061. The migration has been applied only to disposable validation databases, since removed. CI run 39161267484: unit suite 21 files, 383 tests; database integration suite 7 files, 131 tests; Gitleaks no leaks. **Phase 7 not started**; its planning needs your go-ahead.
+**Phase 7 — Admin authentication, roles and audit: plan approved; migration review is the next stop.** Phases 3–6 are merged into `main`. Start SHA: `cb72b6b675ea5b25f790343d3e7d671b852a49ee`. Branch: `phase-7-admin-auth`. Decisions D-062 to D-075 approved for implementation. No Phase 7 migration has been run; the migration must be reviewed and explicitly approved before applying it to any database.
 
 ## Phase 6 setup results (gate passed 2026-10-19, D-061)
 
@@ -175,13 +175,13 @@ All of these need V14.
 | Phase 4 implementation, Zod installation in the repository | **Authorised and done locally** | D-043 |
 | Phase 4 completion gate | **Passed** | D-044 |
 | Phase 5 plan and decisions | **Approved** | D-045 to D-049, D-132 |
-| Commit, push, draft PR #3 for Phase 5 | **Authorised** | D-133 |
+| Commit, push, draft PR #3 for Phase 5 | **Done and merged** | PR #3; merge commit `4f20baa5` |
 | Phase 5 completion gate | **Passed** | D-050 |
-| Commit, push, draft PR #2 for Phase 4 | **Done** | `dc52aad`; PR #2 open, draft, unmerged |
+| Commit, push, draft PR #2 for Phase 4 | **Done and merged** | PR #2; merge commit `38a0a851` |
 | Branch `phase-4-shared-contracts` | **Pushed** | GitHub at the Phase 4 commits; PR #2 head |
-| Commit and push of the Phase 3 housekeeping | **Done** | `619d175` |
+| Commit and push of the Phase 3 housekeeping | **Done and merged** | `619d175`; included in PR #1 |
 | Committing and pushing `phase-3-foundation` | **Approved and done** | `567e27f` on GitHub |
-| Opening a draft pull request to trigger CI | **Done** | PR #1, draft, open, not merged |
+| Phase 3 pull request | **Merged** | PR #1; merge commit `03c12bd` |
 | TD-001 styling | **Unresolved** | `technology-decisions.md` |
 | TD-002 shared tokens | **Proposed** | `technology-decisions.md` |
 | ST-01 styling evaluation | **Not approved**; nothing installed | index |
@@ -189,15 +189,15 @@ All of these need V14.
 | D-202, D-203 | **Open**; not blocking | `DECISION-LOG.md` |
 | Phase 6 plan, decisions, setup | **Approved; setup done** | D-051 to D-060 |
 | Phase 6 migration | **Validated on disposable databases** (`20261018193745_core_schema`); not applied to any kept database | `phase-6-plan.md` |
-| Commit, push, draft PR #4 for Phase 6 | **Done** | `56ef435`; PR #4 open, draft, unmerged |
+| Commit, push, draft PR #4 for Phase 6 | **Done and merged** | PR #4; merge commit `cb72b6b6` |
 | Phase 6 completion gate | **Passed** | D-061 |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 7 planning | Now | Needs your go-ahead |
-| Merge PR #1, PR #2 and PR #3 | Only with your explicit authorisation | Not authorised |
+| Phase 7 migration review | Now | Draft migration must be reviewed and approved before applying |
+| PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
@@ -205,7 +205,7 @@ All of these need V14.
 
 ## Blockers for Phase 7
 
-- Phase 6 gate recorded (D-061). Phase 7 planning needs your go-ahead; implementation needs separate approval of its plan.
+- Phase 6 gate recorded (D-061). Phase 7 plan and decisions D-062–D-075 approved. Migration review is the next approval stop.
 
 ## Skills audit
 
