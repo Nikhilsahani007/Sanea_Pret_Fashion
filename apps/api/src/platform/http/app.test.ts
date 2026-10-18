@@ -108,6 +108,31 @@ describe("CORS", () => {
     ).toBeUndefined();
   });
 
+  it("classifies admin paths by pathname, ignoring the query string", async () => {
+    const { app } = testApp();
+    const admin = await request(app)
+      .get("/api/v1/admin?anything=1")
+      .set("Origin", ADMIN);
+    expect(admin.headers["access-control-allow-origin"]).toBe(ADMIN);
+    const fromShop = await request(app)
+      .get("/api/v1/admin?anything=1")
+      .set("Origin", STOREFRONT);
+    expect(fromShop.headers["access-control-allow-origin"]).toBeUndefined();
+    const preflightFromShop = await request(app)
+      .options("/api/v1/admin?anything=1")
+      .set("Origin", STOREFRONT)
+      .set("Access-Control-Request-Method", "POST");
+    expect(
+      preflightFromShop.headers["access-control-allow-origin"],
+    ).toBeUndefined();
+    const publicWithQuery = await request(app)
+      .get("/api/v1/health?anything=1")
+      .set("Origin", STOREFRONT);
+    expect(publicWithQuery.headers["access-control-allow-origin"]).toBe(
+      STOREFRONT,
+    );
+  });
+
   it("sends no CORS headers to unknown origins", async () => {
     const res = await request(testApp().app)
       .get("/api/v1/health")

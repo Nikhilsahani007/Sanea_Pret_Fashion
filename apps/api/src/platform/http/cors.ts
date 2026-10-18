@@ -11,7 +11,8 @@ import { allowedOriginFor } from "./origins.ts";
 export function corsPolicy(config: Config): RequestHandler {
   return cors((req, callback) => {
     const origin = req.headers.origin;
-    const allowed = allowedOriginFor(req.url ?? "", config);
+    // Pathname only: req.url includes the query string.
+    const allowed = allowedOriginFor(req.path, config);
     callback(null, {
       origin: origin === allowed ? allowed : false,
       credentials: true,
