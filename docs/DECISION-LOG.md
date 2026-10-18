@@ -2,7 +2,7 @@
 
 Date started: 2026-10-18
 
-Each entry has a status:
+Each entry has a status. Approving a policy confirms that policy only; the document edits that describe it, and any technology choice it leads to, are approved separately.
 - **Confirmed**: stated by you in a brief or message. Source quoted.
 - **Proposed**: recommended in the planning documents, not yet approved by you.
 - **Observed**: inferred from repository evidence, not stated by you. Needs confirmation.
@@ -24,7 +24,7 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-008 | Admin manages products, pricing, descriptions, homepage and catalogue content, inventory and orders. | Kickoff brief |
 | D-009 | Storefront content editable without code changes. | Kickoff brief |
 | D-010 | Rehma Foundation page with no unverified charity, equity, donation or legal claims. | Kickoff brief |
-| D-011 | TypeScript monorepo: React + Vite storefront and admin, Node + Express API, PostgreSQL + Prisma, `/api/v1`, shared package, modular monolith, regular CSS, no Tailwind. | Kickoff brief |
+| D-011 | TypeScript monorepo: React + Vite storefront and admin, Node + Express API, PostgreSQL + Prisma, `/api/v1`, shared package, modular monolith. *The original "regular CSS, no Tailwind" clause is superseded by D-020 and D-021.* | Kickoff brief; amended by technology-policy request, 2026-10-18 |
 | D-012 | Nishorama landing-page composition is mandatory: announcement bar, minimal header, category pills, full-width hero with oversized wordmark, New Ins immediately below, further product rows, tabbed products, footer. | Reference addendum; restated in the review request |
 | D-013 | The landing page needs its own desktop and mobile screenshot review and your explicit approval. | Review request |
 | D-014 | No application code, packages, migrations or infrastructure until you approve. | Kickoff brief; review request |
@@ -33,39 +33,57 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | D-017 | One authoritative implementation sequence; old phase references corrected or mapped to it. | Repository-preparation request, 2026-10-18 |
 | D-018 | No skill is uninstalled and `skills-lock.json` is not altered without evidence and your approval. | Repository-preparation request, 2026-10-18 |
 | D-019 | Changes are prepared but not committed or pushed until you approve. | Repository-preparation request, 2026-10-18 |
+| D-020 | Technology-flexible engineering: any suitable technology may be adopted for a meaningful benefit, judged on functionality, customer experience, accessibility, performance, security, productivity, maintainability, compatibility, cost and lock-in; significant choices documented; experiments when uncertain; confirmed architecture preserved unless a justified change is approved. | Technology-policy request, 2026-10-18; restated in the refinement request |
+| D-021 | The blanket prohibition on Tailwind CSS is removed. Tailwind is not adopted or installed automatically; it is evaluated against regular CSS and CSS Modules. | Technology-policy request; restated in the refinement request |
+| D-022 | The premium editorial direction and brand identity stay independent of the styling framework, and tokens stay consistent across storefront and admin. | Technology-policy request; refinement request |
+| D-023 | The styling evaluation is a separate, explicitly approved task before the admin and storefront shells, not a Phase 3 deliverable. Phase 3 stays limited to repository foundation and CI. | Refinement request, 2026-10-18 |
+| D-024 | Tailwind experiment dependencies stay uninstalled until you explicitly approve the experiment. | Refinement request, 2026-10-18 |
+| D-026 | Phase 7 (admin authentication, roles and audit) is backend security work and must not depend on the styling decision; the styling decision stays a prerequisite for UI work that needs it, including Phase 11. | Final-corrections request, 2026-10-18 |
+| D-027 | Apply the nine-file technology-policy documentation patch to the working tree, without committing. This approves the document edits only; TD-001, TD-002, ST-01, the 19-phase index and later phases keep their own gates. | Apply request, 2026-10-18 |
+| D-028 | **Phase 1 gate passed.** The 19-phase `MASTER-IMPLEMENTATION-INDEX.md` is the canonical implementation roadmap, and the current planning documents are the approved baseline. Not covered: TD-001 (unresolved), TD-002 (proposed), ST-01 (needs approval before execution), the Phase 3 gate, live payment integration and production infrastructure, the open business questions in `open-decisions.md`, and skill removal. | Phase 1 approval, 2026-10-18 |
 
-## Proposed (awaiting your approval)
+## Proposals
 
-| ID | Decision | Rationale | Document |
-|----|----------|-----------|----------|
-| D-101 | npm workspaces; no pnpm or Turborepo. | npm 11 is installed; avoids new tooling. | `system-architecture.md` §2 |
-| D-102 | Prisma schema stays at the root `prisma/`; only the API imports the client. | Matches your proposed structure. | `system-architecture.md` §2 |
-| D-103 | Add a root `e2e/` folder for Playwright tests. | Tests cross both apps and the API. | `system-architecture.md` §2 |
-| D-104 | Money as integer paise; UUID v7 keys; UTC storage with Asia/Kolkata display. | Correctness and sortable IDs. | `system-architecture.md` §5 |
-| D-105 | Stock reserved atomically at checkout, 15-minute hold for prepaid, immediate hold for COD, DB check constraints as last guard. | Prevents overselling. | `system-design.md` §2 |
-| D-106 | Orders confirmed only from verified webhooks or server status queries. | Prevents fake confirmations. | `system-design.md` §6 |
-| D-107 | Mock payment provider until gateway approval; it cannot load in production. | D-005. | `system-design.md` §6.1 |
-| D-108 | Server-side sessions in PostgreSQL, Argon2id passwords, MFA for Owner and Manager. | ASVS Level 2 target. | `security-design.md` §2 |
-| D-109 | CMS content as typed blocks with draft and published versions; no raw HTML. | Safe editing; XSS prevention. | `system-design.md` §7 |
-| D-110 | Search with PostgreSQL full-text and trigram; no external search engine in R1. | Catalogue size. | `system-design.md` §8 |
-| D-111 | Storefront starts as a single-page app with a link-preview meta endpoint; SSR evaluated later. | Effort versus SEO benefit. | `system-architecture.md` §6, OD-14 |
-| D-112 | Art direction "The name as a monument" (Taste seed 2101993053), Panchang and Switzer, blush and aubergine palette, square buttons, flat pills. | Fits the mandatory oversized wordmark. | `design-system.md` |
-| D-113 | Where the brief and Taste rules conflict (pills, overlaid wordmark, product card rows, header icons), the brief wins. | Your stated priority. | `design-system.md` §7 |
-| D-114 | UI UX Pro Max's "Liquid Glass" style recommendation rejected; its usability and accessibility rules kept. | Generic luxury default; conflicts with Taste no-glass rule. | `design-system.md` §1 |
-| D-115 | Guest checkout allowed; one warehouse; English only; max 10 units per cart line; order numbers `SP-YYMM-NNNNNN`. | Working assumptions. | `open-decisions.md` |
-| D-116 | Adopt the 19-phase `MASTER-IMPLEMENTATION-INDEX.md` as the canonical sequence; `implementation-roadmap.md` becomes historical. | The canonical list you mentioned was not found (B-01); D-017 asks for one authoritative sequence. | `MASTER-IMPLEMENTATION-INDEX.md` |
-| D-117 | Cart API and drawer, and header search, are built before the landing gate. | Bag and search must work at the landing gate. | `MASTER-IMPLEMENTATION-INDEX.md` |
-| D-118 | Live gateway (Phase 18) precedes launch (Phase 19). | BR-6 requires prepaid at launch. | `MASTER-IMPLEMENTATION-INDEX.md`, OD-22 |
-| D-119 | Database schema is migrated in stages: core in Phase 6, customers in Phase 14, orders and payments in Phase 15. | Order and tax columns depend on unanswered decisions. | `MASTER-IMPLEMENTATION-INDEX.md` |
-| D-120 | The landing gate cannot pass on placeholder imagery. | A visual review against the reference needs real photography. | `MASTER-IMPLEMENTATION-INDEX.md` Phase 12 |
-| D-121 | "Needed by" phases in `open-decisions.md` re-mapped to the index; OD-04, OD-05, OD-10, OD-11 needed before Phase 6. | They shape the core schema. | `open-decisions.md` |
-| D-122 | Skills: keep `design-taste-frontend`, `ui-ux-pro-max`, `design-motion-principles`; use `brand`, `design-system` selectively; consider removing `ui-styling`, `banner-design`, `design`, `slides`. No removal without approval. | Evidence in `PROJECT-STATUS.md` skills table. | `CLAUDE.md`, `PROJECT-STATUS.md` |
+The Status column shows which proposals D-028 approved as part of the baseline and which remain open.
+
+| ID | Decision | Rationale | Document | Status |
+|----|----------|-----------|----------|--------|
+| D-101 | npm workspaces; no pnpm or Turborepo. | npm 11 is installed; avoids new tooling. | `system-architecture.md` §2 | Approved (D-028) |
+| D-102 | Prisma schema stays at the root `prisma/`; only the API imports the client. | Matches your proposed structure. | `system-architecture.md` §2 | Approved (D-028) |
+| D-103 | Add a root `e2e/` folder for Playwright tests. | Tests cross both apps and the API. | `system-architecture.md` §2 | Approved (D-028) |
+| D-104 | Money as integer paise; UUID v7 keys; UTC storage with Asia/Kolkata display. | Correctness and sortable IDs. | `system-architecture.md` §5 | Approved (D-028) |
+| D-105 | Stock reserved atomically at checkout, 15-minute hold for prepaid, immediate hold for COD, DB check constraints as last guard. | Prevents overselling. | `system-design.md` §2 | Approved (D-028) |
+| D-106 | Orders confirmed only from verified webhooks or server status queries. | Prevents fake confirmations. | `system-design.md` §6 | Approved (D-028) |
+| D-107 | Mock payment provider until gateway approval; it cannot load in production. | D-005. | `system-design.md` §6.1 | Approved (D-028) |
+| D-108 | Server-side sessions in PostgreSQL, Argon2id passwords, MFA for Owner and Manager. | ASVS Level 2 target. | `security-design.md` §2 | Approved (D-028) |
+| D-109 | CMS content as typed blocks with draft and published versions; no raw HTML. | Safe editing; XSS prevention. | `system-design.md` §7 | Approved (D-028) |
+| D-110 | Search with PostgreSQL full-text and trigram; no external search engine in R1. | Catalogue size. | `system-design.md` §8 | Approved (D-028) |
+| D-111 | Storefront starts as a single-page app with a link-preview meta endpoint; SSR evaluated later. | Effort versus SEO benefit. | `system-architecture.md` §6, OD-14 | Approved (D-028) |
+| D-112 | Art direction "The name as a monument" (Taste seed 2101993053), Panchang and Switzer, blush and aubergine palette, square buttons, flat pills. | Fits the mandatory oversized wordmark. | `design-system.md` | Approved (D-028) |
+| D-113 | Where the brief and Taste rules conflict (pills, overlaid wordmark, product card rows, header icons), the brief wins. | Your stated priority. | `design-system.md` §7 | Approved (D-028) |
+| D-114 | UI UX Pro Max's "Liquid Glass" style recommendation rejected; its usability and accessibility rules kept. | Generic luxury default; conflicts with Taste no-glass rule. | `design-system.md` §1 | Approved (D-028) |
+| D-115 | Guest checkout allowed; one warehouse; English only; max 10 units per cart line; order numbers `SP-YYMM-NNNNNN`. | Working assumptions. | `open-decisions.md` | Approved (D-028) |
+| D-116 | Adopt the 19-phase `MASTER-IMPLEMENTATION-INDEX.md` as the canonical sequence; `implementation-roadmap.md` becomes historical. | The canonical list you mentioned was not found (B-01); D-017 asks for one authoritative sequence. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
+| D-117 | Cart API and drawer, and header search, are built before the landing gate. | Bag and search must work at the landing gate. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
+| D-118 | Live gateway (Phase 18) precedes launch (Phase 19). | BR-6 requires prepaid at launch. | `MASTER-IMPLEMENTATION-INDEX.md`, OD-22 | Approved (D-028) |
+| D-119 | Database schema is migrated in stages: core in Phase 6, customers in Phase 14, orders and payments in Phase 15. | Order and tax columns depend on unanswered decisions. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
+| D-120 | The landing gate cannot pass on placeholder imagery. | A visual review against the reference needs real photography. | `MASTER-IMPLEMENTATION-INDEX.md` Phase 12 | Approved (D-028) |
+| D-121 | "Needed by" phases in `open-decisions.md` re-mapped to the index; OD-04, OD-05, OD-10, OD-11 needed before Phase 6. | They shape the core schema. | `open-decisions.md` | Approved (D-028) |
+| D-122 | Skills: keep `design-taste-frontend`, `ui-ux-pro-max`, `design-motion-principles`; use `brand`, `design-system` selectively; `ui-styling` only if TD-001 adopts Tailwind; consider removing `banner-design`, `design`, `slides`. No removal without approval. | Evidence in `PROJECT-STATUS.md` skills table. | `CLAUDE.md`, `PROJECT-STATUS.md` | Open |
+| D-123 | TD-001 styling stays **unresolved**. CSS Modules with token custom properties is a provisional recommendation without measured evidence, not a choice. | D-020 calls for evidence when uncertain. | `technology-decisions.md` TD-001 | Open |
+| D-124 | TD-002: one token source in `packages/shared` (CSS custom properties) used by both apps; imported by each Vite app through package subpath exports; admin overrides semantic surface tokens only; a zero-dependency CI check flags hard-coded colours and font families, with registered exceptions. | Keeps one brand without changing the confirmed structure or adding a dependency. | `technology-decisions.md` TD-002 | Open |
+| D-125 | Plan task ST-01 (styling evaluation) after the Phase 3 gate, decided before the first UI deliverable (Phase 8 admin shell), with its own approvals. | D-023, D-026. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
+| D-126 | Move the admin app shell from Phase 7 to Phase 8, so Phase 7 is backend security work only. UI deliverables in any phase wait for TD-001 and TD-002; backend deliverables never do. Written into the index under D-027; binding since the index was approved (D-028). | D-026. A styling decision cannot hold back authentication. | `MASTER-IMPLEMENTATION-INDEX.md` | Approved (D-028) |
+| D-127 | OD-04 sizes: S, M, L, XL, XXL; product-specific size charts; stock by size and colour; availability matches supplier products. | Your proposed default, 2026-10-18. | `open-decisions.md` | Proposed by you, not accepted |
+| D-128 | OD-05 GST: GST-inclusive prices; product-level HSN and tax configuration; invoice tax breakdowns; no universal hard-coded rate; accountant verification before live sales. | Your proposed default, 2026-10-18. | `open-decisions.md`, OD-25 | Proposed by you, not accepted |
+| D-129 | OD-10 sign-in: guest checkout only in the initial release; optional accounts designed for later. | Your proposed default, 2026-10-18. | `open-decisions.md`, OD-26 | Proposed by you, not accepted |
+| D-130 | OD-11 MFA: required for the Owner and every role that can see customer or order data or change products, prices, inventory or orders; read-only exception documented for later approval. | Your proposed default, 2026-10-18. | `open-decisions.md` | Proposed by you, not accepted |
 
 ## Observed (needs confirmation)
 
 | ID | Observation | Evidence | Question |
 |----|-------------|----------|----------|
-| D-201 | The planning and tracking documents were committed and pushed by you. | Commits `3be7523` "Requirement docs" and `9f63e88` "updated docs" on `origin/main`. | Do these commits mean the plan is approved, or only saved? Treated as **saved, not approved**. |
+| D-201 | The planning, tracking and preparation documents were committed and pushed by you. | Commits `3be7523` "Requirement docs", `9f63e88` "updated docs" and `1e52d81` "updated files" on `origin/main`. | Do these commits mean approval, or only saving? Treated as **saved, not approved**. |
 | D-202 | `.taste-skill/direction.json` is committed. | Present in `origin/main` since `3be7523`. | Ignoring temporary screenshots is now confirmed (D-016). Keeping `direction.json` tracked still needs your confirmation (OD-21). |
 | D-203 | The whole `.claude/skills/` folder is committed to the repository. | 231 files in commit `3be7523`. | Keep project skills in git (reproducible) or ignore them? Recommended: keep, since `skills-lock.json` only covers two of the nine. |
 
@@ -74,4 +92,8 @@ Open questions that are not yet decisions live in `open-decisions.md`.
 | Date | Change |
 |------|--------|
 | 2026-10-18 | Log created. D-001 to D-015 recorded from briefs; D-101 to D-120 proposed; D-201 to D-203 observed. Committed by you in `9f63e88`. |
-| 2026-10-18 | Repository preparation (uncommitted): D-016 to D-019 confirmed from your request; D-116 reworded; D-121, D-122 proposed; D-201, D-202 evidence updated. |
+| 2026-10-18 | Repository preparation: D-016 to D-019 confirmed from your request; D-116 reworded; D-121, D-122 proposed; D-201, D-202 evidence updated. Committed by you in `1e52d81`. |
+| 2026-10-18 | Technology policy: D-020 to D-024 and D-026 confirmed by your instructions; D-011 amended; D-122 updated; D-123 to D-126 proposed. |
+| 2026-10-18 | Documentation patch applied to the working tree (D-027). Not committed. |
+| 2026-10-18 | Phase 1 approved (D-028). D-101 to D-121, D-125 and D-126 approved as baseline; D-122 to D-124 stay open. |
+| 2026-10-18 | Phase 2: your proposed defaults for OD-04, OD-05, OD-10, OD-11 recorded as D-127 to D-130, not accepted. OD-25 and OD-26 added. Specifications not changed. |

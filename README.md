@@ -4,7 +4,7 @@ Ecommerce platform for Sanéa Pret, a premium Indian women's eastern-wear brand.
 
 **Status:** planning. No application code exists yet. See [Project status](docs/PROJECT-STATUS.md).
 
-Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, a Node + Express API, PostgreSQL with Prisma, and a shared contracts package. Regular CSS, no Tailwind.
+Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, a Node + Express API, PostgreSQL with Prisma, and a shared contracts package. Technology choices follow a documented, technology-flexible policy; the styling approach is not yet decided.
 
 ## Documentation
 
@@ -17,6 +17,7 @@ Planned stack: TypeScript monorepo with React + Vite storefront and admin apps, 
 | [Open decisions](docs/open-decisions.md) | Unanswered business questions with safe defaults |
 | [Project requirements](docs/project-requirements.md) | Business rules, scope, sitemap, user flows |
 | [System architecture](docs/system-architecture.md) | Monorepo, modules, runtime |
+| [Technology decisions](docs/technology-decisions.md) | Technology policy and decision records |
 | [System design](docs/system-design.md) | Stock, checkout, orders, payments, content |
 | [Database design](docs/database-design.md) | Entities and relationships |
 | [API specification](docs/api-specification.md) | `/api/v1` endpoints |

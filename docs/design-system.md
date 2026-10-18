@@ -11,7 +11,7 @@ Status: Draft for approval · Date: 2026-10-18
 | Design Motion Principles (`design-motion-principles`) | Installed, instructions read | Ecommerce weighting: Jakub Krehel primary (production polish), Emil Kowalski secondary (speed for frequent actions), Jhey Tompkins selective (product showcase only). Audit mode runs before each storefront phase sign-off. |
 | Awesome Claude Design | **Not installed** in `.claude/skills` or the user skills folder | Not consulted. If you share the repository or files, I will inspect the relevant references. Nothing was installed, per the brief. |
 | Design MD Chrome | **Not installed** | Not consulted. Same as above. |
-| Other installed skills (`design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) | Installed, not used | `ui-styling` targets Tailwind and shadcn, which the brief excludes. The others overlap with the three primary skills. |
+| Other installed skills (`design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) | Installed, not used | `ui-styling` targets Tailwind and shadcn; it becomes relevant only if TD-001 adopts Tailwind. The others overlap with the three primary skills. |
 
 Where skills disagree, the order is: **your brief and the mandatory Nishorama reference** → accessibility (UI UX Pro Max critical rules) → Taste house rules → Taste direction sheet → motion skill.
 
@@ -204,3 +204,12 @@ Only `transform` and `opacity` animate. Every motion has a `prefers-reduced-moti
 4. Motion audit with the motion skill.
 5. UI UX Pro Max pre-delivery checklist: contrast, focus, tap targets, reduced motion, 375/768/1024/1440 widths.
 6. Lighthouse performance and accessibility on a throttled mobile profile.
+
+## 11. Independence from the styling framework
+
+The direction in this document belongs to Sanéa Pret, not to a styling tool.
+- Tokens for colour, type, spacing, radius, focus and motion are defined once as CSS custom properties and shared by the storefront and the admin. How they are shared is TD-002 in `technology-decisions.md` (proposed).
+- The admin keeps the same brand palette, faces and focus treatment, and overrides only semantic surface tokens for dense data (§5).
+- Whatever TD-001 decides, components read these tokens. If Tailwind is adopted, its theme maps to the same custom properties rather than defining its own values.
+- Framework defaults (palettes, shadows, radii, spacing scales) are not used where they differ from these tokens.
+- The quality gates in §10 apply unchanged, whichever approach is chosen.

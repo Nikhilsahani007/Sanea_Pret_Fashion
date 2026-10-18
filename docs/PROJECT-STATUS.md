@@ -4,9 +4,9 @@ Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 1 — Planning and approval** (`MASTER-IMPLEMENTATION-INDEX.md`).
+**Phase 2 — Business decisions and brand inputs** (`MASTER-IMPLEMENTATION-INDEX.md`). In progress: your proposed defaults recorded, not accepted.
 
-State: **repository preparation done, uncommitted, awaiting your approval.** No application source code, dependencies, migrations or infrastructure exist.
+Phase 1 gate passed on 2026-10-18 (D-028): the 19-phase index is canonical and the planning documents are the approved baseline. No application source code, dependencies, migrations or infrastructure exist.
 
 ## Git history (actual)
 
@@ -15,8 +15,9 @@ State: **repository preparation done, uncommitted, awaiting your approval.** No 
 | `cb1cbf7` | NikhilSahani007 | Initial commit | `README.md`, `.gitattributes` |
 | `3be7523` | NikhilSahani007 | Requirement docs | Ten planning documents, `.claude/skills/` (nine skills), `.taste-skill/direction.json`, `skills-lock.json` |
 | `9f63e88` | NikhilSahani007 | updated docs | `MASTER-IMPLEMENTATION-INDEX.md`, `PROJECT-STATUS.md`, `DECISION-LOG.md`, `BLOCKERS.md`; edits to `implementation-roadmap.md` and `open-decisions.md` |
+| `1e52d81` | NikhilSahani007 | updated files | Repository preparation: `CLAUDE.md`, `.gitignore`, `README.md`, reconciled index, historical roadmap, re-mapped phase references, tracking documents (12 files) |
 
-Local `HEAD` and `origin/main` were both `9f63e88` before the current changes.
+Before the technology-policy edits: `HEAD`, `origin/main` and the GitHub `main` branch were all `1e52d81`, and the working tree was clean.
 
 ## Completed work (with evidence)
 
@@ -25,45 +26,69 @@ Local `HEAD` and `origin/main` were both `9f63e88` before the current changes.
 | Environment inspected: Node 24.11.0, npm 11.1.0, Git 2.49.0, Python 3.13.0, Docker 28.0.4, Edge and Chrome present, `psql` absent | Command output, 2026-10-18 |
 | Ten planning documents | Commit `3be7523` |
 | Taste art direction (seed 2101993053) | `.taste-skill/direction.json`, commit `3be7523` |
-| Tracking documents and 19-phase index, first version | Commit `9f63e88` |
-| Repository preparation: `CLAUDE.md`, `.gitignore`, `README.md`, reconciled index, historical roadmap, re-mapped phase references, updated tracking docs | Working tree only, **not committed** (see "Uncommitted changes") |
+| Tracking documents and 19-phase index | Commits `9f63e88`, `1e52d81` |
+| Repository preparation (`CLAUDE.md`, `.gitignore`, `README.md`, single sequence, re-mapped references) | Commit `1e52d81` |
+| Technology-flexible policy recorded | Working tree only, not committed (D-027); the policy itself is confirmed by you (D-020 to D-024, D-026) |
+| Phase 1 gate: index canonical, planning documents approved | D-028 (recorded in the working tree, not committed) |
 
-## Uncommitted changes (this preparation)
+Committing is treated as saving, not approval (D-201).
+
+## Technology-policy documentation (applied, not committed)
 
 | File | Change |
 |------|--------|
-| `CLAUDE.md` | Created |
-| `.gitignore` | Created |
-| `README.md` | Rewritten (was one line) |
-| `docs/MASTER-IMPLEMENTATION-INDEX.md` | Reconciled: per-phase scope, dependencies, deliverables, verification, gate |
-| `docs/implementation-roadmap.md` | Header marks it historical; body unchanged |
-| `docs/open-decisions.md` | "Needed by" phases re-mapped to the index; default-versus-decision wording |
-| `docs/system-architecture.md` | Two phase references re-mapped |
-| `docs/system-design.md` | One phase reference re-mapped |
-| `docs/security-design.md` | One phase reference re-mapped |
-| `docs/DECISION-LOG.md` | D-016 to D-019 added from your request; D-116 reworded; D-121, D-122 proposed; evidence updated |
-| `docs/BLOCKERS.md` | Re-grouped by index phase; resolved items listed |
+| `docs/technology-decisions.md` | Created: policy, TD-001 styling (unresolved), TD-002 token sharing (proposed) |
+| `CLAUDE.md` | Old styling rule replaced; technology-choices section; `ui-styling` conditional |
+| `README.md` | Stack line; link to technology decisions |
+| `docs/system-architecture.md` | Styling lines point to TD-001; new §8 policy pointer |
+| `docs/design-system.md` | Skill note; §11 framework independence and shared tokens |
+| `docs/MASTER-IMPLEMENTATION-INDEX.md` | Rule 6: UI deliverables wait for TD-001 and TD-002, backend never does; admin shell moved from Phase 7 to Phase 8; UI dependencies on Phases 8 to 11; new "Separately approved tasks" with ST-01; Phase 3 unchanged |
+| `docs/DECISION-LOG.md` | D-011 amended; D-020 to D-024 confirmed; D-122 updated; D-123 to D-125 proposed |
+| `docs/BLOCKERS.md` | B-12 added; commit evidence updated |
 | `docs/PROJECT-STATUS.md` | This file |
 
-## Remaining work in Phase 1
+## Approval status
+
+| Item | Status |
+|------|--------|
+| Technology-flexible policy, Tailwind prohibition removed, brand independence, separate styling task, no experiment installs (D-020 to D-024) | **Confirmed by you** |
+| The document edits listed above | **Approved and applied** to the working tree (D-027); not committed |
+| TD-001 styling approach | **Unresolved** |
+| TD-002 token sharing | **Proposed** |
+| ST-01 styling evaluation | **Planned, not approved**; `tailwindcss` and `@tailwindcss/vite` not installed |
+| Planning documents and 19-phase index | **Approved** (D-028) |
+| Phase 3 repository foundation and CI | **Not approved**; needs its own gate |
+| Live payment integration (Phase 18), production infrastructure (Phase 19) | **Not approved** |
+
+## Phase 1 result
 
 | Task | Status |
 |------|--------|
-| Accept the 19-phase index as canonical, or supply yours (B-01) | Not done |
-| Approve the planning documents and index (B-02) | Not done |
-| Review and approve this preparation diff | Not done |
-| Commit the preparation (only after your approval) | Not done |
-| Confirm D-202 (keep `direction.json` tracked) and D-203 (keep skills in git) | Not done |
+| Index accepted as canonical | Done (D-028) |
+| Planning documents approved | Done (D-028) |
+| Technology-policy document edits | Approved and applied (D-027) |
+| Commit the working-tree changes | Not done; awaits your instruction |
+| Confirm D-202 (keep `direction.json` tracked) and D-203 (keep skills in git) | Open; does not block Phase 2 |
 
-## Remaining phases
+## Phase 2 work
 
-Phases 2 to 19. None started.
+| Task | Status |
+|------|--------|
+| Answers or accepted defaults for OD-04, OD-05, OD-10, OD-11 (needed before Phase 6) | Your proposed defaults recorded (D-127 to D-130); **not accepted** |
+| GST rate model and seller registration (OD-25, needed before Phase 6) | Open; needs your answer or accepted default, and accountant confirmation before live sales |
+| R1 scope if guest-only checkout is accepted (OD-26) | Open |
+| Logo decision (OD-02), screen recording (OD-01), first real photography (B-06) | Not started; may arrive later, blocks Phases 11 and 12 |
+
+## Remaining phases and tasks
+
+Phases 3 to 19 in `MASTER-IMPLEMENTATION-INDEX.md`, none started. Task ST-01 runs after the Phase 3 gate and must be decided before the first UI deliverable (Phase 8 admin shell), only with your approval.
 
 ## Blocked decisions
 
 | Needed before | Decisions |
 |---------------|-----------|
-| Database (Phase 6) | OD-04 sizes, OD-05 GST, OD-10 customer sign-in, OD-11 MFA scope; assumptions in D-115 |
+| Database (Phase 6) | Acceptance of D-127 to D-130 (OD-04, OD-05, OD-10, OD-11); OD-25 GST rate model |
+| UI deliverables (admin shell and screens in Phases 8 to 10; storefront from Phase 11) | TD-001 styling and TD-002 tokens, via ST-01 (B-12). Backend work is not blocked. |
 | Checkout (Phase 15) | OD-07 COD, OD-08 shipping, OD-09 returns text, OD-17 launch offer; OD-05 again for invoices |
 | Production launch (Phases 17–19) | OD-06 gateway, OD-22 launch mode, OD-12 legal, OD-13 Rehma content, OD-14 SEO, OD-16 WhatsApp number, OD-18 hosting, OD-19 email, OD-20 analytics, OD-02 brand, real photography |
 
@@ -74,11 +99,11 @@ Details and defaults: `BLOCKERS.md`, `open-decisions.md`.
 | Gate | Criterion | Result | Evidence |
 |------|-----------|--------|----------|
 | Phase 1 | Planning documents exist in git | **Pass** | Commit `3be7523` |
-| Phase 1 | Tracking documents exist in git | **Pass** | Commit `9f63e88` (updated versions uncommitted) |
-| Phase 1 | No application files exist | **Pass** | No `package.json`, `apps/`, `packages/`, `prisma/`, `e2e/`, `.env.example`; 0 `.ts/.tsx/.js/.css/.prisma` files outside `.claude/` |
-| Phase 1 | `.gitignore` protects the required paths | **Pass** | `git check-ignore` below |
+| Phase 1 | Tracking documents exist in git | **Pass** | Commits `9f63e88`, `1e52d81` |
+| Phase 1 | No application files exist | **Pass** | No `package.json`, `apps/`, `packages/`, `prisma/`, `e2e/`, `.env.example`; 0 `.ts/.tsx/.js/.css/.prisma` files outside `.claude/` (checked 2026-10-18) |
+| Phase 1 | `.gitignore` protects the required paths | **Pass** | `git check-ignore` results below (run before `1e52d81`; `.gitignore` unchanged since) |
 | Phase 1 | No unmapped old phase references in specifications | **Pass** | `grep` below |
-| Phase 1 | You approve the plan and index | **Not met** | No approval recorded |
+| Phase 1 | You approve the plan and index | **Pass** | D-028 |
 
 ### Verification commands run (2026-10-18)
 
@@ -91,10 +116,13 @@ git check-ignore --no-index .env.example .taste-skill/direction.json CLAUDE.md d
   → exit 1: none ignored (correct)
 
 git ls-files -ci --exclude-standard
-  → no output: no tracked file is caught by the new rules
+  → no output
 
 grep -n "Phase [0-9]" docs/<eight specifications> | grep -v "master index"
-  → no output: every phase reference in the specifications is labelled
+  → no output
+
+git status -sb; git branch -vv; git rev-parse HEAD origin/main; git ls-remote origin refs/heads/main
+  → main...origin/main, clean; all three SHAs 1e52d81a7225a863080b3991b3b64ed3ec24e0ad
 ```
 
 No tests, builds or installs were run; none exist yet.
@@ -103,25 +131,21 @@ No tests, builds or installs were run; none exist yet.
 
 | Skill | Recommendation | Evidence |
 |-------|----------------|----------|
-| design-taste-frontend | Keep (storefront pages) | In `skills-lock.json`; `draw.mjs` and `lint.mjs` ran; art direction comes from it; its description excludes dashboards. Writes temporary screenshots to `.taste-skill/inspect/`, now ignored. |
-| ui-ux-pro-max | Keep (admin, accessibility, forms) | `search.py` returned results; its own "Skip" section excludes backend, API and database work. Tailwind appears only as optional stack filters. Not in the lock file. |
+| design-taste-frontend | Keep (storefront pages) | In `skills-lock.json`; `draw.mjs` and `lint.mjs` ran; its scripts contain no Tailwind-specific rules. Writes temporary screenshots to `.taste-skill/inspect/`, which is ignored. |
+| ui-ux-pro-max | Keep (admin, accessibility, forms) | `search.py` returned results; its own "Skip" section excludes backend, API and database work. Not in the lock file. |
 | design-motion-principles | Keep (animation only) | In `skills-lock.json`; instructions and workflows only. |
 | brand | Invoke selectively, once a logo exists | Brand voice and identity guidance. Not in the lock file. |
-| design-system | Invoke selectively | Overlaps `docs/design-system.md` and includes slide generation; mentions Tailwind 3 times in `SKILL.md`. Not in the lock file. |
-| ui-styling | Consider removing | Built on shadcn and Tailwind (26 mentions in `SKILL.md`), against the no-Tailwind rule. Excluded in `CLAUDE.md`. |
+| design-system | Invoke selectively | Overlaps `docs/design-system.md`; includes slide generation. Not in the lock file. |
+| ui-styling | Invoke only if TD-001 adopts Tailwind | Built on shadcn and Tailwind (26 mentions in `SKILL.md`). No longer conflicts with a rule (D-021). |
 | banner-design | Consider removing | Depends on `ai-artist`, `ai-multimodal`, `frontend-design`, none installed. |
 | design | Consider removing | Same missing dependencies; logo generation needs Gemini; overlaps three other skills. |
 | slides | Consider removing | Presentation generation; nothing in project scope needs it. |
 | find-skills (user folder) | Invoke selectively | Installs skills; run only on request. |
 
-No skill was removed and `skills-lock.json` was not changed (D-018). Removal needs your approval (D-122). Backend tasks need none of these skills.
+No skill was removed and `skills-lock.json` was not changed (D-018).
 
 ## Next exact task
 
-**You:** review the diff, then reply with:
-1. Approval (or changes) for this preparation.
-2. "Accept the 19-phase index as canonical", or your own list (B-01).
-3. Approval of the planning documents (B-02).
-4. Answers, or accepted defaults, for OD-04, OD-05, OD-10 and OD-11 (B-05).
+**You (Phase 2):** accept or change your proposed defaults D-127 to D-130, and answer or accept the default for OD-25 (GST rate model) and OD-26 (R1 scope of accounts and wishlist).
 
-**Then me:** commit the preparation if you ask me to, record your answers in `DECISION-LOG.md`, and draft the Phase 3 dependency list (each package with its reason) for approval **before** anything is installed.
+**Then me:** record acceptance, update the affected specifications (`database-design.md`, `security-design.md`, `project-requirements.md` and the index if OD-26 changes scope), then prepare the Phase 3 dependency list for its own gate.

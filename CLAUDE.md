@@ -6,14 +6,22 @@ Premium Indian women's eastern-wear ecommerce. Tagline: "Effortless Elegance". I
 1. `docs/PROJECT-STATUS.md` — current phase, next task, what is blocked.
 2. `docs/MASTER-IMPLEMENTATION-INDEX.md` — the only implementation sequence. Phase numbers everywhere mean this index.
 3. `docs/DECISION-LOG.md` and `docs/BLOCKERS.md` — what is confirmed, proposed or blocked.
-4. Only the specification the task needs: requirements, architecture, system design, database, API, security, design system, testing, open decisions (all in `docs/`).
+4. Only the specification the task needs: requirements, architecture, technology decisions, system design, database, API, security, design system, testing, open decisions (all in `docs/`).
 
 `docs/implementation-roadmap.md` is historical. Do not plan from it.
 
 ## Confirmed stack (do not change without approval)
 - npm workspaces monorepo: `apps/storefront`, `apps/admin` (React + Vite + TypeScript), `apps/api` (Node + Express + TypeScript, modular monolith), `packages/shared` (types and Zod schemas), `prisma/` (PostgreSQL + Prisma).
 - API prefix `/api/v1`. No microservices.
-- **Regular CSS only. No Tailwind, no shadcn, no CSS-in-JS runtime.**
+- Styling approach: **unresolved** (TD-001 in `docs/technology-decisions.md`). Tailwind is allowed but not adopted or installed; it is evaluated only in the separately approved task ST-01.
+- Design tokens are CSS custom properties with one shared source for both apps (TD-002, proposed), independent of the styling approach.
+
+## Technology choices
+- Technology-flexible: any tool may be adopted when it gives a meaningful, documented benefit (`docs/technology-decisions.md` §1).
+- Judge options on functionality, customer experience, accessibility, performance, security, productivity, maintainability, compatibility, cost and lock-in.
+- No unnecessary or duplicate dependencies, no speculative abstractions, no paid service without demonstrated value.
+- Significant choices get a record (problem, options, recommendation, trade-offs, verification) and the user's approval. Run a small experiment when the best option is unclear.
+- A provisional recommendation is not a decision.
 
 ## Business rules that code must respect
 - Money in integer paise; display with `en-IN` INR formatting.
@@ -36,7 +44,7 @@ Premium Indian women's eastern-wear ecommerce. Tagline: "Effortless Elegance". I
 ## Skills
 - Storefront pages: `design-taste-frontend`. Admin screens, accessibility and forms: `ui-ux-pro-max`. Animation: `design-motion-principles`.
 - Backend, database and API tasks need no design skill.
-- Do not use `ui-styling` (Tailwind and shadcn based).
+- `ui-styling` (Tailwind and shadcn) only if TD-001 adopts Tailwind.
 
 ## Reporting
 - Mark work done only with evidence: commit hash, command and output, screenshot path, or recorded approval.

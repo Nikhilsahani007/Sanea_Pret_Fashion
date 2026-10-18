@@ -8,17 +8,16 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 
 | ID | Blocker | Blocks | Owner | Safe default |
 |----|---------|--------|-------|--------------|
-| B-01 | The "required 19-phase master index" you mentioned has not been supplied. Not found in the repository, workspace, conversation or skills. | Final status of the index (Phase 1 gate) | You | Accept the 19-phase index in `MASTER-IMPLEMENTATION-INDEX.md` as canonical, or supply yours for reconciliation. |
-| B-02 | No explicit approval of the planning documents or the index. Commits `3be7523` and `9f63e88` save them but are not approvals (D-201). | Phase 1 gate and everything after it | You | None. Explicit approval needed. |
 | B-03 | The nishorama.com screen recording is not in the repository (OD-01). Motion timing, slide duration and hover behaviour are unverified. | Phase 12 gate | You | Build from the live site; motion stays provisional. |
 | B-04 | No logo, brand colours or brand fonts supplied (OD-02). | Phase 11 final tokens; Phase 12 gate | You | Typeset Panchang wordmark and dealt palette, replaceable through tokens. |
-| B-05 | Decisions that shape the core schema are unanswered: size model (OD-04), GST (OD-05), customer sign-in (OD-10), MFA scope (OD-11). | Phase 6 migration approval | You | Defaults in `open-decisions.md`, once accepted. |
+| B-05 | Decisions that shape the core schema are not accepted: your proposed defaults for OD-04, OD-05, OD-10, OD-11 (D-127 to D-130) await acceptance; the GST rate model (OD-25) needs an answer or accepted default. | Phase 6 schema and migration approval | You (OD-25: with your accountant) | Defaults in `open-decisions.md`, once accepted. |
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |
 | B-08 | Email provider and sender domain (OD-19). | Phase 16 gate | You | Log-only provider in development. |
 | B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
 | B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
+| B-12 | Styling approach unresolved (TD-001) and token sharing not approved (TD-002). Task ST-01 needs your explicit approval, including installing `tailwindcss` and `@tailwindcss/vite` on a throwaway branch. | UI deliverables only: admin shell and screens (Phases 8 to 10), storefront (Phase 11 onward). Backend work, including Phase 7, is not blocked. | You | None for the decision. Provisional hypothesis: CSS Modules with shared token custom properties. Nothing installed. |
 
 ## Environment risks (not blocking yet)
 
@@ -33,6 +32,8 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 
 | ID | Item | Resolution | Evidence |
 |----|------|-----------|----------|
-| R-01 | No `.gitignore`: a future `npm install` or `.env` could be committed. | Root `.gitignore` prepared (D-016). | `git check-ignore` results in `PROJECT-STATUS.md`. Not yet committed. |
-| R-02 | No project instructions for Claude Code. | Root `CLAUDE.md` prepared (D-016). | File present. Not yet committed. |
-| R-03 | Two sequencing documents with colliding phase numbers. | Index made the single sequence; roadmap marked historical; spec references re-mapped (D-017). | `grep` results in `PROJECT-STATUS.md`. Not yet committed. |
+| R-01 | No `.gitignore`: a future `npm install` or `.env` could be committed. | Root `.gitignore` added (D-016). | `git check-ignore` results in `PROJECT-STATUS.md`; committed in `1e52d81`. |
+| R-02 | No project instructions for Claude Code. | Root `CLAUDE.md` added (D-016). | Committed in `1e52d81`. |
+| R-03 | Two sequencing documents with colliding phase numbers. | Index made the single sequence; roadmap marked historical; spec references re-mapped (D-017). | `grep` results in `PROJECT-STATUS.md`; committed in `1e52d81`. |
+| R-04 (was B-01) | No canonical 19-phase list. | You approved `MASTER-IMPLEMENTATION-INDEX.md` as canonical. | D-028 |
+| R-05 (was B-02) | Planning documents and index not approved. | You approved them as the baseline. | D-028 |

@@ -1,6 +1,6 @@
 # Sanéa Pret — Master Implementation Index
 
-Status: **Proposed. Becomes authoritative when you approve it (B-01, B-02).** · Last updated: 2026-10-18
+Status: **Approved as the canonical implementation roadmap (D-028, 2026-10-18).** · Last updated: 2026-10-18
 
 This is the **only** implementation sequence for the project. `implementation-roadmap.md` is a historical reference: it shows the earlier seven-phase plan and maps each old phase to the phases below. Wherever the two differ, this index applies.
 
@@ -8,7 +8,7 @@ All phase numbers anywhere in `docs/` refer to this index unless they are explic
 
 ## Source of the 19 phases
 
-You asked for a "required 19-phase master index". No such list was found in the repository, workspace, conversation or skills (B-01). The 19 phases below are derived from the old roadmap and the planning documents. If you supply a canonical list, this index will be reconciled with it and every difference logged in `DECISION-LOG.md`.
+The 19 phases were derived from the old roadmap and the planning documents, and you approved them as canonical on 2026-10-18 (D-028). Changes to phases, scopes or gates need a new `DECISION-LOG.md` entry.
 
 ## Rules for every phase
 
@@ -17,6 +17,7 @@ You asked for a "required 19-phase master index". No such list was found in the 
 3. No application source code before Phase 3. No database migration before the Phase 6 gate. No live payment configuration before the Phase 18 gate. No infrastructure before the Phase 19 gate.
 4. Storefront quality gates are defined once, in `design-system.md` §10. Test cases are defined once, in `testing-strategy.md`. Phases reference them and do not restate them.
 5. Each phase's scope is exclusive. Work listed under one phase is not repeated in another.
+6. **UI deliverables** (admin screens, storefront screens, stylesheets) start only after TD-001 and TD-002 are decided through task ST-01. **API, database and other backend deliverables never wait for a styling decision.** A phase with both kinds passes its gate when both are done.
 
 ---
 
@@ -30,11 +31,11 @@ You asked for a "required 19-phase master index". No such list was found in the 
 | 4 | Shared contracts package | 3 | Review of test evidence |
 | 5 | API platform skeleton | 4 | Review of test evidence |
 | 6 | Core database schema | 5, and decisions OD-04, OD-05, OD-10, OD-11 | **Your migration approval** |
-| 7 | Admin authentication, roles and audit | 6 | Review of test evidence |
-| 8 | Catalogue, media and catalogue API | 7 | Review of test evidence |
-| 9 | Inventory and stock reservation | 8 | Review of concurrency evidence |
-| 10 | Content management | 7, 8 | Review of test evidence |
-| 11 | Storefront shell, search and cart | 8, 9, 10 | Review of screenshots and tests |
+| 7 | Admin authentication, roles and audit (API only) | 6 | Review of test evidence |
+| 8 | Catalogue, media, catalogue API and admin shell | 7; TD-001 and TD-002 decided for UI deliverables | Review of test evidence and screenshots |
+| 9 | Inventory and stock reservation | 8; TD-001 and TD-002 decided for UI deliverables | Review of concurrency evidence |
+| 10 | Content management | 7, 8; TD-001 and TD-002 decided for UI deliverables | Review of test evidence |
+| 11 | Storefront shell, search and cart | 8, 9, 10; TD-001 and TD-002 decided for UI deliverables | Review of screenshots and tests |
 | 12 | Landing page | 11 | **Your visual approval** |
 | 13 | Browsing, product detail and enquiries | 12 | Review of tests and screenshots |
 | 14 | Customer accounts and wishlist | 11 | Review of test evidence |
@@ -53,7 +54,7 @@ You asked for a "required 19-phase master index". No such list was found in the 
 - **Depends on:** nothing.
 - **Deliverables:** the ten specifications in `docs/`; `PROJECT-STATUS.md`, `DECISION-LOG.md`, `BLOCKERS.md`; this index; root `CLAUDE.md`, `.gitignore`, `README.md`.
 - **Verification:** files exist in git; no application files exist; `.gitignore` rules checked with `git check-ignore`.
-- **Gate:** you approve the planning documents and this index (B-01, B-02).
+- **Gate:** you approve the planning documents and this index. **Passed 2026-10-18 (D-028).**
 
 ### Phase 2 — Business decisions and brand inputs
 - **Scope:** collecting answers, not building. Decisions needed before the database: OD-04, OD-05, OD-10, OD-11. Brand inputs: logo decision (OD-02), screen recording (OD-01), first real photography (B-06).
@@ -91,36 +92,36 @@ You asked for a "required 19-phase master index". No such list was found in the 
 - **Gate:** **you approve the schema and migration before it is run.**
 
 ### Phase 7 — Admin authentication, roles and audit
-- **Scope:** admin sign-in, sessions, MFA, staff invites, role middleware, audit log, admin app shell (sign-in and navigation only).
-- **Depends on:** Phase 6.
-- **Deliverables:** `auth` and `audit` API modules; admin shell.
-- **Verification:** the role matrix test (`security-design.md` §4) passes for every role; lockout and session tests pass.
+- **Scope:** backend security only: admin sign-in API, sessions, MFA, staff invites, role middleware, audit log. No admin UI; the admin shell is in Phase 8.
+- **Depends on:** Phase 6. Not on any styling decision.
+- **Deliverables:** `auth` and `audit` API modules.
+- **Verification:** the role matrix test (`security-design.md` §4) passes for every role through API tests; lockout and session tests pass.
 - **Gate:** you review the test output.
 
 ### Phase 8 — Catalogue, media and catalogue API
-- **Scope:** admin management of products, variants, categories, collections and images; image processing; public catalogue, filter and search endpoints.
-- **Depends on:** Phase 7.
-- **Deliverables:** `catalogue`, `search` and `media` modules; admin catalogue screens.
-- **Verification:** a product with colour × size variants and images can be published and found by filter and search.
-- **Gate:** you review the test output.
+- **Scope:** backend: products, variants, categories, collections, images, image processing, public catalogue, filter and search endpoints. UI: the shared design tokens (TD-002), the admin app shell (sign-in screen and navigation, moved from Phase 7), and admin catalogue screens.
+- **Depends on:** Phase 7. UI deliverables also depend on TD-001 and TD-002 being decided; backend deliverables do not.
+- **Deliverables:** `catalogue`, `search` and `media` modules; shared token files; admin shell; admin catalogue screens.
+- **Verification:** a product with colour × size variants and images can be published and found by filter and search; admin sign-in works through the shell for every role; token checks from TD-002 pass.
+- **Gate:** you review the test output and admin screenshots.
 
 ### Phase 9 — Inventory and stock reservation
 - **Scope:** stock levels, adjustments, movements, low-stock view, the atomic reservation service and its expiry job. No checkout.
-- **Depends on:** Phase 8.
+- **Depends on:** Phase 8. Admin inventory screens also depend on TD-001 and TD-002; the `inventory` module does not.
 - **Deliverables:** `inventory` module; admin inventory screens.
 - **Verification:** the overselling and movement tests in `testing-strategy.md` §3 pass.
 - **Gate:** you review the concurrency test output.
 
 ### Phase 10 — Content management
 - **Scope:** content blocks (announcement bar, hero slides, category pills, product rows, tabbed grid, footer), navigation, pages, draft and publish, Rehma Foundation Owner-verified publishing.
-- **Depends on:** Phases 7 and 8.
+- **Depends on:** Phases 7 and 8. Admin content editors also depend on TD-001 and TD-002; the `content` module does not.
 - **Deliverables:** `content` module; admin content editors.
 - **Verification:** drafts are never served publicly; the Rehma Foundation page returns 404 until the Owner publishes it with verification.
 - **Gate:** you review the test output.
 
 ### Phase 11 — Storefront shell, search and cart
-- **Scope:** design tokens and base CSS; header with search suggestions and a search results page; category pills; announcement bar; footer; cart API and cart drawer for guests. No landing-page sections.
-- **Depends on:** Phases 8, 9 and 10. Brand input OD-02 or acceptance of the typeset-wordmark default.
+- **Scope:** storefront base styles on the shared tokens from Phase 8; header with search suggestions and a search results page; category pills; announcement bar; footer; cart API and cart drawer for guests. No landing-page sections.
+- **Depends on:** Phases 8, 9 and 10. Storefront UI also depends on TD-001 and TD-002; the cart API does not. Brand input OD-02 or acceptance of the typeset-wordmark default.
 - **Deliverables:** storefront shell; `cart` module.
 - **Verification:** `design-system.md` §10 gates 1, 5 and 6 at 390, 768 and 1440 px; cart tests pass.
 - **Gate:** you review screenshots and test output.
@@ -203,13 +204,25 @@ You asked for a "required 19-phase master index". No such list was found in the 
 
 ---
 
+## Separately approved tasks
+
+These tasks sit outside the numbered phases. Each runs only after its own explicit approval and does not change any phase's scope or gate.
+
+### ST-01 — Styling evaluation (TD-001, TD-002)
+- **When:** any time after the Phase 3 gate (it needs the Phase 3 tooling). It must be decided before the first UI deliverable, the admin shell in Phase 8. It does not block Phases 4 to 7 or any backend deliverable.
+- **Scope:** the comparative experiment described in `technology-decisions.md` TD-001 (CSS Modules, Tailwind v4, hybrid) on a throwaway branch, plus the TD-002 token check. No production code; the branch is not merged.
+- **Approvals:** (1) you approve running ST-01, including installing `tailwindcss` and `@tailwindcss/vite` on the throwaway branch only; (2) you approve the TD-001 and TD-002 decisions from the recorded results.
+- **Deliverables:** measurements and a recommendation added to TD-001 and TD-002; a `DECISION-LOG.md` entry with your decision.
+- **Verification:** the measurements listed in TD-001; the token checks listed in TD-002.
+- **Until approved:** no Tailwind package is installed anywhere.
+
 ## Reconciliation with the old roadmap
 
 | Old roadmap phase | Now covered by | Notes |
 |-------------------|----------------|-------|
 | 0 Planning | 1 | Unchanged. |
 | 1 Foundation | 3, 4, 5, 6 | Split. The full schema is no longer built at once (D-119). |
-| 2 Catalogue, inventory and admin core | 7, 8, 9 | Dashboard moved to 16. |
+| 2 Catalogue, inventory and admin core | 7, 8, 9 | Dashboard moved to 16; admin shell in 8. |
 | 3 Storefront landing and browsing | 10, 11, 12, 13 | Content editors moved to 10; cart and search moved to 11; landing has its own gate in 12. |
 | 4 Cart, checkout, orders and COD | 11 (cart), 14, 15, 16 | Split. |
 | 5 Hardening and launch readiness | 17, 19 | Launch moved after the gateway (D-118). |

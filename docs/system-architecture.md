@@ -35,14 +35,14 @@ A TypeScript monorepo containing two React single-page apps (storefront and admi
 ```
 sanea-pret/                         (this repository root)
   apps/
-    storefront/                     React + Vite + TS, regular CSS
+    storefront/                     React + Vite + TS; styling per TD-001
       src/
         app/                        routing, providers, error boundaries
         features/                   catalogue, product, cart, checkout, account, content, enquiry
         components/                 shared UI primitives (Button, Pill, Drawer, Carousel…)
         styles/                     tokens.css, base.css, layout.css
         lib/                        api client, formatters, analytics
-    admin/                          React + Vite + TS, regular CSS
+    admin/                          React + Vite + TS; styling per TD-001
       src/ (same shape: app, features, components, styles, lib)
     api/
       src/
@@ -153,4 +153,8 @@ Nothing is installed yet. Planned dependencies and the reason for each:
 | vitest, supertest, @testing-library/react, playwright | dev | Tests. |
 | typescript, eslint, prettier | dev | Tooling. |
 
-Deliberately avoided: Tailwind (per brief), CSS-in-JS runtimes, a component library such as MUI (it would fight the editorial design), Redux, GraphQL and any microservice tooling.
+Not planned, unless a decision record shows a benefit (`technology-decisions.md`): runtime CSS-in-JS (performance cost), a component library such as MUI (it would fight the editorial design), Redux, GraphQL and any microservice tooling. Tailwind is no longer excluded; whether to use it is the unresolved decision TD-001.
+
+## 8. Technology decision policy
+
+New technologies are chosen under the technology-flexible policy in `technology-decisions.md` §1. The architecture in this document is preserved unless a decision record justifies a change and you approve it.
