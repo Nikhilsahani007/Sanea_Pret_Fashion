@@ -38,10 +38,12 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 
 | HTTP | Typical codes |
 |------|---------------|
-| 400 | `VALIDATION_FAILED` (details list field paths) |
+| 400 | `VALIDATION_FAILED` (details list field paths), `MALFORMED_JSON` (body is not valid JSON) |
 | 401 | `UNAUTHENTICATED` |
 | 403 | `FORBIDDEN`, `CSRF_FAILED` |
 | 404 | `NOT_FOUND` |
+| 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB) |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`) |
 | 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT` |
 | 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
 | 429 | `RATE_LIMITED` |

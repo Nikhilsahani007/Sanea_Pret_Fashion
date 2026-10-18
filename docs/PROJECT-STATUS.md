@@ -4,7 +4,26 @@ Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 5 — API platform skeleton** (`MASTER-IMPLEMENTATION-INDEX.md`). **Not started:** planning only; implementation needs your approval of the Phase 5 plan.
+**Phase 5 — API platform skeleton** (`MASTER-IMPLEMENTATION-INDEX.md`). **Implemented and verified locally; commit, push and draft PR #3 authorised (D-133).** Approved by D-049 with D-045 to D-048; cookie strategy D-132 confirmed. Branch `phase-5-api-platform` from `dc3e1da`. Phase 5 completion needs a separate approval.
+
+## Phase 5 results (2026-10-19)
+
+| Criterion | Result |
+|-----------|--------|
+| P5-AC1 Dependencies | **Pass**: only the 14 planned packages, exact versions (`system-architecture.md` §7); `npm audit` 0 vulnerabilities |
+| P5-AC2 Config fails fast | **Pass**: bad config exits 1, names each problem, prints no secret (unit tests and real `node src/main.ts`) |
+| P5-AC3 Error shape | **Pass**: documented shape with `requestId`; 500 hides messages and stacks |
+| P5-AC4 Security headers | **Pass**: CSP, nosniff, Referrer-Policy, Permissions-Policy, no X-Powered-By; HSTS only in production |
+| P5-AC5 CORS | **Pass**: storefront origin on public routes, admin origin only on `/api/v1/admin/*`, others get no CORS headers |
+| P5-AC6 CSRF | **Pass**: Origin check, header equals cookie, HMAC signature, 12-hour expiry, forged and tampered tokens rejected; real-server round trip passed; cookie and flow verified in headless Edge 155 and Chrome 154 (`phase-5-plan.md`) |
+| P5-AC7 Rate limiting | **Pass**: `429 RATE_LIMITED`; spoofed X-Forwarded-For ignored; 300/min global, health exempt |
+| P5-AC8 Health | **Pass**: `200 {"status":"ok"}`, no internal details |
+| P5-AC9 Log redaction | **Pass**: authorization, cookie, CSRF header redacted (tests and real server log) |
+| P5-AC10 Quality gate | **Pass**: format, lint, typecheck; 18 files, 307 tests passed, 0 failed |
+| P5-AC11 Scope | **Pass**: no business routes, database, sessions or authentication; no consumer project references |
+| Graceful shutdown (Linux) | **Pass**: SIGTERM and SIGINT in Docker `node:24.11.0-bookworm-slim`, exit 0 in 16 and 24 ms with an idle keep-alive connection open, stderr empty (`phase-5-plan.md`) |
+| P5-AC12 CI on draft PR #3 and your approval | **Open**: CI results are reported at the gate; your approval pending |
+
 
 **Phase 4 — Shared contracts: gate passed (D-044).** Commit `dc52aad` on `phase-4-shared-contracts`, in draft PR #2 into `phase-3-foundation`. The results below are the Phase 4 record.
 
@@ -136,6 +155,9 @@ All of these need V14.
 | Phase 4 design decisions | **Approved in principle** | D-040, D-041, D-042 |
 | Phase 4 implementation, Zod installation in the repository | **Authorised and done locally** | D-043 |
 | Phase 4 completion gate | **Passed** | D-044 |
+| Phase 5 plan and decisions | **Approved** | D-045 to D-049, D-132 |
+| Commit, push, draft PR #3 for Phase 5 | **Authorised** | D-133 |
+| Phase 5 completion gate | **Pending** | — |
 | Commit, push, draft PR #2 for Phase 4 | **Done** | `dc52aad`; PR #2 open, draft, unmerged |
 | Branch `phase-4-shared-contracts` | **Pushed** | GitHub at the Phase 4 commits; PR #2 head |
 | Commit and push of the Phase 3 housekeeping | **Done** | `619d175` |
@@ -151,18 +173,16 @@ All of these need V14.
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 5 plan | Now | Being prepared; needs your approval |
-| Phase 5 implementation | After plan approval | Not started |
-| Merge PR #1 and PR #2 | Only with your explicit authorisation | Not authorised |
+| Phase 5 completion gate | Now | Needs your review of PR #3 and its CI results |
+| Merge PR #1, PR #2 and PR #3 | Only with your explicit authorisation | Not authorised |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
-## Blockers for Phase 5
+## Blockers for Phase 6
 
-- Phase 5 implementation needs your approval of the Phase 5 plan.
-- No open business decision blocks Phase 5; its dependencies need approval with the plan.
+- Phase 6 starts only after the Phase 5 gate is recorded in `DECISION-LOG.md`.
 
 ## Skills audit
 
@@ -170,6 +190,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review the Phase 5 execution plan and approve it, change it, or reject it.
+**You:** review draft PR #3 and its CI results, then pass, change or reject the Phase 5 gate.
 
-**Then me:** implement Phase 5 only after approval, in milestones, with targeted checks and a final verification gate.
+**Then me:** record the gate; Phase 6 planning only after it is passed.

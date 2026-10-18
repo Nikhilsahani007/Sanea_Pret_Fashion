@@ -1,0 +1,53 @@
+// Test helpers for the API platform. Not used by production code.
+import { Writable } from "node:stream";
+
+import type { Router } from "express";
+
+import { loadConfig, type Config } from "./config.ts";
+import { createApp } from "./http/app.ts";
+import { createLogger } from "./logger.ts";
+
+export const STOREFRONT = "http://localhost:5173";
+export const ADMIN = "http://localhost:5174";
+export const SECRET = "test-secret-that-is-at-least-32-characters";
+
+export function testConfig(overrides: Record<string, string> = {}): Config {
+  return loadConfig({
+    NODE_ENV: "test",
+    STOREFRONT_ORIGIN: STOREFRONT,
+    ADMIN_ORIGIN: ADMIN,
+    CSRF_SECRET: SECRET,
+    LOG_LEVEL: "info",
+    ...overrides,
+  });
+}
+
+/** Builds an app whose log lines are captured in `lines`. */
+export function testApp(options: { config?: Config; routers?: Router[] } = {}) {
+  const lines: string[] = [];
+  const stream = new Writable({
+    write(chunk, _encoding, callback) {
+      lines.push(String(chunk));
+      callback();
+    },
+  });
+  const config = options.config ?? testConfig();
+  const logger = createLogger(config.logLevel, stream);
+  const app = createApp({ config, logger, routers: options.routers ?? [] });
+  return { app, lines, config };
+}
+
+/** Extracts `name=value` from a Set-Cookie header for sending back as Cookie. */
+export function cookiePair(
+  setCookie: string | string[] | undefined,
+  name: string,
+): string {
+  const all = Array.isArray(setCookie)
+    ? setCookie
+    : setCookie
+      ? [setCookie]
+      : [];
+  const found = all.find((c) => c.startsWith(`${name}=`));
+  if (!found) throw new Error(`cookie ${name} not set`);
+  return found.split(";")[0] ?? "";
+}
