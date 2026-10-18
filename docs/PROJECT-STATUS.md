@@ -4,14 +4,39 @@ Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 4 — Shared contracts** (`MASTER-IMPLEMENTATION-INDEX.md`). **Not started.** Design approved in principle (D-040 to D-042); implementation not authorised.
+**Phase 5 — API platform skeleton** (`MASTER-IMPLEMENTATION-INDEX.md`). **Not started:** planning only; implementation needs your approval of the Phase 5 plan.
+
+**Phase 4 — Shared contracts: gate passed (D-044).** Commit `dc52aad` on `phase-4-shared-contracts`, in draft PR #2 into `phase-3-foundation`. The results below are the Phase 4 record.
+
+## Phase 4 results (gate passed 2026-10-18, D-044)
+
+| Check | Command | Result |
+|-------|---------|--------|
+| AC1 Zod only new package | `npm ls zod`; `npm ls --omit=dev --all` | **Pass**: `zod@4.6.7` under `@sanea/shared` only; no other runtime package |
+| AC2 Format | `npm run format:check` | **Pass** after formatting the new files (first run: 30 new files not in Prettier style) |
+| AC2 Lint | `npm run lint` | **Pass** after one fix (first run: 2 unused-variable errors in `address.test.ts`) |
+| AC2 Typecheck | `npm run typecheck` | **Pass** after one fix (first run: phone result type, TS2322) |
+| AC2 Tests | `npm test` | **Pass**: 14 files, 259 passed, 0 failed, 0 skipped (earlier runs: one wrong test expectation and one optional-field rule, both corrected) |
+| AC2 Audit | `npm run audit` | **Pass**: 0 vulnerabilities |
+| AC3 Planned test cases and review regressions | `npm test` | **Pass**: 259/259, including the phone-separator and address control-character regression tests |
+| AC4 Public API | `public-api.test.ts`; `node -e "import('@sanea/shared')"` | **Pass**: 33 documented runtime exports; deep import rejected at runtime (`ERR_PACKAGE_PATH_NOT_EXPORTED`) and by the type checker (`@ts-expect-error`) |
+| AC5 Node 24 without build | `node -e "import('@sanea/shared')…"` | **Pass**: runs TypeScript source, 0 bytes on stderr |
+| AC6 Code rules | `git grep` for `enum` declarations, `parseFloat`/`toFixed`, `export *` | **Pass**: 0, 0, 0 |
+| AC7 Documentation | `packages/shared/README.md` | **Done**: API, rounding, rupee, phone, PIN, address and error-code rules |
+| AC8 Changed paths | `git status` | **Pass**: `packages/shared/**`, `tsconfig.base.json`, `package-lock.json`, `docs/**` only |
+| D-041 | `apps/*/tsconfig.json` | **Pass**: no project references |
+| D-042 | `git grep zod/mini` | **Pass**: 0 |
+| AC9 CI and Gitleaks on draft PR #2 | GitHub Actions | **Pass**: run [39122113132](https://github.com/Nikhilsahani007/Sanea_Pret_Fashion/actions/runs/39122113132) on `dc52aad`; "Format, lint, typecheck, test, audit" and "Secret scan (Gitleaks)" both success |
+| AC10 Your review | — | **Pass**: Phase 4 completion approved (D-044) |
+
+Review fixes (approved): phone separators limited to ASCII space, non-breaking space and hyphen; address text rejects control characters (`TEXT_INVALID_CHARACTERS`). Runtime: plain Node 24 import works with no stderr; deep imports fail with `ERR_PACKAGE_PATH_NOT_EXPORTED`; 33 runtime exports, 46 names, all documented. Implementation notes: `phase-4-plan.md`.
 
 **Phase 3 — Repository foundation and CI: gate passed (D-039).** The details below are the Phase 3 record.
 
 - Approved by D-038, with the D-036 and D-037 choices.
 - Phase 3 work is committed on branch `phase-3-foundation` as `567e27f` (message "phase 1 first commit"; the content is Phase 3) and pushed. This status correction follows in the next commit on the same branch. `main` is unchanged.
 - The Phase 3 gate passed on 2026-10-18 (D-039), after CI run 39117996687 on draft PR #1 succeeded (V14).
-- No application features, runtime dependencies, database schema, migrations, payments or infrastructure exist.
+- At the Phase 3 gate, no application features, runtime dependencies, database schema, migrations, payments or infrastructure existed.
 
 ## Git state (verified 2026-10-18)
 
@@ -33,6 +58,8 @@ Last updated: 2026-10-18 · Repository: https://github.com/Nikhilsahani007/Sanea
 | `624a2dd` | doc changes | Technology policy (D-027); Phase 1 gate (D-028); first Phase 2 proposals |
 | `0fdb74c` | Phase 2 docs | Phase 2 decisions (D-029 to D-033), scope change (D-034), Phase 2 gate (D-035), `phase-3-plan.md` |
 | `71576b7` | phase 3 plan | Status reconciliation; Playwright and Dependabot choices (D-036, D-037) |
+| `619d175` | docs: record Phase 3 gate and Phase 4 decisions | D-039 to D-042; base of `phase-4-shared-contracts` |
+| `dc52aad` | feat(shared): Phase 4 shared contracts | Phase 4 implementation (38 files), on `phase-4-shared-contracts` |
 
 All commits are by NikhilSahani007.
 
@@ -107,9 +134,11 @@ All of these need V14.
 | Phase 3 plan and dependency list | **Approved** | D-038 |
 | Phase 3 gate | **Passed** | D-039 |
 | Phase 4 design decisions | **Approved in principle** | D-040, D-041, D-042 |
-| Phase 4 implementation, Zod installation in the repository | **Not authorised** | — |
-| Branch `phase-4-shared-contracts` | **Authorised once this housekeeping is committed**; not created | — |
-| Commit and push of this housekeeping | **Not approved** | — |
+| Phase 4 implementation, Zod installation in the repository | **Authorised and done locally** | D-043 |
+| Phase 4 completion gate | **Passed** | D-044 |
+| Commit, push, draft PR #2 for Phase 4 | **Done** | `dc52aad`; PR #2 open, draft, unmerged |
+| Branch `phase-4-shared-contracts` | **Pushed** | GitHub at the Phase 4 commits; PR #2 head |
+| Commit and push of the Phase 3 housekeeping | **Done** | `619d175` |
 | Committing and pushing `phase-3-foundation` | **Approved and done** | `567e27f` on GitHub |
 | Opening a draft pull request to trigger CI | **Done** | PR #1, draft, open, not merged |
 | TD-001 styling | **Unresolved** | `technology-decisions.md` |
@@ -122,19 +151,18 @@ All of these need V14.
 
 | Task | When | Status |
 |------|------|--------|
-| Approve committing and pushing this housekeeping on `phase-3-foundation` | Now | Waiting |
-| Create `phase-4-shared-contracts` from the committed base | After that commit | Authorised, not done |
-| Authorise Phase 4 implementation | After the branch exists | Waiting |
+| Phase 5 plan | Now | Being prepared; needs your approval |
+| Phase 5 implementation | After plan approval | Not started |
+| Merge PR #1 and PR #2 | Only with your explicit authorisation | Not authorised |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Not done (documentation) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
-## Blockers for Phase 4
+## Blockers for Phase 5
 
-- Phase 4 implementation is not authorised yet.
-- No open business decision blocks it. Design decisions are D-040 to D-042.
-- `zod@4.6.7` is installed only when implementation is authorised.
+- Phase 5 implementation needs your approval of the Phase 5 plan.
+- No open business decision blocks Phase 5; its dependencies need approval with the plan.
 
 ## Skills audit
 
@@ -142,6 +170,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** approve committing and pushing this housekeeping on `phase-3-foundation`. The commit adds one docs-only commit to draft PR #1 and re-runs CI there.
+**You:** review the Phase 5 execution plan and approve it, change it, or reject it.
 
-**Then me:** confirm the new base SHA and a clean tree, create `phase-4-shared-contracts` from it, and wait for Phase 4 implementation authorisation.
+**Then me:** implement Phase 5 only after approval, in milestones, with targeted checks and a final verification gate.

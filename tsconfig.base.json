@@ -13,6 +13,8 @@
     "skipLibCheck": true,
     "types": [],
     "composite": true,
-    "noEmit": true
+    "noEmit": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true
   }
 }
