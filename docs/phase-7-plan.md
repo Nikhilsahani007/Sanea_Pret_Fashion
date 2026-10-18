@@ -1,6 +1,6 @@
 # Phase 7 Plan — Admin Authentication, Roles and Audit (API only)
 
-Status: **Approved (D-062 to D-075); migration approved; implemented and verified locally.** Branch `phase-7-admin-auth` from `cb72b6b`, committed for draft PR #5 into `main`. Gate pending. · Date: 2026-10-19
+Status: **Gate passed (D-076).** Commit `75f499c` on `phase-7-admin-auth`, draft PR #5 into `main`, unmerged. · Date: 2026-10-19
 
 ## Scope
 Admin sign-in with mandatory 2FA, server-side sessions, session-bound CSRF, staff invites and resets, role middleware with the `security-design.md` §4 matrix, and the audit log. API only; the admin shell is Phase 8. No new packages: Argon2id and TOTP use Node's built-in `crypto` (D-062, D-064).
@@ -82,5 +82,10 @@ Note: the new 2FA CHECK would stop the upgrade if a database held an active admi
 - **Key rotation:** the key version is stored, but rotation tooling does not exist yet. A secret under another version cannot be decrypted and sign-in fails, with an error logged.
 - **Invite links:** passed on by hand until an email provider exists (Phase 16).
 
-## Next
-1. CI on draft PR #5, then your review of the Phase 7 gate.
+## Gate
+CI run 39165512527 on draft PR #5 at `75f499c`:
+- Format, lint, typecheck, test, audit: 22 files, 429 tests;
+- Database integration tests: 11 files, 267 tests;
+- Secret scan (Gitleaks): no leaks.
+
+All three jobs succeeded. Gate approved 2026-10-19 (D-076).

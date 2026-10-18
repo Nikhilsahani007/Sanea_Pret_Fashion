@@ -4,7 +4,7 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 7 — Admin authentication, roles and audit (API only)** (`MASTER-IMPLEMENTATION-INDEX.md`). **Implemented and verified locally; committed for draft PR #5 into `main`.** Plan and migration approved (D-062 to D-075). Branch `phase-7-admin-auth` from `cb72b6b`. Unit suite 22 files, 429 tests; database and API suite 11 files, 267 tests (`phase-7-plan.md`).
+**Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076).** Commit `75f499c` on `phase-7-admin-auth`, in draft PR #5 into `main`, open and unmerged. Decisions D-062 to D-075. CI run 39165512527: unit suite 22 files, 429 tests; database and API suite 11 files, 267 tests; Gitleaks no leaks (`phase-7-plan.md`). **Phase 8 not started**; its planning needs your go-ahead.
 
 **`main`:** PRs #1 to #4 merged (D-134); `main` at `cb72b6b`, CI run 39162324224 succeeded.
 
@@ -80,7 +80,8 @@ Review fixes (approved): phone separators limited to ASCII space, non-breaking s
 
 | Check | Result |
 |-------|--------|
-| Current branch | `phase-7-admin-auth` (from `cb72b6b`), draft PR #5 into `main` |
+| Current branch | `phase-7-admin-auth` (from `cb72b6b`) |
+| PR #5 `phase-7-admin-auth` → `main` | `75f499c` before this status commit; open, draft, unmerged |
 | `main` on GitHub | `cb72b6b` (merge of PR #4); PRs #1 to #4 merged (D-134) |
 | PR #1 `phase-3-foundation` → `main` | Merged: `03c12bd` |
 | PR #2 `phase-4-shared-contracts` → `main` | Merged: `38a0a85` |
@@ -195,21 +196,26 @@ All of these need V14.
 | Phase 6 migration | **Validated on disposable databases** (`20261018193745_core_schema`); not applied to any kept database | `phase-6-plan.md` |
 | Commit, push, draft PR #4 for Phase 6 | **Done and merged** | PR #4; merge commit `cb72b6b6` |
 | Phase 6 completion gate | **Passed** | D-061 |
+| Phase 7 plan and migration | **Approved** | D-062 to D-075 |
+| Commit, push, draft PR #5 for Phase 7 | **Done** | `75f499c`; PR #5 open, draft, unmerged |
+| Phase 7 completion gate | **Passed** | D-076 |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 7 gate | Now | Needs CI on draft PR #5 and your review |
+| Phase 8 planning | Now | Needs your go-ahead; UI parts also need TD-001 and TD-002 (ST-01) |
+| Merge PR #5 | Only with your explicit authorisation | Not authorised |
 | PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Done in Phase 6 (`database-design.md`, `security-design.md`; no conflicts in `project-requirements.md`) |
 | ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
-## Blockers for Phase 7
+## Blockers for Phase 8
 
-- None for the gate beyond your review. Phase 8 starts only after the Phase 7 gate is recorded.
+- Phase 7 gate recorded (D-076). Phase 8 backend work (catalogue, media, search API) needs only your go-ahead for planning.
+- Phase 8 UI work (design tokens, admin shell, admin catalogue screens) is blocked by TD-001 and TD-002, which need the ST-01 styling evaluation (B-12).
 
 ## Skills audit
 
@@ -217,6 +223,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review draft PR #5 and its CI results, then pass, change or reject the Phase 7 gate.
+**You:** decide whether to merge PR #5, authorise Phase 8 planning, or approve ST-01 (the styling evaluation that unblocks Phase 8 UI work).
 
-**Me, after that:** record the gate; Phase 8 planning only after it is passed.
+**Me, after that:** only the step you authorise; a Phase 8 plan would come with no code or dependencies until you approve it.
