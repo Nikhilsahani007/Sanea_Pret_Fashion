@@ -27,6 +27,11 @@ Each item has a recommended safe default. If you accept a default, I will record
 | OD-19 | Email sender: which domain and provider (Amazon SES, Postmark, Resend)? | Log-only email provider in development; choose with hosting. | Phase 4 |
 | OD-20 | Analytics: which tool, and is a consent banner required for your use? | No third-party analytics in R1 beyond privacy-friendly server logs; decide with legal review. | Phase 5 |
 | OD-21 | Should `.taste-skill/` (design working files) be committed or git-ignored? | Git-ignore screenshots and keep `direction.json` committed so the direction is reproducible. | Phase 1 |
+| OD-22 | Launch mode: wait for the live gateway, or soft-launch with COD only? | Wait for the live gateway. BR-6 requires prepaid and COD at launch. | Phase 18 (master index) |
+| OD-23 | May the landing page include sections beyond the mandated Nishorama composition (editorial band, Rehma Foundation teaser)? | Off by default. Decided at the landing-page gate. | Phase 12 (master index) |
+| OD-24 | At the landing gate, must account and wishlist be fully functional, or only open their real routes? | Open real routes (sign-in page, wishlist page with sign-in prompt); full behaviour accepted in Phase 14. | Phase 12 (master index) |
+
+Phase numbers in the "Needed by" column for OD-01 to OD-21 refer to the old `implementation-roadmap.md`. The equivalent phases in `MASTER-IMPLEMENTATION-INDEX.md` are in its "Old roadmap phase" column.
 
 ## Assumptions already made in the documents
 

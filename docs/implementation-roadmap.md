@@ -2,6 +2,8 @@
 
 Status: Draft for approval · Date: 2026-10-18
 
+> **Sequencing note (2026-10-18):** `MASTER-IMPLEMENTATION-INDEX.md` proposes a 19-phase sequence that replaces the phase order below once approved. This file is kept for its scope and acceptance detail. Differences are listed in the index's comparison section.
+
 Each phase ends with a review. The next phase starts only after approval. Durations are rough estimates for one full-time developer with AI assistance and will be revised after Phase 1.
 
 ## Phase 0 — Planning (this phase)
