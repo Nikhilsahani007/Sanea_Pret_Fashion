@@ -18,15 +18,18 @@ import {
 import { createTestDatabase } from "./testing/database.ts";
 
 const migrations = new URL("../../../../prisma/migrations/", import.meta.url);
-const sql = readdirSync(migrations, { withFileTypes: true })
+const dirs = readdirSync(migrations, { withFileTypes: true })
   .filter((d) => d.isDirectory())
-  .map((d) =>
-    readFileSync(new URL(`${d.name}/migration.sql`, migrations), "utf8"),
-  )
+  .map((d) => d.name)
+  .sort();
+const sql = dirs
+  .map((d) => readFileSync(new URL(`${d}/migration.sql`, migrations), "utf8"))
   .join("\n");
 
 /** Only these foreign keys may cascade (database-design.md, D-055). */
 const CASCADES = new Set([
+  "admin_invite.admin_user_id",
+  "admin_recovery_code.admin_user_id",
   "admin_session.admin_user_id",
   "collection_product.collection_id",
   "collection_product.product_id",
@@ -43,13 +46,13 @@ beforeAll(async () => {
 afterAll(() => drop());
 
 describe("migration state", () => {
-  it("records the migration as applied", async () => {
+  it("records every migration as applied", async () => {
     const rows = await q<{ migration_name: string; finished: boolean }>(
       `SELECT "migration_name", "finished_at" IS NOT NULL AS "finished" FROM "_prisma_migrations"`,
     );
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.finished).toBe(true);
-    expect(rows[0]?.migration_name).toMatch(/_core_schema$/);
+    // Every migration folder, in order, applied and finished.
+    expect(rows.map((r) => r.migration_name).sort()).toEqual(dirs);
+    expect(rows.every((r) => r.finished)).toBe(true);
   });
 
   it("runs on PostgreSQL 18", async () => {
@@ -61,7 +64,7 @@ describe("migration state", () => {
 });
 
 describe("tables and scope", () => {
-  it("has exactly the 20 Phase 6 tables (plus Prisma's own)", async () => {
+  it("has exactly the approved tables (plus Prisma's own)", async () => {
     const rows = await q<{ t: string }>(
       `SELECT table_name AS t FROM information_schema.tables
        WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY 1`,
@@ -70,6 +73,8 @@ describe("tables and scope", () => {
       .map((r) => r.t)
       .filter((t) => t !== "_prisma_migrations");
     expect(names).toEqual([
+      "admin_invite",
+      "admin_recovery_code",
       "admin_session",
       "admin_user",
       "audit_log",
@@ -114,7 +119,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(19);
+    expect(counts).toHaveLength(21);
   });
 });
 
@@ -181,7 +186,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(22);
+    expect(expected).toHaveLength(25);
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -216,7 +221,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(17);
+    expect(rows).toHaveLength(19);
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

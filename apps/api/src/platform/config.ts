@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const ORIGIN = /^https?:\/\/[^/\s?#]+$/;
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 function originSchema(name: string) {
   return z.string({ error: `${name} is required` }).regex(ORIGIN, {
@@ -24,6 +25,21 @@ const schema = z
       .string({ error: "CSRF_SECRET is required" })
       .min(32, { error: "CSRF_SECRET must be at least 32 characters" }),
     TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
+    DATABASE_URL: z
+      .string({ error: "DATABASE_URL is required" })
+      .regex(/^postgres(ql)?:\/\/\S+$/, {
+        error: "DATABASE_URL must be a postgresql:// URL",
+      }),
+    // 32 random bytes, base64 (D-065). Checked without echoing the value.
+    MFA_ENCRYPTION_KEY: z
+      .string({ error: "MFA_ENCRYPTION_KEY is required" })
+      .refine((v) => BASE64.test(v) && Buffer.from(v, "base64").length === 32, {
+        error: "MFA_ENCRYPTION_KEY must be 32 bytes, base64-encoded",
+      }),
+    MFA_ENCRYPTION_KEY_VERSION: z.coerce.number().int().min(1).default(1),
+    IP_HASH_KEY: z
+      .string({ error: "IP_HASH_KEY is required" })
+      .min(32, { error: "IP_HASH_KEY must be at least 32 characters" }),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -47,6 +63,10 @@ export type Config = {
   readonly adminOrigin: string;
   readonly csrfSecret: string;
   readonly trustProxy: number;
+  readonly databaseUrl: string;
+  readonly mfaEncryptionKey: Buffer;
+  readonly mfaKeyVersion: number;
+  readonly ipHashKey: string;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -86,5 +106,9 @@ export function loadConfig(
     adminOrigin: e.ADMIN_ORIGIN,
     csrfSecret: e.CSRF_SECRET,
     trustProxy: e.TRUST_PROXY,
+    databaseUrl: e.DATABASE_URL,
+    mfaEncryptionKey: Buffer.from(e.MFA_ENCRYPTION_KEY, "base64"),
+    mfaKeyVersion: e.MFA_ENCRYPTION_KEY_VERSION,
+    ipHashKey: e.IP_HASH_KEY,
   };
 }

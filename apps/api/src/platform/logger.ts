@@ -12,6 +12,13 @@ export const REDACT_PATHS = [
   "*.phone",
   "*.email",
   "*.csrfToken",
+  "*.challenge",
+  "*.code",
+  "*.recoveryCode",
+  "*.recoveryCodes",
+  "*.secret",
+  "*.otpauthUri",
+  "*.inviteUrl",
 ];
 
 /** JSON logger with redaction. Pass a stream in tests to capture output. */

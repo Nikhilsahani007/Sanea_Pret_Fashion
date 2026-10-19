@@ -16,8 +16,9 @@ export function admin(db: PrismaClient, role = "OWNER"): Promise<string> {
   const i = next();
   return one(
     db,
-    `INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "updated_at")
-     VALUES ('test-admin-${i}@example.test', 'TEST Admin ${i}', 'TEST-hash', '${role}', now()) RETURNING "id"`,
+    // Active admins must have 2FA (admin_user_mfa_required_check); placeholder bytes.
+    `INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "mfa_secret_encrypted", "mfa_key_version", "mfa_enabled_at", "updated_at")
+     VALUES ('test-admin-${i}@example.test', 'TEST Admin ${i}', 'TEST-hash', '${role}', '\\x00'::bytea, 1, now(), now()) RETURNING "id"`,
   );
 }
 

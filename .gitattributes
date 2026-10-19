@@ -1,2 +1,3 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Auto detect text files; always LF in the working tree (Prettier expects LF;
+# without this, core.autocrlf=true on Windows checks files out as CRLF).
+* text=auto eol=lf

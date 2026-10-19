@@ -5,7 +5,7 @@
 // does not notice if it is removed (phase-6-plan.md). Every handwritten object
 // is listed in apps/api/src/db/handwritten.ts and checked by tests.
 //
-// Phase 6 tables only (database-design.md §6, D-054).
+// Phase 6 tables plus the Phase 7 admin-auth tables (database-design.md §6).
 
 generator client {
   provider               = "prisma-client"
@@ -373,9 +373,14 @@ model AdminUser {
   name               String
   passwordHash       String    @map("password_hash")
   role               AdminRole
-  /// TOTP secret, encrypted by the API before storage (scheme in Phase 7).
-  /// 2FA is mandatory for all four roles (D-032), enforced in Phase 7.
+  /// TOTP secret, AES-256-GCM encrypted by the API (D-065). 2FA is
+  /// mandatory for all four roles (D-032): an active admin must have it (CHECK).
   mfaSecretEncrypted Bytes?    @map("mfa_secret_encrypted")
+  /// Which MFA_ENCRYPTION_KEY version encrypted the secret (rotation).
+  mfaKeyVersion      Int?      @map("mfa_key_version")
+  mfaEnabledAt       DateTime? @map("mfa_enabled_at") @db.Timestamptz(3)
+  /// Last accepted TOTP time step; a code cannot be reused (D-064).
+  mfaLastUsedStep    Int?      @map("mfa_last_used_step")
   isActive           Boolean   @default(true) @map("is_active")
   lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz(3)
   failedLoginCount   Int       @default(0) @map("failed_login_count")
@@ -390,6 +395,9 @@ model AdminUser {
   publishedBlocks ContentBlock[]
   verifiedPages   Page[]
   settingUpdates  StoreSetting[]
+  recoveryCodes   AdminRecoveryCode[]
+  invitesSent     AdminInvite[]       @relation("InviteSentBy")
+  resetInvites    AdminInvite[]       @relation("InviteForAdmin")
 
   @@map("admin_user")
 }
@@ -410,6 +418,48 @@ model AdminSession {
   @@index([adminUserId])
   @@index([expiresAt])
   @@map("admin_session")
+}
+
+/// Single-use invite or reset link (D-070, D-071). Only the SHA-256 hash of
+/// the token is stored. `adminUserId` is set for a reset of an existing admin;
+/// a new admin is created when a fresh invite is accepted. The TOTP secret for
+/// enrolment is generated before acceptance and kept encrypted here.
+model AdminInvite {
+  id                   String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  email                String    @db.Citext
+  role                 AdminRole
+  tokenHash            Bytes     @unique @map("token_hash")
+  adminUserId          String?   @map("admin_user_id") @db.Uuid
+  /// Null only for the first Owner created by the CLI (D-069).
+  invitedByAdminId     String?   @map("invited_by_admin_id") @db.Uuid
+  pendingMfaSecret     Bytes?    @map("pending_mfa_secret_encrypted")
+  pendingMfaKeyVersion Int?      @map("pending_mfa_key_version")
+  expiresAt            DateTime  @map("expires_at") @db.Timestamptz(3)
+  acceptedAt           DateTime? @map("accepted_at") @db.Timestamptz(3)
+  revokedAt            DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  adminUser AdminUser? @relation("InviteForAdmin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  invitedBy AdminUser? @relation("InviteSentBy", fields: [invitedByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([email])
+  @@index([adminUserId])
+  @@index([invitedByAdminId])
+  @@map("admin_invite")
+}
+
+/// One-time MFA recovery codes (D-071); only SHA-256 hashes are stored.
+model AdminRecoveryCode {
+  id          String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  adminUserId String    @map("admin_user_id") @db.Uuid
+  codeHash    Bytes     @unique @map("code_hash")
+  usedAt      DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@map("admin_recovery_code")
 }
 
 /// Append-only: a trigger rejects UPDATE, DELETE and TRUNCATE (D-057).

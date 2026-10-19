@@ -8,11 +8,33 @@ export const API_ERROR_CODES = {
     status: 400,
     message: "The request body is not valid JSON.",
   },
+  INVITE_INVALID: {
+    status: 400,
+    message: "This link is not valid or has expired.",
+  },
+  PASSWORD_REJECTED: {
+    status: 400,
+    message: "Choose a different password.",
+  },
+  UNAUTHENTICATED: { status: 401, message: "Sign in to continue." },
+  // One generic answer for every sign-in failure (D-066).
+  SIGN_IN_FAILED: {
+    status: 401,
+    message: "The details are not correct, or the account is locked.",
+  },
+  FORBIDDEN: {
+    status: 403,
+    message: "You do not have permission to do this.",
+  },
   CSRF_FAILED: {
     status: 403,
     message: "The request could not be verified. Refresh and try again.",
   },
   NOT_FOUND: { status: 404, message: "Not found." },
+  CONFLICT: {
+    status: 409,
+    message: "This change conflicts with the current state.",
+  },
   PAYLOAD_TOO_LARGE: { status: 413, message: "The request body is too large." },
   UNSUPPORTED_MEDIA_TYPE: {
     status: 415,

@@ -18,10 +18,11 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 
 ### Admin
 - Email and password. Passwords hashed with **Argon2id** (memory 64 MB, iterations 3, parallelism 1, tuned on target hardware).
-- Minimum 12 characters, checked against a breached-password list (k-anonymity range check or a bundled top-100k list). No composition rules.
+- Minimum 12 and maximum 128 characters (the maximum bounds hashing work), checked case-insensitively against a bundled common-password list (D-063: SecLists top 100,000, keeping its 483 entries of 12+ characters; source and licence in `apps/api/src/modules/auth/data/README.md`). No composition rules. Hashing uses Node's built-in `crypto.argon2` (D-062).
 - **TOTP multi-factor authentication required for all four roles** (Owner, Manager, Catalogue Editor, Fulfilment; D-032).
-- Lockout: 5 failed attempts → 15-minute lock, plus IP rate limit. Generic error messages.
-- Staff are invited by the Owner. Invite links are single-use and expire in 48 hours. No public admin sign-up.
+- Lockout: 5 failed attempts → 15-minute lock, plus IP rate limit. Wrong passwords and wrong 2FA codes both count. Generic error messages: every failure is `401 SIGN_IN_FAILED` (D-066).
+- Sign-in is two steps: password, then a 5-minute signed 2FA challenge (not a session), then a TOTP code or a one-time recovery code. TOTP is RFC 6238 (6 digits, 30 s, ±1 step); each step is claimed atomically, so a code cannot be reused. 2FA secrets are AES-256-GCM encrypted with `MFA_ENCRYPTION_KEY`, with the key version stored (D-064, D-065).
+- Staff are invited by the Owner. Invite links are single-use and expire in 48 hours; the token is in the URL fragment, so it never reaches server logs. Accepting sets the password and enrols 2FA; 10 recovery codes are shown once. Until Phase 16 the link is returned to the Owner to pass on (D-070). An Owner resets another admin with a new link (D-071). The first Owner is created with `npm run admin:create-owner` (D-069). No public admin sign-up.
 
 ### Customer
 **Deferred to a later release (D-034).** Release one has guest checkout only; the rules below apply when accounts are added.
@@ -32,7 +33,8 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 ### Sessions
 - Server-side sessions in PostgreSQL. Cookie holds a random 256-bit token; the database stores only its SHA-256 hash.
 - Release one has admin sessions only: table `admin_session`, linked to `admin_user` by a foreign key with `ON DELETE CASCADE` (D-055). Customer sessions return with accounts (D-034).
-- Cookies: `HttpOnly`, `Secure`, `SameSite=Lax` (storefront) and `SameSite=Strict` (admin), `Path=/`, host-only with the `__Host-` prefix.
+- Cookies: `HttpOnly`, `Secure`, `SameSite=Lax` (storefront) and `SameSite=Strict` (admin), `Path=/`, host-only with the `__Host-` prefix. The admin cookie is `__Host-sp_admin` (D-067).
+- With an admin session, state-changing admin requests must send that session's CSRF token, an HMAC of the session ID returned by `/admin/auth/mfa` and `/admin/auth/me` (D-068).
 - Admin sessions: 8-hour absolute, 30-minute idle timeout. Customer sessions: 30-day absolute, 7-day idle.
 - Session ID rotated on sign-in and privilege change. Sign-out deletes the server session.
 - Tokens are never stored in `localStorage`.
