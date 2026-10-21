@@ -192,7 +192,7 @@ Editable storefront content is modelled as typed blocks, not free HTML:
 
 ## 8. Search and filtering
 
-- PostgreSQL full-text search (`tsvector` on name, description, category, collection, colour names) plus `pg_trgm` for typo tolerance and prefix suggestions.
+- PostgreSQL full-text search (`tsvector` on name, description, category, collection, colour names) plus `pg_trgm` for typo tolerance and prefix suggestions. The vector uses the `simple` configuration and is kept current by database triggers (D-081, Q8-1; `database-design.md` §3.1).
 - Facets computed from published, in-stock-aware variants: size, colour, category, price bands.
 - Filter state is in the URL query string, so results are shareable and the back button works.
 - Moving to a dedicated search engine (Meilisearch, OpenSearch) is deferred until the catalogue exceeds a few thousand products.
@@ -205,9 +205,30 @@ Editable storefront content is modelled as typed blocks, not free HTML:
 
 ## 10. Media
 
-- Uploads accepted: JPEG, PNG, WebP up to 15 MB. File type checked by magic bytes, not extension.
-- `sharp` strips metadata and produces AVIF and WebP at widths 480, 960, 1440, 2048.
-- Original kept privately. Derivatives served publicly through the CDN.
+- Uploads accepted: JPEG, PNG, WebP up to 15 MB, sent as the raw request body (D-079). File type checked by magic bytes, not extension, and again by `sharp` from the image header before any pixels are decoded (D-078). SVG, GIF, TIFF, HEIF and animated or multi-page images are refused even though `sharp` can read them.
+- Images wider or taller than 8000 px, or over 8000 × 8000 pixels, are refused (`limitInputPixels`, D-077).
+- `sharp` strips metadata and produces AVIF and WebP at widths 480, 960, 1440, 2048, never upscaled.
+- **Processing settings (Q8-11):**
+  - processing is synchronous: the upload response returns after every file is written;
+  - libvips threads are fixed at 4 with `sharp.concurrency(4)`, never taken from the CPU count, which containers can over-report;
+  - AVIF quality 50 at effort 3; WebP quality 80;
+  - **upload queue (Phase 8; `phase-8-plan.md` §5.7 is authoritative):**
+    - limits apply **per API process**, not globally; replicas each have their own;
+    - one active upload, plus a bounded waiting queue whose size is configurable (`MEDIA_UPLOAD_QUEUE_WAITING`, default 2);
+    - capacity is reserved before the body is read, and the body is streamed with a 15 MB limit;
+    - when the queue is full: `429 UPLOAD_QUEUE_FULL`;
+    - after 30 s of waiting: `503 UPLOAD_QUEUE_TIMEOUT`;
+    - when the 60 s deadline from admission (covering waiting, body reception and processing) runs out: `503 UPLOAD_PROCESSING_TIMEOUT`, with nothing saved.
+
+  Measured on 2026-10-20 (`phase-8-plan.md` §10b): a typical upload about 2 s, the worst accepted image about 18 s in a 4-CPU Linux container. These settings are retested in CI and on production-like hardware before launch.
+- **Failure handling:** files are written to a temporary folder and moved into place only when every output succeeds. A failure leaves no files and no database row.
+- **Storage (D-080):** `MediaStorage` is an interface.
+  - **Development:** a local-disk implementation under `MEDIA_STORAGE_DIR`, with private originals and public derivatives kept in separate folders, under random keys.
+  - **Production:** object storage behind a CDN, chosen with Phase 19 infrastructure.
+- **Serving (Phase 8 safeguard 1):**
+  - Original kept privately; derivatives served publicly through the CDN, at `MEDIA_PUBLIC_BASE_URL`.
+  - Images are never served from the API origin.
+  - In development, a small read-only server on Node's built-in `node:http` (Q8-9) serves only the derivatives folder on its own loopback port. It refuses path traversal: `..`, encoded separators and absolute paths are refused, and every resolved path must stay inside that folder. It never serves originals or lists folders.
 - Alt text required before an image can be published.
 
 ## 11. Notifications

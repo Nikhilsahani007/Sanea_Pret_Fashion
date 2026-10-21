@@ -16,7 +16,7 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 
 ## 2. Conventions
 
-- JSON only. `Content-Type: application/json; charset=utf-8`. Request bodies limited to 100 KB (uploads separate).
+- JSON only. `Content-Type: application/json; charset=utf-8`. Request bodies limited to 100 KB. The one exception is the admin image upload `POST /admin/media`, which takes the raw image bytes (§4, D-079).
 - Money fields are integers in paise, named `…Paise`, plus `currency: "INR"` on order-level objects.
 - Pagination: cursor-based. `?limit=24&cursor=<opaque>`. Responses include `nextCursor`.
 - Dates: ISO 8601 UTC strings.
@@ -42,12 +42,13 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | 401 | `UNAUTHENTICATED`, `SIGN_IN_FAILED` (one generic answer for wrong email, password, code, locked or inactive account; D-066) |
 | 403 | `FORBIDDEN`, `CSRF_FAILED` |
 | 404 | `NOT_FOUND` |
-| 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB) |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`) |
+| 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB; image upload over 15 MB) |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`; on the image upload, a `Content-Type` other than `image/jpeg`, `image/png` or `image/webp`, or file bytes that are not one of those formats or do not match the declared type). The status and code are the same on every route; the `message` is route-specific: JSON routes keep the JSON message, and the image upload has an image-specific message |
 | 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
 | 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
-| 429 | `RATE_LIMITED` |
+| 429 | `RATE_LIMITED` (sent by the rate-limit middleware with `Retry-After` and `RateLimit` headers), `UPLOAD_QUEUE_FULL` (admin image upload only: this API process already has one upload processing and its waiting capacity full, `MEDIA_UPLOAD_QUEUE_WAITING`, default 2; nothing is stored; **no `Retry-After` or `RateLimit` header**, because no reliable wait estimate exists. Sent by the upload queue, not the rate-limit middleware) |
 | 500 | `INTERNAL_ERROR` (no stack traces) |
+| 503 | `UPLOAD_QUEUE_TIMEOUT` (admin image upload only: the upload waited 30 s in the queue without starting; nothing is stored), `UPLOAD_PROCESSING_TIMEOUT` (admin image upload only: the 60 s deadline counted from admission, covering queue wait, body reception and processing, ran out; **the upload is not saved**, and output produced later is discarded. The response does not mean processing has already stopped). Both are sent only while the client is still connected |
 
 ## 3. Public storefront endpoints
 
@@ -123,8 +124,9 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST | `/admin/products` | GET: O M C F · POST: O M C |
 | GET/PATCH | `/admin/products/:id` | GET: all · PATCH: O M C (price fields: O M only) |
 | POST | `/admin/products/:id/publish` · `/archive` | O M C |
-| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | O M C (price: O M) |
+| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | GET: all · POST: O M (a variant needs a price, Q8-4) · PATCH: O M C (price fields `pricePaise`, `compareAtPricePaise`: O M only; a request from C that contains them is refused whole with `403 FORBIDDEN`) |
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
+| GET/POST/PATCH | `/admin/colours[/:id]` · `/admin/size-charts[/:id]` (Q8-3) | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
 | GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
 | POST | `/admin/inventory/:variantId/adjustments` `{ delta, reason }` | O M F |
@@ -141,7 +143,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
 | POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
-| POST | `/admin/media` (multipart) · GET `/admin/media` | O M C |
+| POST | `/admin/media`: the raw image bytes as the request body, not multipart (D-079). `Content-Type` must be `image/jpeg`, `image/png` or `image/webp`; at most 15 MB; the file's own bytes must match (D-078). Processed before the response: re-encoded without metadata, AVIF and WebP at 480, 960, 1440 and 2048 px (D-077, Q8-11). Returns the media asset with its derivative URLs. One upload is processed at a time per API process, and up to `MEDIA_UPLOAD_QUEUE_WAITING` (default 2) wait. Outcomes: `429 UPLOAD_QUEUE_FULL` when the queue is full; `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting; `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved; `413 PAYLOAD_TOO_LARGE` for a declared or streamed body over 15 MB, including chunked bodies; `415 UNSUPPORTED_MEDIA_TYPE` with an image-specific message. Node's 300 s server request timeout is separate and unchanged. Phase 8 queue policy (D-088; values approved 2026-10-21; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, per process; `phase-8-plan.md` §5.7). · GET `/admin/media` | O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |
@@ -173,7 +175,9 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 }
 ```
 
-`availability` is `IN_STOCK`, `LOW_STOCK` (with `"remaining": n` when n ≤ threshold, used for "Only 2 left" — real numbers only), or `SOLD_OUT`. Exact stock counts above the threshold are not exposed publicly.
+`availability` is `IN_STOCK`, `LOW_STOCK` or `SOLD_OUT` (D-082 as amended by Q8-2). Available means on hand minus reserved. `LOW_STOCK` applies when 0 < available ≤ the variant's `lowStockThreshold`, and only then is `"remaining": n` included, for "Only 2 left" (real numbers only). `IN_STOCK` and `SOLD_OUT` never carry a count, so exact stock above the threshold is not exposed publicly.
+
+`labels` come from an allow-list; in release one it contains only `NEW` (Q8-8). Image `url`s point only to public derivatives; originals are never exposed (Phase 8 safeguard 1). `description` is structured rich text: no HTML, and links only to allowed internal paths (Q8-10, Phase 8 safeguard 2).
 
 ## 7. Versioning
 
