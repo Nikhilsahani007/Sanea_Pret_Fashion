@@ -14,6 +14,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_TRIGGERS,
+  SEARCH_TRIGGERS,
 } from "./handwritten.ts";
 import { createTestDatabase } from "./testing/database.ts";
 
@@ -98,13 +99,24 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("has no GST, order-link or search column", async () => {
+  it("has no GST, order-link or customer column", async () => {
     const rows = await q<{ c: string }>(
       `SELECT table_name || '.' || column_name AS c FROM information_schema.columns
        WHERE table_schema = 'public'
-         AND (column_name ~ '(gst|tax|order_id|customer|search)' OR data_type = 'tsvector')`,
+         AND column_name ~ '(gst|tax|order_id|customer)'`,
     );
     expect(rows).toEqual([]);
+  });
+
+  it("has exactly one search column: product.search_vector (D-081)", async () => {
+    const rows = await q<{ c: string; type: string; nullable: string }>(
+      `SELECT table_name || '.' || column_name AS c, data_type AS type, is_nullable AS nullable
+       FROM information_schema.columns
+       WHERE table_schema = 'public' AND (column_name ~ 'search' OR data_type = 'tsvector')`,
+    );
+    expect(rows).toEqual([
+      { c: "product.search_vector", type: "tsvector", nullable: "NO" },
+    ]);
   });
 
   it("inserts exactly the six approved sizes and no other rows", async () => {
@@ -150,7 +162,7 @@ describe("handwritten objects exist in the live catalogue", () => {
     expect(rows.every((r) => r.valid)).toBe(true);
   });
 
-  it("every append-only trigger, enabled, on the right table and function", async () => {
+  it("every trigger is listed, enabled and on the right table and function", async () => {
     const rows = await q<{
       t: string;
       name: string;
@@ -164,11 +176,21 @@ describe("handwritten objects exist in the live catalogue", () => {
        FROM pg_trigger WHERE NOT tgisinternal`,
     );
     expect(rows.map((r) => `${r.t}.${r.name}`).sort()).toEqual(
-      HANDWRITTEN_TRIGGERS.map((t) => `${t.table}.${t.name}`).sort(),
+      [...HANDWRITTEN_TRIGGERS, ...SEARCH_TRIGGERS]
+        .map((t) => `${t.table}.${t.name}`)
+        .sort(),
     );
-    for (const r of rows) {
-      expect(r.enabled).toBe("O");
-      expect(r.fn).toBe("reject_append_only_change");
+    for (const r of rows) expect(r.enabled, r.name).toBe("O");
+    for (const t of HANDWRITTEN_TRIGGERS) {
+      const r = rows.find((x) => x.t === t.table && x.name === t.name);
+      expect(r?.fn, t.name).toBe("reject_append_only_change");
+    }
+    // Search triggers: AFTER, row-level, never on TRUNCATE (D-081).
+    for (const t of SEARCH_TRIGGERS) {
+      const r = rows.find((x) => x.t === t.table && x.name === t.name);
+      expect(r?.fn, t.name).toBe(t.fn);
+      expect(r?.row_level, t.name).toBe(true);
+      expect(r?.truncate, t.name).toBe(false);
     }
     for (const table of APPEND_ONLY_TABLES) {
       expect(

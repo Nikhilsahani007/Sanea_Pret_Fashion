@@ -5,7 +5,8 @@
 // does not notice if it is removed (phase-6-plan.md). Every handwritten object
 // is listed in apps/api/src/db/handwritten.ts and checked by tests.
 //
-// Phase 6 tables plus the Phase 7 admin-auth tables (database-design.md §6).
+// Phase 6 tables plus the Phase 7 admin-auth tables and the Phase 8 search
+// column and indexes (database-design.md §6).
 
 generator client {
   provider               = "prisma-client"
@@ -128,6 +129,8 @@ model Category {
   products Product[]
 
   @@index([parentId])
+  // Category suggestions (D-081). Needs pg_trgm (handwritten in the migration).
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "category_name_trgm_idx")
   @@map("category")
 }
 
@@ -166,11 +169,11 @@ model CollectionProduct {
 }
 
 model Product {
-  id               String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id               String                  @id @default(dbgenerated("uuidv7()")) @db.Uuid
   name             String
-  slug             String        @unique
-  categoryId       String        @map("category_id") @db.Uuid
-  shortDescription String        @map("short_description")
+  slug             String                  @unique
+  categoryId       String                  @map("category_id") @db.Uuid
+  shortDescription String                  @map("short_description")
   /// Structured rich text (no HTML).
   description      Json
   fabric           String?
@@ -178,15 +181,19 @@ model Product {
   fit              String?
   /// For GST invoices (D-030). No GST rate here: rates come from the rules
   /// model in Phase 15 (D-033).
-  hsnCode          String?       @map("hsn_code")
-  sizeChartId      String?       @map("size_chart_id") @db.Uuid
-  status           PublishStatus @default(DRAFT)
-  publishedAt      DateTime?     @map("published_at") @db.Timestamptz(3)
-  labels           String[]      @default([])
-  seoTitle         String?       @map("seo_title")
-  seoDescription   String?       @map("seo_description")
-  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  hsnCode          String?                 @map("hsn_code")
+  sizeChartId      String?                 @map("size_chart_id") @db.Uuid
+  status           PublishStatus           @default(DRAFT)
+  publishedAt      DateTime?               @map("published_at") @db.Timestamptz(3)
+  labels           String[]                @default([])
+  seoTitle         String?                 @map("seo_title")
+  seoDescription   String?                 @map("seo_description")
+  /// Full-text search document (D-081, Q8-1). Maintained only by the
+  /// handwritten triggers in the catalogue_search migration; never written by
+  /// the API, and read only through reviewed raw SQL.
+  searchVector     Unsupported("tsvector") @default(dbgenerated("''::tsvector")) @map("search_vector")
+  createdAt        DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   category    Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   sizeChart   SizeChart?          @relation(fields: [sizeChartId], references: [id], onDelete: Restrict)
@@ -197,6 +204,9 @@ model Product {
   @@index([categoryId])
   @@index([sizeChartId])
   @@index([status, publishedAt(sort: Desc)])
+  // Search (D-081). The trigram index needs pg_trgm (handwritten in the migration).
+  @@index([searchVector], type: Gin, map: "product_search_vector_idx")
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "product_name_trgm_idx")
   @@map("product")
 }
 

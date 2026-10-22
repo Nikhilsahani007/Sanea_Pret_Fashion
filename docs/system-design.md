@@ -188,7 +188,7 @@ Editable storefront content is modelled as typed blocks, not free HTML:
 
 - Each block has `draft` and `published` JSON payloads validated by Zod schemas from `packages/shared`.
 - Publishing copies draft to published and writes an audit entry. The storefront reads only published content, cached for 60 seconds and invalidated on publish.
-- Pages (About, Rehma Foundation, policies) use structured rich text (headings, paragraphs, lists, links, images). Stored as JSON and rendered through an allow-listed renderer, never as raw HTML.
+- Pages (About, Rehma Foundation, policies) use structured rich text (headings, paragraphs, lists, links, images). Stored as JSON and rendered through an allow-listed renderer, never as raw HTML. In every rich-text document (pages and product descriptions), text nodes store their words as a string under the key `text` (R2, 2026-10-22).
 
 ## 8. Search and filtering
 

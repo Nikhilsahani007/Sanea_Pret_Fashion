@@ -17,8 +17,9 @@ Last updated: 2026-10-21 · Repository: https://github.com/Nikhilsahani007/Sanea
   - `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved;
   - per-route `415` messages;
   - `MEDIA_UPLOAD_QUEUE_WAITING`, default 2, approved range 0 to 4 per API process.
-- The `sharp` timeout test (T-4) is planned and has not been run.
-- **The `catalogue_search` migration is not authorised and has not been written.** No Prisma schema change.
+- Planning, specifications and `sharp` committed as `b576a03` on `phase-8-catalogue` (not pushed).
+- T-4 `sharp` timeout test run 2026-10-21: `sharp`'s timeout does not stop AVIF encoding, so a killable child process is required (`phase-8-plan.md` §10c). **The approach awaits your approval.**
+- **Migration `20261021180245_catalogue_search` approved 2026-10-22** after review (R1, N1 corrected; R2 approved), validated on disposable databases only (`phase-8-plan.md` §10d). Not applied to any kept or production database.
 - **API implementation has not started.** No module, middleware, queue or test exists.
 - **No commit, push or PR is authorised.**
 
@@ -224,7 +225,7 @@ All of these need V14.
 | Q8-11 and safeguards 1–3 | **Approved**; AVIF retest passed | `DECISION-LOG.md` Phase 8; `phase-8-plan.md` §5.6, §10b |
 | Phase 8 step 3: branch, `sharp`, specification amendments | **Authorised and done**, uncommitted | `phase-8-catalogue` |
 | Phase 8 upload queue policy | **Approved in principle** (D-088, 2026-10-20); QP-1 to QP-7 and T-1 to T-7 **approved 2026-10-21**; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, default 2 | `DECISION-LOG.md`; `phase-8-plan.md` §5.7 |
-| `sharp` timeout test (T-4) | **Planned; not authorised; not run** | `phase-8-plan.md` §5.7.7 |
+| `sharp` timeout test (T-4) | **Authorised and run** 2026-10-21; child-process approach awaiting approval | `phase-8-plan.md` §10c |
 | Phase 8 migration and API modules | **Not authorised**; not written or started | — |
 | Commit, push, PR for Phase 8 work | **Not authorised** | — |
 
@@ -232,7 +233,8 @@ All of these need V14.
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 8 step 4: migration (`catalogue_search`), then API modules | Now | Needs your authorisation |
+| Phase 8 step 5: API modules, then the UI addendum and UI work | Now | In progress |
+| Phase 8 step 5: API modules | After approval of the migration and the child-process approach | Not authorised |
 | Commit the Phase 8 planning, documentation and `sharp` changes | With your approval | Not done |
 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | After the backend plan is approved | Unblocked by D-085 and D-086; not written |
 | Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
@@ -245,9 +247,9 @@ All of these need V14.
 ## Blockers for Phase 8
 
 - Backend:
-  - **step 4:** the `catalogue_search` migration is not authorised and not written;
+  - **step 4:** the `catalogue_search` migration is written and validated, awaiting your approval;
   - **steps 4a and 4b:** done 2026-10-21 (capacity range 0 to 4; QP and T approved);
-  - **step 4c:** the T-4 `sharp` timeout test is not authorised and not run, so the native-work approach is undecided;
+  - **step 4c:** the T-4 test is done; the child-process approach awaits your approval;
   - **step 5:** API implementation has not started.
 - Gate evidence: none yet; the Phase 8 gate needs backend and UI evidence (step 8).
 - UI: no longer blocked by styling (D-085, D-086). The UI plan addendum (tokens, admin shell, catalogue screens) has not been written.
@@ -258,13 +260,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:**
-- review the uncommitted changes on `phase-8-catalogue`, and approve a commit if you want them saved;
-- authorise step 4: write the `catalogue_search` migration and validate it on disposable databases only, then stop for review. Not authorised yet.
+**Me:** Phase 8 step 5 (shared contracts, catalogue, search and media modules with the child-process image worker), then the Phase 8 UI addendum and UI deliverables, then the Phase 8 gate.
 
-**Before any API implementation:**
-- separate authorisation for the `sharp` timeout test (T-4, step 4c), then approval of the native-work approach. QP-1 to QP-7, T-1 to T-7 and the capacity range (0 to 4) were approved on 2026-10-21.
-
-The `catalogue_search` migration remains unauthorised and unwritten.
-
-**Me, after that:** only the step you authorise.
+**You:** nothing until the next gate or blocker.

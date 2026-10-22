@@ -85,19 +85,19 @@ ContentBlock, Page, NavigationItem, StoreSetting, MediaAsset
 
 Search fields are added in Phase 8 with the search module (D-054). A search vector across category, collection and colour names cannot be a generated column, because generated columns cannot read other tables.
 
-**Phase 8 search design (D-081 as amended by Q8-1; approved in principle, not yet migrated):**
+**Phase 8 search design (D-081 as amended by Q8-1; migration `20261021180245_catalogue_search` written and validated on disposable databases, awaiting approval; `phase-8-plan.md` §10d):**
 - **Column:** `product.search_vector`, type `tsvector`, `NOT NULL DEFAULT ''`. In Prisma it is `Unsupported("tsvector")`, so it is read and written only through reviewed raw SQL.
 - **Text-search configuration:** `simple`, so transliterated garment names such as "Anarkali" are not stemmed as English.
 - **Weights:**
   - A: product name;
-  - B: category name, collection names and the names of the colours of the product's variants;
-  - C: short description and the text of the description.
+  - B: category name, collection names and the names of the colours of the product's **active** variants (an inactive variant's colour is not searchable);
+  - C: short description and the text of the description: the string values under the key `text`, where canonical rich-text text nodes store their words (R2, 2026-10-22). Other JSON is ignored, never an error.
 - **Maintenance:** handwritten trigger functions recompute the vector whenever any of these change:
   - the product's own fields;
   - a category name (all products in that category);
   - a collection name (all products in that collection);
   - a collection's membership (`collection_product` insert and delete);
-  - a variant's colour (`product_variant` insert, update and delete);
+  - a variant's colour or active flag (`product_variant` insert, update of product, colour or `is_active`, and delete);
   - a colour name (all products with a variant in that colour).
 
   The migration backfills existing rows. Like the other handwritten objects, the functions and triggers are listed in `apps/api/src/db/handwritten.ts` and checked against the migration SQL and the live catalogue.

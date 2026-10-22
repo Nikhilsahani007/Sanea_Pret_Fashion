@@ -177,7 +177,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 
 `availability` is `IN_STOCK`, `LOW_STOCK` or `SOLD_OUT` (D-082 as amended by Q8-2). Available means on hand minus reserved. `LOW_STOCK` applies when 0 < available ≤ the variant's `lowStockThreshold`, and only then is `"remaining": n` included, for "Only 2 left" (real numbers only). `IN_STOCK` and `SOLD_OUT` never carry a count, so exact stock above the threshold is not exposed publicly.
 
-`labels` come from an allow-list; in release one it contains only `NEW` (Q8-8). Image `url`s point only to public derivatives; originals are never exposed (Phase 8 safeguard 1). `description` is structured rich text: no HTML, and links only to allowed internal paths (Q8-10, Phase 8 safeguard 2).
+`labels` come from an allow-list; in release one it contains only `NEW` (Q8-8). Image `url`s point only to public derivatives; originals are never exposed (Phase 8 safeguard 1). `description` is structured rich text: no HTML, and links only to allowed internal paths (Q8-10, Phase 8 safeguard 2). Its text nodes store their words as a string under the key `text` (R2).
 
 ## 7. Versioning
 

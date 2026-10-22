@@ -1,6 +1,6 @@
 # Phase 8 Plan — Catalogue, Media and Catalogue API (backend)
 
-Status: **Decisions approved in principle (2026-10-19), including Q8-11 and three safeguards. `sharp` compatibility test passed (§10a); AVIF retest passed (§10b). Step 3 done on branch `phase-8-catalogue` (uncommitted). No API module or migration yet: step 4 needs your approval.** · Date: 2026-10-19 · Updated: 2026-10-20 · Base: `main` at `6593082` (Phase 7 merged, PR #5)
+Status: **Decisions approved (D-077 to D-084, Q8-1 to Q8-11, safeguards, QP-1 to QP-7, T-1 to T-7, capacity range). `sharp` compatibility (§10a), AVIF retest (§10b) and T-4 timeout test (§10c) done. Planning and `sharp` committed as `b576a03` on `phase-8-catalogue`. Migration `20261021180245_catalogue_search` written and validated on disposable databases (§10d), uncommitted, awaiting your review. No API module yet.** · Date: 2026-10-19 · Updated: 2026-10-21
 
 This plan covers the **backend** half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8). It changes no code, runs no migration and installs nothing. Every step in "Sequence and stop points" needs its own approval.
 
@@ -85,7 +85,7 @@ These were found while checking the plan. **All are resolved** (2026-10-19 and 2
 - **Q8-7 (a):** an inventory row is created with each variant.
 - **Q8-8:** `NEW` only.
 - **Q8-9 (a):** a development image server on `node:http`.
-- **Q8-10 (a):** a minimal shared rich-text schema.
+- **Q8-10 (a):** a minimal shared rich-text schema. **Contract decided 2026-10-22 (R2):** canonical rich-text text nodes store their words as a string under the key `text`; the shared schema (step 5) is built to match.
 - **Q8-11 (a):** synchronous processing, 4 threads, effort 3, one upload at a time.
 
 ## 5. Design
@@ -196,7 +196,7 @@ Permission names are those in `apps/api/src/modules/auth/permissions.ts`, which 
 - The policy is approved in principle (D-088).
 - The values QP-1 to QP-7 below, and T-1 to T-7 (§5.7.7), were proposed and recorded on 2026-10-21 and **formally approved on 2026-10-21**. The capacity maximum was approved separately the same day: `MEDIA_UPLOAD_QUEUE_WAITING` whole numbers 0 to 4 inclusive, default 2.
 - The contract choices under "Confirmed contract inputs" below were first recorded as a clarification and are part of that approval. Approval of the contract authorises no implementation, migration or test.
-- Nothing in this section has been built or tested. The `sharp` timeout test (T-4) has not been run.
+- Nothing in this section has been built yet. The T-4 `sharp` timeout test was run on 2026-10-21 (§10c): `sharp`'s timeout does not stop AVIF encoding, so a killable child process is required (approach awaiting your approval).
 
 **Approved in principle (D-088):**
 1. **One upload at a time:** one image upload is actively processed at a time per API process.
@@ -225,7 +225,7 @@ Permission names are those in `apps/api/src/modules/auth/permissions.ts`, which 
 | T-1 Queue-wait timeout | HTTP `503`, code `UPLOAD_QUEUE_TIMEOUT` |
 | T-2 Processing or job timeout | HTTP `503`, code `UPLOAD_PROCESSING_TIMEOUT` |
 | T-3 Total deadline | 60 s from admission, covering queue wait, body reception and processing |
-| T-4 `sharp` timeout test | Stays a **planned prerequisite**; not run; needs separate authorisation |
+| T-4 `sharp` timeout test | Run 2026-10-21 under your authorisation (§10c). Result: native AVIF work cannot be stopped in process; killable child process required |
 | T-5 Waiting capacity | Environment variable `MEDIA_UPLOAD_QUEUE_WAITING`, default `2`, approved range whole numbers 0 to 4 inclusive (per API process), validated at start-up |
 | T-6 Monitoring | Structured logs and basic in-process counters |
 | T-7 Body size | Declared `Content-Length` over 15 MB refused before reading; the same limit enforced while streaming when there is no `Content-Length` or the body is chunked |
@@ -286,6 +286,8 @@ Permission names are those in `apps/api/src/modules/auth/permissions.ts`, which 
    - (b) **in a child process:** processing runs in a child process (Node's built-in `node:child_process`, no new dependency), which is killed at the deadline. This guarantees the native work stops and its memory is returned, at the cost of process start-up time and passing up to 15 MB between processes.
 
    **Recommended:** first test whether AVIF encoding stops under `sharp`'s timeout. Use (a) only if it does, otherwise (b).
+
+   **Result (T-4, §10c, 2026-10-21):** it does not; AVIF encoding ignored a 1 s timeout and ran to completion. **(b), the killable child process, is therefore required** by the approved T-4 rule. The detailed child-process design is part of the API implementation plan and needs your approval.
 
 #### 5.7.3 Error contract
 - **Full queue:** `429` with code `UPLOAD_QUEUE_FULL`, in the standard error shape (`api-specification.md` §2), and nothing stored.
@@ -356,7 +358,7 @@ Permission names are those in `apps/api/src/modules/auth/permissions.ts`, which 
 | T-1 | Response when a waiting job reaches 30 s | `503 UPLOAD_QUEUE_TIMEOUT`, only if the client is still connected | — |
 | T-2 | Response when a job reaches its 60 s deadline | `503 UPLOAD_PROCESSING_TIMEOUT`, only if the client is still connected; upload not saved, late output discarded | — |
 | T-3 | When the 60 s deadline starts | At admission. It covers queue wait, body reception and processing, and is absolute | — |
-| T-4 | How native work is stopped or isolated | Planned prerequisite: test `sharp`'s timeout in isolation. If native work cannot be reliably stopped, use a killable child process or another explicitly reviewed isolation mechanism. The active slot stays occupied until native work has ended or been safely terminated | **The test has not been run;** it needs separate authorisation |
+| T-4 | How native work is stopped or isolated | Planned prerequisite: test `sharp`'s timeout in isolation. If native work cannot be reliably stopped, use a killable child process or another explicitly reviewed isolation mechanism. The active slot stays occupied until native work has ended or been safely terminated | **Test run 2026-10-21 (§10c).** `sharp`'s timeout cannot stop AVIF encoding; a killable child process is required. Child-process approach awaiting your approval |
 | T-5 | Waiting capacity configuration | `MEDIA_UPLOAD_QUEUE_WAITING`, default `2`, validated at start-up; accepts only whole numbers 0 to 4 inclusive; `0` means no waiting slots | — (range approved 2026-10-21) |
 | T-6 | Monitoring | Structured logs and basic in-process counters (§5.7.4) | Where counters are exposed beyond logs: decided with Phase 19 monitoring |
 | T-7 | Bodies without `Content-Length` or chunked | Accepted; the 15 MB limit is enforced while streaming; a declared size over 15 MB is refused before reading. Both cases are tested in the authorised implementation phase | — |
@@ -374,7 +376,9 @@ Applied in `api-specification.md` §2, §4 and §6, `database-design.md` §1, §
 | `system-design.md` §10 | Development storage and image server (D-080, Q8-9) |
 | `.env.example` | New names only, no values: `MEDIA_STORAGE_DIR`, `MEDIA_PUBLIC_BASE_URL` |
 
-## 7. Migration (not written; needs authorisation for step 4, then stop for review)
+## 7. Migration (written 2026-10-21; validated on disposable databases, §10d; awaiting your review)
+
+File: `prisma/migrations/20261021180245_catalogue_search/migration.sql`. The plan below was followed; differences are noted in §10d.
 
 Proposed name `<timestamp>_catalogue_search`, generated with `prisma migrate diff` plus handwritten SQL:
 - `CREATE EXTENSION IF NOT EXISTS "pg_trgm";`
@@ -460,10 +464,10 @@ Nothing else:
 | 1 | Decide D-077 to D-084 and Q8-1 to Q8-10 | **Done: approved in principle** |
 | 2 | Compatibility test of `sharp` 0.35.5 in a throwaway folder outside the repository: install on Windows and in a Linux container (`node:24.11.0-bookworm-slim`), AVIF encode time at 2048 px, metadata stripping, the pixel cap. Results recorded here | **Done: passed** (§10a) |
 | 3 | Decide Q8-11. Branch `phase-8-catalogue` from `main` `6593082`; add `sharp` 0.35.5 exactly; apply the §6 specification amendments; retest AVIF (§10b) | **Done** (2026-10-20), uncommitted |
-| 4 | Write the migration and validate it on disposable databases. **Stop for review** | **Yes (next gate):** authorisation to write the migration, then its approval |
+| 4 | Write the migration and validate it on disposable databases. **Stop for review** | **Done:** written and validated (§10d); reviewed; **approved 2026-10-22** |
 | 4a | **Gate:** decide and document the maximum for `MEDIA_UPLOAD_QUEUE_WAITING` | **Done** (2026-10-21): whole numbers 0 to 4 inclusive, default 2 |
 | 4b | **Gate:** final review and formal approval of QP-1 to QP-7 and T-1 to T-7 (§5.7) | **Done** (2026-10-21): approved |
-| 4c | **Gate (pending):** separately authorise and run the T-4 `sharp` timeout test (disposable location, synthetic images); record its result in this plan; decide and record the native-work approach (in process or a killable child process, §5.7.2) | **Yes:** authorisation to run the test, then approval of the approach |
+| 4c | **Gate:** separately authorise and run the T-4 `sharp` timeout test (disposable location, synthetic images); record its result in this plan; decide and record the native-work approach (§5.7.2) | **Test done** 2026-10-21 under your authorisation (§10c). Result: killable child process required. **Pending:** your approval of the child-process approach |
 | 5 | Build the modules and tests, only after steps 4a to 4c are complete; run every local check | Yes: separate authorisation for API modules |
 | 6 | Commit, push, open a draft PR into `main` | Yes, each action |
 | 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | Yes, separately |
@@ -552,6 +556,81 @@ Peak memory:
 - Memory peaked close to the 2 GB limit on the 8000 × 8000 case. Production containers for the API need at least 2 GB, or uploads need their own memory headroom; this is decided with Phase 19 hosting.
 - Retest in CI and on production-like hardware before launch (P8-AC11).
 
+## 10c. T-4 `sharp` timeout test (2026-10-21)
+
+Run under your authorisation in the disposable folder and a disposable Linux container (4 CPUs, 2 GB, nothing mounted, removed afterwards). Synthetic images only; nothing entered the repository.
+
+- **Input:** worst-case 2048 × 8000 noise JPEG.
+- **Settings:** 4 libvips threads, AVIF effort 3, deadline 1 s.
+- **"CPU after"** is the process's CPU time in the 2 s after the call settled or the deadline passed; zero means no native work is still running.
+
+| Case | Windows | Linux |
+|---|---|---|
+| Baseline AVIF encode, no deadline | 3.8 s | 5.0 s |
+| **(B) JavaScript-only deadline** (`Promise.race`) | Deadline "won" at 1 s, but **8.0 s of CPU ran in the next 2 s**; native work finished at 3.6 s | Same: 8.0 s of CPU after the deadline; finished at 5.0 s |
+| **(A) `sharp` `timeout({ seconds: 1 })` on AVIF encoding**, 4 runs | **Ignored:** each run *completed successfully* after 3.5 to 3.6 s | **Ignored:** completed after 4.9 to 5.7 s |
+| (A) the same timeout on decode and resize from 8000 × 8000, then AVIF | Rejected at 1.12 s ("timeout: 30% complete") | Rejected at 1.14 s |
+| (A) the same timeout on WebP encoding | Rejected at 1.03 s | Rejected at 1.07 s |
+| In-process memory after the runs above | — | RSS grew to 733 MiB and was not returned |
+| **(C) child process killed with `SIGKILL` at 1 s**, 3 runs | Exited 23 to 24 ms after the kill; no output files; parent CPU after 0 | Exited 6 to 7 ms after the kill; no output files; parent CPU after 0 to 1 ms |
+| (C) child start-up (until `sharp` loaded and ready) | 99 to 115 ms | 67 to 101 ms |
+
+**Conclusion:**
+- `sharp`'s timeout cannot reliably stop native work: it stops decoding, resizing and WebP, but **not AVIF encoding**, which is the slowest step.
+- A JavaScript deadline alone leaves native threads running.
+- Under the approved T-4 rule, image processing must run in a **killable child process**:
+  - the parent sends the 503 to a connected client at the deadline;
+  - it kills the child and waits for its exit;
+  - it removes the temporary files;
+  - only then does it release the active slot.
+- This approach needs no new dependency (`node:child_process`). It costs about 0.1 s of start-up per upload, and up to 15 MB has to be passed to the child; the transfer method is decided in the implementation plan.
+- **Pending your approval:** the child-process approach as the T-4 outcome (gate 4c).
+
+## 10d. Migration validation (step 4, 2026-10-21)
+
+**Files:**
+- `prisma/schema.prisma`: `product.searchVector` (`Unsupported("tsvector")`, default `''`, column `search_vector`) and three GIN indexes, `product_search_vector_idx`, `product_name_trgm_idx` and `category_name_trgm_idx`. The indexes are declared in the schema so that Prisma's drift check covers them. `prisma format` realigned the Product fields.
+- `prisma/migrations/20261021180245_catalogue_search/migration.sql`:
+  - **generated:** the column and the three indexes;
+  - **handwritten:** `CREATE EXTENSION pg_trgm` (before the indexes), the functions `product_search_document` and `refresh_product_search`, six trigger functions, six AFTER row triggers, and the backfill.
+- **Tests:**
+  - `handwritten.ts` lists the new extension, eight functions and six search triggers;
+  - `schema.test.ts` checks each against the migration SQL, and checks that search fields appear only in this migration (the old "no search field" assertion is narrowed accordingly);
+  - `catalog.db-test.ts` checks them in the live database, and that `product.search_vector` is the only search column;
+  - new `search.db-test.ts` (safeguard 3) has 14 tests:
+    - name, category and short description weights;
+    - rich-text "text" values only;
+    - renames;
+    - category moves;
+    - unrelated changes leaving the vector byte-identical;
+    - shared category, collection and colour renames updating every affected product and no other;
+    - collection membership and cascade delete;
+    - variant add, recolour and remove;
+    - the refresh path;
+    - a trigram misspelling match.
+
+**Differences from §5.5 and §7:**
+- The product trigger is an AFTER trigger that recomputes through `refresh_product_search`, rather than computing inside a BEFORE trigger, because the document reads related tables.
+- The description text is taken from the `text` values of the structured rich text (`$.**.text`). **This follows the approved R2 contract (2026-10-22):** canonical rich-text text nodes store their words as a string under the key `text`. Non-string `text` values are ignored.
+- ~~Variant colours of all variants are indexed~~ **Corrected 2026-10-22 (review finding R1):** only active variants' colours are indexed, and the variant trigger also watches `is_active`. Published-product and active-variant filtering of *products* still happens at query time (search API, step 5).
+- **Review finding N1 (2026-10-22):** the rich-text lookup is silent (`jsonb_path_query(..., '{}', true)`), so unexpected description JSON yields no text instead of an error that would block saving a product.
+- **Review finding R2, resolved 2026-10-22:** you approved the `text` key as the canonical location of rich-text words (Q8-10 contract). The migration needed no change.
+
+**Validation** (disposable `postgres:18.6-alpine` container on `127.0.0.1:55435`; random password, never printed; removed afterwards with no leftover volume):
+
+| Check | Result |
+|---|---|
+| Lint, typecheck, format | Pass |
+| Unit suite | 22 files, 445 tests passed (429 before; +16 static migration checks) |
+| `npm run test:integration` (template migrated with all three migrations, then drift-checked) | 12 files, 291 tests passed (267 before), including `search.db-test.ts`. **Re-run 2026-10-22 after corrections R1 and N1: 12 files, 293 tests passed** (two new tests: active-variant colours; silent description lookup) |
+| Upgrade path: Phase 6 and 7 SQL, development seed, then the Phase 8 SQL | Applied cleanly; **3 of 3 seeded products backfilled**; seeded data kept (22 variants, 14 movements) |
+| `prisma migrate deploy` on an empty database, then `migrate status` | 3 migrations applied; "Database schema is up to date" |
+| Drift: migrations folder (shadow) vs database; database vs schema | Both exit 0, no difference |
+| Live catalogue | 23 tables (with `_prisma_migrations`), 34 CHECKs, 10 triggers; extensions `citext`, `pg_trgm` |
+| Index use (sequential scans disabled to force the choice on 3 rows) | Full-text query uses `product_search_vector_idx`; misspelled name uses `product_name_trgm_idx`; category uses `category_name_trgm_idx` |
+
+The migration is **not applied to any kept database** and is **not committed**. It needs your review and approval.
+
 ## 11. Risks
 
 | Risk | Mitigation |
@@ -560,7 +639,7 @@ Peak memory:
 | Slow AVIF encoding on Linux ties up the API (§10a) | Q8-11 settings retested: worst case 17.5 s (§10b); one upload at a time; thread count set explicitly; retest before launch |
 | Image processing memory: 1.6 GiB peak for an 8000 × 8000 image in a 2 GB container (§10b) | One active job per process; waiting requests hold no body (QP-2); memory monitored (QP-7); memory per API container decided with Phase 19 hosting. The queue does not bound the active job's memory (§5.7.6). Not yet implemented |
 | Queue saturation: many uploads at once fill the queue, or abandoned requests hold slots | One active and two waiting per process; `429 UPLOAD_QUEUE_FULL`; 30 s wait and 60 s processing deadlines; removal on disconnect; release on every path (§5.7.1); tests and counters. Limits are per process (§5.7.5). Not yet implemented |
-| Native `sharp`/libvips work does not stop at the deadline | The slot is held until the work settles; at most one timed-out job per process; in-process versus child-process design (T-4, §5.7.2) decided before implementation. Not yet implemented |
+| Native `sharp`/libvips work does not stop at the deadline | Confirmed by T-4 (§10c): AVIF encoding ignores `sharp`'s timeout. Processing runs in a child process killed at the deadline (exit within 25 ms in the test); the slot is released only after the child has exited and its temporary files are removed. Not yet implemented |
 | Slow processing holds the single slot (worst case 17.5 s, §10b) | 60 s total deadline from admission (QP-5); measured again in CI (P8-AC11); monitored (QP-7). Not yet implemented |
 | Slow client connections exhaust the 60 s total deadline: a job that waited close to 30 s has about 30 s to receive up to 15 MB and be processed | Deadline exhaustion is counted and logged (`UPLOAD_PROCESSING_TIMEOUT`); measured during implementation; the deadline value is revisited only with your approval. Not yet implemented |
 | Path traversal or exposure of originals through the image server | Safeguard 1 (§5.6) and its tests |

@@ -5,9 +5,22 @@
  * the migration SQL and, once a database exists, against the live catalogue.
  */
 
-export const HANDWRITTEN_EXTENSIONS = ["citext"] as const;
+// citext (Phase 6); pg_trgm for trigram search (Phase 8, D-081).
+export const HANDWRITTEN_EXTENSIONS = ["citext", "pg_trgm"] as const;
 
-export const HANDWRITTEN_FUNCTIONS = ["reject_append_only_change"] as const;
+export const HANDWRITTEN_FUNCTIONS = [
+  "reject_append_only_change",
+  // Phase 8 search (D-081): the document, the refresh and one trigger
+  // function per table that feeds the document.
+  "product_search_document",
+  "refresh_product_search",
+  "product_search_on_product",
+  "product_search_on_category",
+  "product_search_on_collection",
+  "product_search_on_collection_product",
+  "product_search_on_variant",
+  "product_search_on_colour",
+] as const;
 
 /** Append-only tables (D-057): UPDATE/DELETE row trigger plus TRUNCATE trigger. */
 export const APPEND_ONLY_TABLES = ["stock_movement", "audit_log"] as const;
@@ -16,6 +29,43 @@ export const HANDWRITTEN_TRIGGERS = APPEND_ONLY_TABLES.flatMap((table) => [
   { table, name: `${table}_append_only` },
   { table, name: `${table}_no_truncate` },
 ]);
+
+/**
+ * Search triggers (Phase 8, D-081): AFTER row triggers that keep
+ * `product.search_vector` current when anything it is built from changes.
+ */
+export const SEARCH_TRIGGERS = [
+  {
+    table: "product",
+    name: "product_search_refresh",
+    fn: "product_search_on_product",
+  },
+  {
+    table: "category",
+    name: "category_search_refresh",
+    fn: "product_search_on_category",
+  },
+  {
+    table: "collection",
+    name: "collection_search_refresh",
+    fn: "product_search_on_collection",
+  },
+  {
+    table: "collection_product",
+    name: "collection_product_search_refresh",
+    fn: "product_search_on_collection_product",
+  },
+  {
+    table: "product_variant",
+    name: "product_variant_search_refresh",
+    fn: "product_search_on_variant",
+  },
+  {
+    table: "colour",
+    name: "colour_search_refresh",
+    fn: "product_search_on_colour",
+  },
+] as const;
 
 export const HANDWRITTEN_CHECKS = [
   { table: "category", name: "category_not_own_parent_check" },
