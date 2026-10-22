@@ -58,6 +58,16 @@ Shared contracts for Sanéa Pret: money in paise, INR formatting, Indian mobile 
 
 Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 
+### Catalogue (Phase 8)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `slugSchema`, `SLUG_PATTERN`, `SLUG_MAX_LENGTH` | schema, constants | Lowercase `a-z0-9` words joined by single hyphens, at most 100 characters (`SLUG_INVALID`) |
+| `ProductLabel`, `productLabelSchema` | const object, schema | Admin-set labels; release one allows only `NEW` (Q8-8) |
+| `Availability`, `availabilityOf(stock)`, `VariantAvailability` | const object, function, type | `IN_STOCK`, `LOW_STOCK` with `remaining` (0 < available ≤ threshold), `SOLD_OUT` (D-082, Q8-2) |
+| `richTextSchema`, `RichText`, `EMPTY_RICH_TEXT`, `RICH_TEXT_LIMITS` | schema, type, constants | Structured rich text (Q8-10): `doc` of paragraphs, headings (2, 3) and lists; inline `text` (with `bold`/`italic`) and `link`. Words live under `text` (R2). No HTML |
+| `isInternalLink(href)`, `INTERNAL_LINK_PATTERN` | function, constant | Internal links only (safeguard 2): `/`, `/products/<slug>`, `/collections/<slug>`, `/categories/<slug>`, `/pages/<slug>`, `/search?q=…` (`LINK_NOT_INTERNAL`) |
+
 ### Validation
 
 | Export | Kind | Description |
@@ -100,7 +110,7 @@ Six ASCII digits, first digit 1–9. Outer whitespace trimmed; one ASCII space a
 - Text is trimmed; blank required text, or text made only of zero-width characters, → `REQUIRED` (in optional fields it becomes `undefined`); control characters (including line breaks, tabs and NUL) → `TEXT_INVALID_CHARACTERS`; empty optional text becomes `undefined`; unknown keys → `UNKNOWN_FIELD`. Country is always India and is not a field.
 
 ### Validation codes
-Schemas put a stable code in each issue's `message`; `toFieldErrors` adds the English message. Codes: `REQUIRED`, `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD`, `INVALID`, `MONEY_NOT_INTEGER`, `MONEY_UNSAFE`, `MONEY_NEGATIVE`, `MONEY_NOT_POSITIVE`, `MONEY_ABOVE_LIMIT`, `RUPEES_INVALID`, `RUPEES_TOO_MANY_DECIMALS`, `RUPEES_OUT_OF_RANGE`, `PHONE_INVALID`, `PHONE_NOT_MOBILE`, `PIN_CODE_INVALID`, `STATE_INVALID`, `TEXT_INVALID_CHARACTERS`. Built-in Zod issues without our code map to `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD` or `INVALID`. Non-finite numbers (`NaN`, `Infinity`) are `INVALID_TYPE`.
+Schemas put a stable code in each issue's `message`; `toFieldErrors` adds the English message. Codes: `REQUIRED`, `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD`, `INVALID`, `MONEY_NOT_INTEGER`, `MONEY_UNSAFE`, `MONEY_NEGATIVE`, `MONEY_NOT_POSITIVE`, `MONEY_ABOVE_LIMIT`, `RUPEES_INVALID`, `RUPEES_TOO_MANY_DECIMALS`, `RUPEES_OUT_OF_RANGE`, `PHONE_INVALID`, `PHONE_NOT_MOBILE`, `PIN_CODE_INVALID`, `STATE_INVALID`, `TEXT_INVALID_CHARACTERS`, `SLUG_INVALID`, `LINK_NOT_INTERNAL`. Built-in Zod issues without our code map to `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD` or `INVALID`. Non-finite numbers (`NaN`, `Infinity`) are `INVALID_TYPE`.
 
 ## Not in this package (later phases)
-API routes, database schemas, GST and invoicing, catalogue, inventory, checkout, payments, UI, styling, infrastructure.
+API routes, database schemas, GST and invoicing, catalogue route bodies, inventory, checkout, payments, UI, styling, infrastructure.

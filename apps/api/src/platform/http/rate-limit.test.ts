@@ -22,6 +22,9 @@ describe("rate limiting", () => {
     expect(res.status).toBe(429);
     expect(res.body.error.code).toBe("RATE_LIMITED");
     expect(res.headers["ratelimit-policy"]).toBeDefined();
+    // Kept unchanged by Phase 8 (T-1 to T-7): both headers on RATE_LIMITED.
+    expect(res.headers["retry-after"]).toMatch(/^\d+$/);
+    expect(res.headers["ratelimit"]).toBeDefined();
   });
 
   it("ignores a spoofed X-Forwarded-For when no proxy is trusted", async () => {

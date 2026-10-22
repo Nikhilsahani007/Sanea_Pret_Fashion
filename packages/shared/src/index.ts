@@ -47,6 +47,20 @@ export { OrderStatus, orderStatusSchema } from "./enums/order-status.ts";
 export { PaymentMethod, paymentMethodSchema } from "./enums/payment-method.ts";
 export { AdminRole, adminRoleSchema } from "./enums/admin-role.ts";
 
+// Catalogue
+export { SLUG_MAX_LENGTH, SLUG_PATTERN, slugSchema } from "./catalogue/slug.ts";
+export { ProductLabel, productLabelSchema } from "./catalogue/labels.ts";
+export { Availability, availabilityOf } from "./catalogue/availability.ts";
+export type { VariantAvailability } from "./catalogue/availability.ts";
+export {
+  EMPTY_RICH_TEXT,
+  INTERNAL_LINK_PATTERN,
+  RICH_TEXT_LIMITS,
+  isInternalLink,
+  richTextSchema,
+} from "./catalogue/rich-text.ts";
+export type { RichText } from "./catalogue/rich-text.ts";
+
 // Validation
 export {
   VALIDATION_CODES,

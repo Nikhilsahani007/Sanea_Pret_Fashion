@@ -25,6 +25,8 @@ export const VALIDATION_CODES = {
   PIN_CODE_INVALID: "PIN_CODE_INVALID",
   STATE_INVALID: "STATE_INVALID",
   TEXT_INVALID_CHARACTERS: "TEXT_INVALID_CHARACTERS",
+  SLUG_INVALID: "SLUG_INVALID",
+  LINK_NOT_INTERNAL: "LINK_NOT_INTERNAL",
 } as const;
 
 export type ValidationCode =
@@ -51,6 +53,9 @@ const MESSAGES: Record<ValidationCode, string> = {
   PIN_CODE_INVALID: "Enter a valid 6-digit PIN code.",
   STATE_INVALID: "Choose a state or union territory from the list.",
   TEXT_INVALID_CHARACTERS: "Remove line breaks and other control characters.",
+  SLUG_INVALID:
+    "Use lowercase letters and digits, with single hyphens between words.",
+  LINK_NOT_INTERNAL: "Links must point to a page on this site.",
 };
 
 /** Human-readable English message for a validation code. */

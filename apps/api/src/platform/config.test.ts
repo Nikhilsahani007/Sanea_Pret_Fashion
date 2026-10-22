@@ -10,6 +10,8 @@ const valid = {
   DATABASE_URL: "postgresql://u:p@127.0.0.1:5433/sanea_dev",
   MFA_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64"),
   IP_HASH_KEY: "i".repeat(32),
+  MEDIA_STORAGE_DIR: "/var/lib/sanea/media",
+  MEDIA_PUBLIC_BASE_URL: "http://127.0.0.1:4010/",
 };
 
 function problems(env: Record<string, string | undefined>): readonly string[] {
@@ -37,6 +39,9 @@ describe("loadConfig()", () => {
       mfaEncryptionKey: Buffer.alloc(32, 7),
       mfaKeyVersion: 1,
       ipHashKey: "i".repeat(32),
+      mediaStorageDir: "/var/lib/sanea/media",
+      mediaPublicBaseUrl: "http://127.0.0.1:4010/",
+      mediaUploadQueueWaiting: 2,
     });
   });
 
@@ -63,10 +68,12 @@ describe("loadConfig()", () => {
       "DATABASE_URL is required",
       "MFA_ENCRYPTION_KEY is required",
       "IP_HASH_KEY is required",
+      "MEDIA_STORAGE_DIR is required",
+      "MEDIA_PUBLIC_BASE_URL is required",
     ]);
   });
 
-  it.each([
+  it.each<[Record<string, string>, string]>([
     [{ NODE_ENV: "staging" }, "NODE_ENV"],
     [{ PORT: "0" }, "PORT"],
     [{ PORT: "abc" }, "PORT"],
@@ -83,10 +90,40 @@ describe("loadConfig()", () => {
     [{ MFA_ENCRYPTION_KEY: "not base64!" }, "MFA_ENCRYPTION_KEY"],
     [{ MFA_ENCRYPTION_KEY_VERSION: "0" }, "MFA_ENCRYPTION_KEY_VERSION"],
     [{ IP_HASH_KEY: "short" }, "IP_HASH_KEY"],
+    [{ MEDIA_STORAGE_DIR: "" }, "MEDIA_STORAGE_DIR"],
+    [
+      { MEDIA_PUBLIC_BASE_URL: "http://127.0.0.1:4010" },
+      "MEDIA_PUBLIC_BASE_URL",
+    ],
+    [{ MEDIA_PUBLIC_BASE_URL: "ftp://cdn.example/" }, "MEDIA_PUBLIC_BASE_URL"],
+    [
+      { MEDIA_PUBLIC_BASE_URL: "https://cdn.example/?x=1/" },
+      "MEDIA_PUBLIC_BASE_URL",
+    ],
+    ...["-1", "5", "2.5", "1e0", " 2", "two", "02"].map(
+      (v): [Record<string, string>, string] => [
+        { MEDIA_UPLOAD_QUEUE_WAITING: v },
+        "MEDIA_UPLOAD_QUEUE_WAITING",
+      ],
+    ),
   ])("rejects %j", (override, name) => {
     const found = problems({ ...valid, ...override });
     expect(found).toHaveLength(1);
     expect(found[0]).toContain(name);
+  });
+
+  it("accepts MEDIA_UPLOAD_QUEUE_WAITING 0 to 4, default 2 (T-5)", () => {
+    for (const v of ["0", "1", "2", "3", "4"])
+      expect(
+        loadConfig({ ...valid, MEDIA_UPLOAD_QUEUE_WAITING: v })
+          .mediaUploadQueueWaiting,
+      ).toBe(Number(v));
+    // Unset and empty both mean the default.
+    expect(loadConfig(valid).mediaUploadQueueWaiting).toBe(2);
+    expect(
+      loadConfig({ ...valid, MEDIA_UPLOAD_QUEUE_WAITING: "" })
+        .mediaUploadQueueWaiting,
+    ).toBe(2);
   });
 
   it("requires https origins in production", () => {

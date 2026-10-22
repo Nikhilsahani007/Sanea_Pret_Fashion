@@ -5,6 +5,8 @@ export const REDACT_PATHS = [
   "req.headers.authorization",
   "req.headers.cookie",
   'req.headers["x-csrf-token"]',
+  // Original image filenames are never logged (phase-8-plan.md §5.7.4).
+  'req.headers["x-upload-filename"]',
   'res.headers["set-cookie"]',
   "*.password",
   "*.token",

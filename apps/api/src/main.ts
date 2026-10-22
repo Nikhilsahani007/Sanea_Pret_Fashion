@@ -1,3 +1,6 @@
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ConfigError, loadConfig, type Config } from "./platform/config.ts";
 import { checkDb, createDb } from "./platform/db.ts";
 import { createApp } from "./platform/http/app.ts";
@@ -25,6 +28,8 @@ try {
 `);
   process.exit(1);
 }
+// Remove upload job folders left by a crash (phase-8-plan.md §5.7.2).
+await rm(join(config.mediaStorageDir, "tmp"), { recursive: true, force: true });
 const app = createApp({ config, logger, db });
 const server = app.listen(config.port, config.host, () => {
   logger.info({ host: config.host, port: config.port }, "api listening");

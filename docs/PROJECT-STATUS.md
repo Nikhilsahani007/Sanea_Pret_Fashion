@@ -4,24 +4,17 @@ Last updated: 2026-10-21 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 8 — Catalogue, media and catalogue API: repository integration done (step 3), uncommitted.**
-- **Closure state: `Documentation review complete; decisions outstanding`.** Phase 8 is not implemented.
-- D-077 to D-084, Q8-1 to Q8-11 and three safeguards approved.
-- `sharp` 0.35.5 compatibility test passed (D-087).
-- AVIF retest at the Q8-11 settings passed: worst case 17.5 s, typical about 2 s (`phase-8-plan.md` §10b).
-- Branch `phase-8-catalogue` at `6593082`: `sharp` 0.35.5 added to `@sanea/api`; specifications and `.env.example` amended; all uncommitted.
-- Upload queue policy decided in principle (D-088). Values QP-1 to QP-7 and points T-1 to T-7 **approved on 2026-10-21**.
-- The approved contract includes:
-  - `429 UPLOAD_QUEUE_FULL` without `Retry-After` or `RateLimit` headers;
-  - `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting;
-  - `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved;
-  - per-route `415` messages;
-  - `MEDIA_UPLOAD_QUEUE_WAITING`, default 2, approved range 0 to 4 per API process.
-- Planning, specifications and `sharp` committed as `b576a03` on `phase-8-catalogue` (not pushed).
-- T-4 `sharp` timeout test run 2026-10-21: `sharp`'s timeout does not stop AVIF encoding, so a killable child process is required (`phase-8-plan.md` §10c). **The approach awaits your approval.**
-- **Migration `20261021180245_catalogue_search` approved 2026-10-22** after review (R1, N1 corrected; R2 approved), validated on disposable databases only (`phase-8-plan.md` §10d). Not applied to any kept or production database.
-- **API implementation has not started.** No module, middleware, queue or test exists.
-- **No commit, push or PR is authorised.**
+**Phase 8 — Catalogue, media and catalogue API: backend implemented (step 5); UI half not started.**
+- **Closure state: backend complete with test evidence; the Phase 8 gate is not passed.** It also needs the UI deliverables (tokens, admin shell, catalogue screens) and your review of the test output and admin screenshots (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
+- Decisions: D-077 to D-084, Q8-1 to Q8-11, safeguards 1–3, D-087, D-088, QP-1 to QP-7, T-1 to T-7, capacity range 0 to 4 (default 2), R2 (rich-text `text` key), migration `20261021180245_catalogue_search` (approved 2026-10-22), and the child-process image worker (approved 2026-10-22).
+- **Step 5 backend (`phase-8-plan.md` §10e):**
+  - `catalogue` (admin and public), `search` and `media` modules;
+  - the child-process image worker and upload queue;
+  - the development image server;
+  - shared catalogue contracts (`slugSchema`, labels, availability, rich text).
+
+  Results: **577 unit and 337 integration tests passed** on a disposable PostgreSQL 18.6; format, lint and typecheck clean.
+- Commits on `phase-8-catalogue`: `b576a03` (planning), `762bef4` (migration); the step 5 backend commit follows this update. Pushed to `origin/phase-8-catalogue`; no PR, no merge.
 
 **Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076), merged into `main` with PR #5 (merge commit `6593082`).** Commit `75f499c`, decisions D-062 to D-075 (`phase-7-plan.md`).
 
@@ -63,7 +56,6 @@ Phase 5 — API platform skeleton: gate passed (D-050). Commits `ab355d6`, `512f
 | P5-AC11 Scope | **Pass**: no business routes, database, sessions or authentication; no consumer project references |
 | Graceful shutdown (Linux) | **Pass**: SIGTERM and SIGINT in Docker `node:24.11.0-bookworm-slim`, exit 0 in 16 and 24 ms with an idle keep-alive connection open, stderr empty (`phase-5-plan.md`) |
 | P5-AC12 CI on draft PR #3 and your approval | **Pass**: CI run 39157064172 at `5f55243` (CI and Gitleaks success); gate approved 2026-10-19 (D-050) |
-
 
 **Phase 4 — Shared contracts: gate passed (D-044).** Commit `dc52aad` on `phase-4-shared-contracts`, in draft PR #2 into `phase-3-foundation`. The results below are the Phase 4 record.
 
@@ -225,7 +217,7 @@ All of these need V14.
 | Q8-11 and safeguards 1–3 | **Approved**; AVIF retest passed | `DECISION-LOG.md` Phase 8; `phase-8-plan.md` §5.6, §10b |
 | Phase 8 step 3: branch, `sharp`, specification amendments | **Authorised and done**, uncommitted | `phase-8-catalogue` |
 | Phase 8 upload queue policy | **Approved in principle** (D-088, 2026-10-20); QP-1 to QP-7 and T-1 to T-7 **approved 2026-10-21**; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, default 2 | `DECISION-LOG.md`; `phase-8-plan.md` §5.7 |
-| `sharp` timeout test (T-4) | **Authorised and run** 2026-10-21; child-process approach awaiting approval | `phase-8-plan.md` §10c |
+| `sharp` timeout test (T-4) | **Run** 2026-10-21; child-process approach **approved and implemented** 2026-10-22 | `phase-8-plan.md` §10c, §10e |
 | Phase 8 migration and API modules | **Not authorised**; not written or started | — |
 | Commit, push, PR for Phase 8 work | **Not authorised** | — |
 
@@ -233,8 +225,9 @@ All of these need V14.
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 8 step 5: API modules, then the UI addendum and UI work | Now | In progress |
-| Phase 8 step 5: API modules | After approval of the migration and the child-process approach | Not authorised |
+| Phase 8 step 5: backend modules | Done | `phase-8-plan.md` §10e |
+| Phase 8 UI plan addendum, then UI deliverables | Now | Not started |
+
 | Commit the Phase 8 planning, documentation and `sharp` changes | With your approval | Not done |
 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | After the backend plan is approved | Unblocked by D-085 and D-086; not written |
 | Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
@@ -249,8 +242,8 @@ All of these need V14.
 - Backend:
   - **step 4:** the `catalogue_search` migration is written and validated, awaiting your approval;
   - **steps 4a and 4b:** done 2026-10-21 (capacity range 0 to 4; QP and T approved);
-  - **step 4c:** the T-4 test is done; the child-process approach awaits your approval;
-  - **step 5:** API implementation has not started.
+  - **step 4c:** done; the child-process approach was approved and implemented (2026-10-22);
+  - **step 5:** backend implemented and tested (`phase-8-plan.md` §10e).
 - Gate evidence: none yet; the Phase 8 gate needs backend and UI evidence (step 8).
 - UI: no longer blocked by styling (D-085, D-086). The UI plan addendum (tokens, admin shell, catalogue screens) has not been written.
 
@@ -260,6 +253,6 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me:** Phase 8 step 5 (shared contracts, catalogue, search and media modules with the child-process image worker), then the Phase 8 UI addendum and UI deliverables, then the Phase 8 gate.
+**Me:** the Phase 8 UI plan addendum (tokens, admin shell, admin catalogue screens), then the UI deliverables and their checks, then the Phase 8 gate evidence.
 
-**You:** nothing until the next gate or blocker.
+**You:** the Phase 8 gate review (test output and admin screenshots) once the UI half is done. Phases 9 to 12 start only after that gate.

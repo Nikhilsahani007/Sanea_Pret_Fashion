@@ -53,15 +53,18 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 ## 3. Public storefront endpoints
 
 ### Catalogue and search
+
+Public catalogue and search responses carry `Cache-Control: public, max-age=60` (Q8-5); admin responses carry `no-store`. Only products that are published, in a published category and with at least one active variant are visible.
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/catalogue/categories` | Published category tree. |
-| GET | `/catalogue/collections` | Published collections. |
-| GET | `/catalogue/collections/:slug` | Collection detail. |
-| GET | `/catalogue/products` | Listing. Query: `category`, `collection`, `size[]`, `colour[]`, `priceMin`, `priceMax`, `inStock`, `sort` (`newest`, `price_asc`, `price_desc`), `limit`, `cursor`. Returns items and facets. |
-| GET | `/catalogue/products/:slug` | Product detail with variants, per-variant `available` (capped display, see §6), images by colour. |
-| GET | `/search` | `q`, plus the same filters. |
-| GET | `/search/suggest` | `q` (≥ 2 chars). Up to 6 product and category suggestions. |
+| GET | `/catalogue/categories` | Published category tree (`name`, `slug`, SEO fields, `children`). A published child of an unpublished parent is not shown. |
+| GET | `/catalogue/collections` | Published collections inside their schedule (`startsAt` ≤ now < `endsAt`, each optional), with the hero image's derivatives. |
+| GET | `/catalogue/collections/:slug` | Collection detail; `404` when not published or outside its schedule. Its products: `/catalogue/products?collection=<slug>`. |
+| GET | `/catalogue/products` | Listing. Query: `category` (slug; includes published sub-categories), `collection` (slug), `size` or `size[]` (size labels, repeatable), `colour` or `colour[]` (colour slugs), `priceMin`, `priceMax` (paise), `inStock` (`true`), `sort` (`newest` default, `price_asc`, `price_desc`), `limit` (1 to 48, default 24), `cursor` (opaque). Size, colour, price and stock filters must all hold for the **same active variant**. Returns `{ items, facets, nextCursor }`: items are summaries (`slug`, `name`, `fromPricePaise`, `currency`, `labels`, `colours`, `soldOut`, `primaryImage`); facets (`sizes`, `colours`, `categories`, `priceBands`) count visible products before the variant filters. Price bands are fixed: under ₹1,000; ₹1,000 to ₹2,000; ₹2,000 to ₹3,000; ₹3,000 to ₹5,000; ₹5,000 and over. Unknown parameters, bad ranges and tampered cursors give `400`. |
+| GET | `/catalogue/products/:slug` | Product detail (§6): active variants with availability, colours, sizes, images by colour (derivatives only), size chart, rich-text description. `404` unless the product is published, its category is published and it has an active variant. |
+| GET | `/search` | `q` (2 to 100 characters), plus the listing filters. `sort` is `relevance` (default; full-text rank plus trigram similarity) or a listing sort. Typo-tolerant (`pg_trgm`). Published, visible products only. 60 requests per minute per IP, shared with suggestions. |
+| GET | `/search/suggest` | `q` (2 to 100 characters). Up to 6 suggestions: up to 2 published categories, then products (`{ categories, products }`, each `slug` and `name`). |
 
 ### Content
 | Method | Path | Description |
@@ -127,6 +130,8 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | GET: all · POST: O M (a variant needs a price, Q8-4) · PATCH: O M C (price fields `pricePaise`, `compareAtPricePaise`: O M only; a request from C that contains them is refused whole with `403 FORBIDDEN`) |
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
 | GET/POST/PATCH | `/admin/colours[/:id]` · `/admin/size-charts[/:id]` (Q8-3) | O M C |
+| GET | `/admin/collections/:id` (with its product order) | O M C |
+| POST · PATCH/DELETE | `/admin/products/:id/images` · `/admin/products/:id/images/:imageId` (`mediaAssetId`, `colourId?`, `alt`, `role`, `position`) | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
 | GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
 | POST | `/admin/inventory/:variantId/adjustments` `{ delta, reason }` | O M F |
@@ -143,7 +148,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
 | POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
-| POST | `/admin/media`: the raw image bytes as the request body, not multipart (D-079). `Content-Type` must be `image/jpeg`, `image/png` or `image/webp`; at most 15 MB; the file's own bytes must match (D-078). Processed before the response: re-encoded without metadata, AVIF and WebP at 480, 960, 1440 and 2048 px (D-077, Q8-11). Returns the media asset with its derivative URLs. One upload is processed at a time per API process, and up to `MEDIA_UPLOAD_QUEUE_WAITING` (default 2) wait. Outcomes: `429 UPLOAD_QUEUE_FULL` when the queue is full; `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting; `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved; `413 PAYLOAD_TOO_LARGE` for a declared or streamed body over 15 MB, including chunked bodies; `415 UNSUPPORTED_MEDIA_TYPE` with an image-specific message. Node's 300 s server request timeout is separate and unchanged. Phase 8 queue policy (D-088; values approved 2026-10-21; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, per process; `phase-8-plan.md` §5.7). · GET `/admin/media` | O M C |
+| POST | `/admin/media`: the raw image bytes as the request body, not multipart (D-079). `Content-Type` must be `image/jpeg`, `image/png` or `image/webp`; at most 15 MB; the file's own bytes must match (D-078). Processed before the response: re-encoded without metadata, AVIF and WebP at 480, 960, 1440 and 2048 px (D-077, Q8-11). Optional header `X-Upload-Filename`: a display name, sanitised and stored; never logged and never used in paths. Returns the media asset with its derivative URLs. One upload is processed at a time per API process, and up to `MEDIA_UPLOAD_QUEUE_WAITING` (default 2) wait. Outcomes: `429 UPLOAD_QUEUE_FULL` when the queue is full; `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting; `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved; `413 PAYLOAD_TOO_LARGE` for a declared or streamed body over 15 MB, including chunked bodies; `415 UNSUPPORTED_MEDIA_TYPE` with an image-specific message. Node's 300 s server request timeout is separate and unchanged. Phase 8 queue policy (D-088; values approved 2026-10-21; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, per process; `phase-8-plan.md` §5.7). · GET `/admin/media` | O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |

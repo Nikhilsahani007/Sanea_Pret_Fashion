@@ -467,10 +467,10 @@ Nothing else:
 | 4 | Write the migration and validate it on disposable databases. **Stop for review** | **Done:** written and validated (§10d); reviewed; **approved 2026-10-22** |
 | 4a | **Gate:** decide and document the maximum for `MEDIA_UPLOAD_QUEUE_WAITING` | **Done** (2026-10-21): whole numbers 0 to 4 inclusive, default 2 |
 | 4b | **Gate:** final review and formal approval of QP-1 to QP-7 and T-1 to T-7 (§5.7) | **Done** (2026-10-21): approved |
-| 4c | **Gate:** separately authorise and run the T-4 `sharp` timeout test (disposable location, synthetic images); record its result in this plan; decide and record the native-work approach (§5.7.2) | **Test done** 2026-10-21 under your authorisation (§10c). Result: killable child process required. **Pending:** your approval of the child-process approach |
-| 5 | Build the modules and tests, only after steps 4a to 4c are complete; run every local check | Yes: separate authorisation for API modules |
+| 4c | **Gate:** separately authorise and run the T-4 `sharp` timeout test; record its result; decide the native-work approach (§5.7.2) | **Done:** test run 2026-10-21 (§10c); child-process approach approved 2026-10-22 |
+| 5 | Build the modules and tests; run every local check | **Backend done** 2026-10-22 (§10e) |
 | 6 | Commit, push, open a draft PR into `main` | Yes, each action |
-| 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | Yes, separately |
+| 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | **Next** |
 | 8 | Phase 8 gate: backend and UI evidence | Yes |
 
 ## 10a. Compatibility test results (step 2, 2026-10-19)
@@ -630,6 +630,69 @@ Run under your authorisation in the disposable folder and a disposable Linux con
 | Index use (sequential scans disabled to force the choice on 3 rows) | Full-text query uses `product_search_vector_idx`; misspelled name uses `product_name_trgm_idx`; category uses `category_name_trgm_idx` |
 
 The migration is **not applied to any kept database** and is **not committed**. It needs your review and approval.
+
+## 10e. Step 5: backend implementation (2026-10-22)
+
+**Delivered (`apps/api/src/modules/`, `packages/shared/src/catalogue/`):**
+- **`media`:**
+  - `POST /admin/media` and `GET /admin/media`;
+  - the upload queue (`queue.ts`): one active job, waiting capacity `MEDIA_UPLOAD_QUEUE_WAITING`, a 30 s wait deadline and a 60 s absolute deadline from admission, release exactly once;
+  - the child-process worker (`image-worker.ts`, `worker-runner.ts`, protocol v1 validated on both sides; empty environment; killed with `SIGKILL` at the deadline; the slot is released only after the child exits);
+  - magic-byte checks; local-disk storage with private originals, public derivatives and path checks;
+  - start-up removal of job folders; the development image server (`npm run media:serve`).
+- **`catalogue`:**
+  - **admin:** categories, collections and their product order, colours and size charts (Q8-3); products, variants (creation O M, Q8-4; field-level price check); images; publish and archive (D-083, Q8-6, slug lock); a stock row with every variant (Q8-7); an audit row for every write;
+  - **public:** category tree, scheduled collections, the listing with facets, sorting and cursors, product detail with availability (D-082, Q8-2); 60 s caching (Q8-5).
+- **`search`:** `/search` (full-text plus trigram, relevance first) and `/search/suggest`; 60 requests a minute per IP.
+- **Shared (`@sanea/shared`):** `slugSchema`, `ProductLabel` (`NEW` only, Q8-8), `availabilityOf`, and `richTextSchema` (R2 `text` key; internal links only; no HTML, safeguard 2).
+- **Platform:**
+  - the error registry gains `UPLOAD_QUEUE_FULL` 429 and `UPLOAD_QUEUE_TIMEOUT` and `UPLOAD_PROCESSING_TIMEOUT` 503;
+  - a per-route message override, used for the image-specific 415;
+  - the error handler writes nothing to a client that has gone;
+  - media config and validation (T-5); the filename header is redacted from logs.
+- **Development seed:** the description now uses the canonical rich-text shape.
+
+**Choices made within the approved scope (for your review):**
+- **Facets** count visible products that match the category, collection and search filters, *before* the size, colour, price and stock filters.
+- **Variant filters** must all hold for the same active variant.
+- **Price bands** are fixed: under ₹1,000; ₹1,000 to ₹2,000; ₹2,000 to ₹3,000; ₹3,000 to ₹5,000; ₹5,000 and over.
+- **Search ranking** is relevance first. Its cursor is an opaque offset; listing cursors are keyset.
+- **Suggestions** are up to 2 categories, then products, 6 in total.
+- **Archived products** can be published again (D-083 sets no rule against it).
+- **Reference-data reads** (categories, collections, colours, size charts) are O M C, as in the API specification; product reads are for all roles.
+- **The upload's display name** comes in the `X-Upload-Filename` header, which is sanitised, stored and never logged.
+- **Image views** drop identical derivatives from small originals.
+- **The global rate limiter's `RateLimit` headers** are removed from `429 UPLOAD_QUEUE_FULL` responses, which the contract requires. The integration test found this.
+
+**Tests** (all on a disposable PostgreSQL 18.6 container, removed afterwards):
+- **Unit:** 26 files, 577 tests. New: `@sanea/shared` catalogue (slug, labels, availability, rich-text and link safety), queue, magic bytes, storage paths, filename sanitising, development image server traversal, publishing rules, cursors, image views, config range 0 to 4, and `RATE_LIMITED` headers.
+- **Integration:** 14 files, 337 tests, including the new `media.db-test.ts` (20) and `catalogue.db-test.ts`:
+  - **uploads:** the real worker; metadata stripped; private master; JPEG, PNG and WebP;
+  - **refusals:** `415` (with its own message), `413` for a declared size and for a chunked body, `400` over 8000 px and for corrupt files;
+  - **access:** permissions and CSRF;
+  - **queue:** `429` without the rate-limit headers; capacity 0; `503` queue and processing timeouts; the absolute deadline;
+  - **failures:** deadline during body reception; worker crash and malformed message (`500`); late output discarded; disconnect while waiting and while processing; release and cleanup on every path;
+  - **catalogue:** the role matrix on the real routes; price-field refusal; audit before and after; validation; publishing rules and slug lock; visibility of drafts, archived products, unpublished categories and inactive variants; availability states; caching; derivative-only URLs; same-variant filters; facets; sorting and paging with no duplicates or gaps; tampered cursors; search terms and misspelling; suggestions; the search rate limit;
+  - **P8-AC3, end to end:** upload, colour × size variants, publish, then found by filter and by search.
+
+**Acceptance criteria (backend half):**
+
+| ID | Status |
+|----|--------|
+| P8-AC1 | Pass: only `sharp` 0.35.5 added; `npm audit` 0 (step 3) |
+| P8-AC2 | Pass (§10d) |
+| P8-AC3 | Pass (end-to-end test) |
+| P8-AC4 | Pass (real-route role tests; price-field rule) |
+| P8-AC5 | Pass (upload tests) |
+| P8-AC6 | Pass (publishing and availability tests) |
+| P8-AC7 | Pass (audit tests) |
+| P8-AC8 | **Partly:** every local check passes. CI has **not** run: `.github/workflows/ci.yml` runs only on pull requests and pushes to `main`, and opening a draft PR is not authorised |
+| P8-AC9 | Pass: specifications amended to match |
+| P8-AC10 | Pass: safeguard 1 (storage, image server), safeguard 2 (rich text), safeguard 3 (search triggers) |
+| P8-AC11 | **Open:** the AVIF retest in CI on Linux needs CI |
+| P8-AC12 | Pass (queue tests, `RATE_LIMITED` headers, config range) |
+
+**Still open for the Phase 8 gate:** the UI half (step 7 addendum, then tokens, admin shell, catalogue screens and their checks); CI evidence (P8-AC8, P8-AC11); your review.
 
 ## 11. Risks
 
