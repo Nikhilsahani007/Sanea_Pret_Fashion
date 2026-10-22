@@ -32,8 +32,15 @@ export function assertSeedAllowed(env: NodeJS.ProcessEnv): string {
   return raw;
 }
 
+// Canonical rich text (Q8-10; words under `text`, R2).
 const DESCRIPTION = {
-  blocks: [{ type: "paragraph", text: "TEST data. Not a real product." }],
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "TEST data. Not a real product." }],
+    },
+  ],
 };
 
 type SampleProduct = {

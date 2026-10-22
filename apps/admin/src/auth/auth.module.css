@@ -1,0 +1,81 @@
+/* Sign-in and account set-up: one narrow column on the admin ground. */
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: var(--sp-space-12) var(--sp-space-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 30rem;
+  background: var(--sp-surface);
+  border: var(--sp-border-width) solid var(--sp-line);
+  padding: var(--sp-space-8) var(--sp-space-6);
+}
+
+.brand {
+  font-family: var(--sp-font-display);
+  font-weight: var(--sp-weight-display);
+  letter-spacing: var(--sp-tracking-display);
+  text-transform: uppercase;
+  font-size: var(--sp-step-lead);
+  line-height: var(--sp-leading-display);
+}
+
+.brandSub {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+.steps {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+/* QR: dark modules on a light ground, whatever the theme (readers need it). */
+.qr {
+  width: min(100%, 15rem);
+  height: auto;
+  border: var(--sp-border-width) solid var(--sp-line);
+}
+
+.qrGround {
+  fill: var(--sp-paper);
+}
+
+.qrInk {
+  fill: var(--sp-ink);
+}
+
+.secret {
+  font-variant-numeric: tabular-nums;
+  word-spacing: 0.4em;
+  overflow-wrap: anywhere;
+  background: var(--sp-surface-alt);
+  padding: var(--sp-space-3);
+}
+
+.codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: var(--sp-space-2);
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.codes li {
+  background: var(--sp-surface-alt);
+  padding: var(--sp-space-2) var(--sp-space-3);
+}
+
+@media (forced-colors: active) {
+  .qrGround {
+    fill: Canvas;
+  }
+
+  .qrInk {
+    fill: CanvasText;
+  }
+}

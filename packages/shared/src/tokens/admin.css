@@ -1,0 +1,24 @@
+/*
+ * Admin semantic layer (design-system.md §5): the same names as the storefront,
+ * with quieter white and grey surfaces for dense data, and the same brand ink,
+ * actions and focus.
+ */
+:root {
+  --sp-bg: var(--sp-grey-50);
+  --sp-surface: var(--sp-white);
+  --sp-surface-alt: var(--sp-grey-100);
+  --sp-paper: var(--sp-white);
+  --sp-line: var(--sp-grey-300);
+  --sp-field-border: var(--sp-grey-500);
+  --sp-ink: var(--sp-aubergine);
+  --sp-muted: var(--sp-grey-700);
+  --sp-accent: var(--sp-aubergine);
+  --sp-accent-ink: var(--sp-white);
+  --sp-field-1: var(--sp-aubergine);
+  --sp-field-1-ink: var(--sp-white);
+  --sp-focus: var(--sp-aubergine);
+  --sp-danger: var(--sp-red);
+  --sp-danger-surface: var(--sp-red-wash);
+  --sp-success: var(--sp-green);
+  --sp-success-surface: var(--sp-green-wash);
+}

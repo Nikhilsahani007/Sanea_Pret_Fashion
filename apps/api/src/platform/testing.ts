@@ -26,6 +26,9 @@ export function testConfig(overrides: Record<string, string> = {}): Config {
     DATABASE_URL: "postgresql://unused@127.0.0.1:1/unused",
     MFA_ENCRYPTION_KEY: MFA_KEY,
     IP_HASH_KEY: IP_KEY,
+    // Media tests pass their own temporary folder.
+    MEDIA_STORAGE_DIR: "unused-media-dir",
+    MEDIA_PUBLIC_BASE_URL: "http://127.0.0.1:4010/",
     ...overrides,
   });
 }
@@ -36,7 +39,10 @@ export function testApp(
     config?: Config;
     routers?: Router[];
     db?: Db;
-  } & Pick<AppOptions, "now" | "argon2" | "authLimits"> = {},
+  } & Pick<
+    AppOptions,
+    "now" | "argon2" | "authLimits" | "media" | "searchLimit"
+  > = {},
 ) {
   const lines: string[] = [];
   const stream = new Writable({
@@ -55,6 +61,8 @@ export function testApp(
     ...(options.now ? { now: options.now } : {}),
     ...(options.argon2 ? { argon2: options.argon2 } : {}),
     ...(options.authLimits ? { authLimits: options.authLimits } : {}),
+    ...(options.media ? { media: options.media } : {}),
+    ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
   });
   return { app, lines, config };
 }

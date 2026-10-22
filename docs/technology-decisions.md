@@ -1,13 +1,13 @@
 # Sanéa Pret — Technology Decisions
 
-Date: 2026-10-18
+Date: 2026-10-18 · Updated: 2026-10-19 (TD-001 and TD-002 decided)
 
 | Item | Status |
 |------|--------|
 | Technology-flexible policy (§1) | **Confirmed by you** (D-020 to D-022) |
-| TD-001 Styling approach | **Unresolved.** Provisional recommendation only |
-| TD-002 Design token sharing | **Proposed**, not approved |
-| ST-01 Styling evaluation task | **Planned**, not approved; nothing installed |
+| TD-001 Styling approach | **Decided: option B, CSS Modules, for both apps** (D-085) |
+| TD-002 Design token sharing | **Decided: option B, one token source in `packages/shared`** (D-086) |
+| ST-01 Styling evaluation task | **Done** (2026-10-19). Tailwind was installed only on the local throwaway branch `st-01-styling-eval`; nothing in the production project |
 
 ## 1. Policy: technology-flexible engineering
 
@@ -57,7 +57,7 @@ Earlier technology decisions (npm workspaces, Prisma, Argon2id, PostgreSQL searc
 
 ## TD-001 — Styling approach for the storefront and admin
 
-**Status:** Unresolved. A decision is needed before the first UI deliverable: the admin shell in Phase 8, then admin screens in Phases 8 to 10 and the storefront from Phase 11. Backend work, including Phase 7, does not wait for it. The decision will be made from the results of the separately approved evaluation task ST-01 (`MASTER-IMPLEMENTATION-INDEX.md`, "Separately approved tasks").
+**Status:** **Decided (D-085, 2026-10-19): option B, CSS Modules with the shared custom-property tokens, for both apps.** Decided from the ST-01 results below. Before the decision, the record read: a decision is needed before the first UI deliverable: the admin shell in Phase 8, then admin screens in Phases 8 to 10 and the storefront from Phase 11. Backend work, including Phase 7, does not wait for it. The decision will be made from the results of the separately approved evaluation task ST-01 (`MASTER-IMPLEMENTATION-INDEX.md`, "Separately approved tasks").
 
 ### Problem
 Both apps need a styling approach. The storefront is an editorial, art-directed site with fluid type, container-sized display type, bespoke section compositions and strict design rules checked by the Taste tools. The admin app is a dense, form- and table-heavy back office where speed and consistency matter more than art direction. The earlier blanket rule ("regular CSS, no Tailwind") has been removed (D-021), so the choice must now be made on merit.
@@ -98,7 +98,7 @@ F is not shortlisted: it adds runtime JavaScript and work on every render, again
 | Brand independence | Tokens native | Tokens native | Tokens mapped into the theme | Both |
 | Taste gates | Supported | Supported | Inspector works on rendered output; source checker coverage of utility classes **unverified** | Storefront supported |
 
-### Provisional recommendation (not a decision)
+### Provisional recommendation (not a decision; superseded by the decision below)
 **Option B, CSS Modules with tokens as custom properties, for both apps.** This is a starting hypothesis based on reasoning, not measurement. It is not the final choice, and it must not be treated as decided until ST-01 has produced evidence and you have approved a decision.
 
 Reasons: it adds no dependency; it keeps bespoke editorial layouts in plain CSS, where fluid sizing and container queries read clearly; tokens are native; and the Taste tools are known to work with it. Tailwind's strongest case is admin productivity, which is why option D is the main alternative being tested.
@@ -117,14 +117,85 @@ Reasons: it adds no dependency; it keeps bespoke editorial layouts in plain CSS,
 - **Adoption rule:** Tailwind (C or D) is adopted only if it shows a clear productivity benefit without a regression in performance, accessibility, Taste gate results or brand fidelity.
 - **Approval:** `tailwindcss` and `@tailwindcss/vite` stay uninstalled until you explicitly approve ST-01. They are installed only on the throwaway branch, which is not merged. Results are added to this record before a decision is proposed.
 
+### Results of ST-01 (2026-10-19)
+
+**Setup:**
+- Throwaway branch `st-01-styling-eval` from `main` (`cb72b6b`), in a separate worktree. It is local only, not pushed and not to be merged.
+- `tailwindcss` 4.3.3 and `@tailwindcss/vite` 4.3.3, exact versions, installed on that branch only; `npm audit` 0 vulnerabilities.
+- The same three pieces were built in B (CSS Modules) and C (Tailwind v4): the hero band with the oversized wordmark, a New Ins row of product cards, and the admin orders table with filters.
+- **Fair comparison:**
+  - both variants render identical markup from shared builders, so only the styling mechanism differs;
+  - both read the TD-002 tokens; C clears Tailwind's default palette (`--color-*: initial`) so only brand colours exist;
+  - fonts: Panchang and Switzer are not in the repository yet (B-04), so both used the same fallback stacks.
+- D (B for the storefront, C for the admin) is read from the B storefront and C admin rows.
+
+| Measure | B: CSS Modules | C: Tailwind v4 | Notes |
+|---------|---------------:|---------------:|-------|
+| Production CSS, gzipped: storefront / admin | 2,008 / 1,300 bytes | 3,505 / 2,909 bytes | C includes Tailwind's preflight and property registrations. Both are far inside the budget |
+| JS, gzipped: storefront / admin | 2,066 / 1,711 bytes | 2,644 / 1,950 bytes | C carries class strings in JS |
+| Build time, median of 5: storefront / admin | 424 / 430 ms | 542 / 527 ms | C about 25% slower |
+| Styling lines: storefront / admin | 41 / 30 | 50 / 49 | C: token mapping plus class-map lines. B: CSS lines |
+| Taste `lint.mjs` on sources | 1 FAIL, 1 WARN | 2 FAIL | Same cause in both: table row lines and a form-field border, which the rule allows for real tables and fields |
+| Lint detects banned patterns written as utilities | — | **Yes**, 9 of 9 probes | `shadow-lg`, arbitrary shadow, gradient utilities and arbitrary gradients, `text-indigo-500`, micro-label, `border-b`, `backdrop-blur`, `font-mono`. **Answers the open question in the table above** |
+| Taste `inspect.mjs`, 3 pages × 1440/768/390 | Hero 5 FAIL 1 WARN; card 3/4; orders 3/2 | **Identical findings** | Whole-page rules expected to trip for isolated fragments with placeholders; one hero design issue, see below |
+| Accessibility tree (role and name, via CDP) | — | Same roles and names on every page | axe-core was **not** run: not installed or approved; see Limitations |
+| Visual parity (box geometry and key computed styles, B vs C) | — | Card: within 1 px. Hero: identical geometry. Orders: up to 9 px drift | Orders drift: Tailwind `text-2xl` bundles a 32 px line height, and preflight resets form controls. Both fixable; see Development notes |
+| Token change reaches the build | Yes | Yes | One primitive changed: every build changed |
+
+**Development notes:**
+- **B, CSS Modules:**
+  - Plain CSS read directly against the design system. Token use is explicit (`var(--sp-space-6)`), including inside `calc()` for the 4.5-card row.
+  - It needs its own small reset for form controls; the experiment's checkbox kept the browser font.
+- **C, Tailwind:**
+  - Fast for spacing and flex layout.
+  - **Spacing utilities (`p-6`, `gap-4`) come from Tailwind's own scale, not the shared spacing tokens.** They match today only by coincidence of values, so changing `--sp-space-*` would not change them unless `--spacing` is mapped too.
+  - Token-based `calc()` layouts had to be written as arbitrary values with literal rem amounts, which decouples them from the tokens.
+  - Pseudo-elements (`before:`) and data attributes needed long arbitrary-variant classes.
+  - Size utilities carry their own line heights, which caused the orders-page drift.
+- **Time:** similar for this small set. No clear productivity gain was observed for the admin table.
+
+**Issues found that do not depend on the styling choice:**
+- **Hero contrast** (`inspect.mjs`): with a light placeholder behind it, the 32% scrim leaves blush text unreadable (reported as 1:1; the tool likely ignores the translucent scrim). The scrim must be darker, or measured against the real campaign image, in Phase 12.
+- **Hero composition** (`inspect.mjs`): it flags the CTA above the wordmark as an eyebrow, and the campaign line as covered text. These are composition questions for the Phase 12 landing gate.
+
+**Limitations:**
+- axe-core was not run, because only the two Tailwind packages were approved for ST-01. Accessibility evidence is the identical accessibility trees plus `inspect.mjs`. Running axe needs approval of `axe-core` (dev) or the planned Playwright and axe setup.
+- Brand fonts are absent, so rendering used fallback faces in both variants.
+- Three pieces only. Productivity is judged from one developer's notes, not a timed study.
+
+### Recommendation (from the evidence)
+**Option B, CSS Modules with the shared custom-property tokens, for both apps.**
+
+The adoption rule says Tailwind is adopted only for a clear productivity benefit with no regression. The experiment found:
+- **No clear productivity benefit:** about the same time, and more styling lines.
+- **Small but real costs:**
+  - 1.7 to 2.2 times the CSS (still tiny);
+  - builds about 25% slower;
+  - a brand-fidelity risk, because spacing and token-based calculations escape the shared tokens unless extra mapping is maintained.
+- **Equal results** on the Taste gates and accessibility trees.
+
+D brings the same costs to the admin, plus two conventions in one repository.
+
+If B is chosen:
+- add a small reset for form controls to the admin base styles;
+- add layout primitives (stack, cluster, grid) as the trade-offs above suggest.
+
+The throwaway branch and its worktree are deleted once you decide.
+
 ### Decision
-Not yet made.
+**Option B, CSS Modules with the shared custom-property tokens, for both the storefront and the admin.** Approved by you on 2026-10-19 (D-085), from the ST-01 results above.
+
+Consequences:
+- Tailwind is **not adopted**. `tailwindcss` and `@tailwindcss/vite` are not added to the production project; they existed only on the throwaway branch.
+- The `ui-styling` skill (Tailwind and shadcn) is not used (D-122).
+- When the first UI work starts (Phase 8 admin shell), the admin base styles get a small form-control reset and the layout primitives (stack, cluster, grid) listed under Recommendation.
+- CSS Modules are built into Vite, so the decision adds no dependency.
 
 ---
 
 ## TD-002 — Sharing design tokens between the storefront and admin
 
-**Status:** Proposed, not approved. It must be decided together with TD-001, before the first UI deliverable (the admin shell in Phase 8). Backend work does not wait for it.
+**Status:** **Decided (D-086, 2026-10-19): option B, one token source in `packages/shared`.** Decided together with TD-001 from the ST-01 results below. Before the decision, the record read: it must be decided together with TD-001, before the first UI deliverable (the admin shell in Phase 8). Backend work does not wait for it.
 
 ### Problem
 The storefront and admin must show one brand: the same colours, type faces, focus styles, radii and motion timings. The admin also needs quieter surfaces for dense data (`design-system.md` §5). If each app defines its own values, they will drift. Whatever styling approach TD-001 chooses must read the same values.
@@ -293,5 +364,30 @@ A small Node script in `scripts/` with no new dependency, run in CI and locally.
   - a side-by-side screenshot shows the same brand colours, faces and focus ring in both apps;
   - changing one primitive token changes both apps.
 
+### Results of ST-01 (2026-10-19)
+Option B was built on the throwaway branch:
+- token files `brand.css`, `storefront.css`, `admin.css` and `fonts.css` under `packages/shared/src/tokens/`;
+- `exports` subpaths and `sideEffects: ["**/*.css"]` in `packages/shared/package.json`;
+- `@import "@sanea/shared/tokens/…"` in each app.
+
+| Check | Result |
+|-------|--------|
+| Vite resolves the bare `@import` through the `exports` map | **Yes**, in all four builds (B and C, storefront and admin) |
+| Each app's CSS contains the brand primitives | **Yes**, in all four |
+| Each app contains only its own semantic layer | **Yes**: storefront builds have no admin layer, and admin builds no storefront layer |
+| Changing one primitive (`--sp-aubergine`) changes every build | **Yes**, all four |
+| Same brand colours and focus ring in both apps | Both apps use `--sp-ink`, `--sp-accent` and `--sp-focus` from `brand.css` (screenshots from `inspect.mjs` for each app) |
+| Literal colours in the built CSS outside the token files | B: `#fff` only, the minifier's form of `--sp-white`. C also: `#0000` and `rgb(from red r g b)`, from Tailwind's preflight and feature detection |
+| Font files emitted as hashed assets | **Not tested**: no font files yet (B-04) |
+| API build contains no CSS | The API has no build step; `apps/api` has no `tokens/` imports |
+| CI hard-coded-value check and its fixture tests | **Not written**: by design it is built when UI work starts (Phase 8) |
+
+**Recommendation:** approve option B. It works as designed with both styling options, needs no new package or build step, and keeps one source of brand values. With Tailwind, the spacing scale would also need mapping to the tokens, which is evidence against C.
+
 ### Decision
-Not yet made.
+**Option B: one source of design tokens as CSS custom properties in `packages/shared`, imported by each Vite app through package subpath exports.** Approved by you on 2026-10-19 (D-086), together with TD-001.
+
+Consequences:
+- The token files and `exports` entries are written into the production project as a Phase 8 UI deliverable (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8). The files on the throwaway branch are evidence, not the deliverable.
+- The zero-dependency CI check for hard-coded design values, with its fixture tests, is built in the same Phase 8 UI work; it was not written by ST-01.
+- Font files are checked as hashed assets once the brand fonts exist (B-04).

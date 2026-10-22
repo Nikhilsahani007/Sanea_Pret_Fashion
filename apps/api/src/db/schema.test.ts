@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_TRIGGERS,
+  SEARCH_TRIGGERS,
 } from "./handwritten.ts";
 
 const migrations = new URL("../../../../prisma/migrations/", import.meta.url);
@@ -46,7 +47,7 @@ describe("migration SQL contains every handwritten object", () => {
   });
 
   it.each(HANDWRITTEN_FUNCTIONS)("function %s", (name) => {
-    expect(sql).toContain(`CREATE FUNCTION "${name}"()`);
+    expect(sql).toContain(`CREATE FUNCTION "${name}"(`);
   });
 
   it.each(HANDWRITTEN_CHECKS)("CHECK $name on $table", ({ table, name }) => {
@@ -61,6 +62,17 @@ describe("migration SQL contains every handwritten object", () => {
       expect(sql).toMatch(
         new RegExp(
           `CREATE TRIGGER "${name}"\\s+BEFORE [A-Z ]+ ON "${table}"\\s+FOR EACH (ROW|STATEMENT) EXECUTE FUNCTION "reject_append_only_change"\\(\\)`,
+        ),
+      );
+    },
+  );
+
+  it.each(SEARCH_TRIGGERS)(
+    "search trigger $name on $table",
+    ({ table, name, fn }) => {
+      expect(sql).toMatch(
+        new RegExp(
+          `CREATE TRIGGER "${name}"\\s+AFTER [^\\n]+ ON "${table}"\\s+FOR EACH ROW (WHEN \\([^)]+\\)\\s+)?EXECUTE FUNCTION "${fn}"\\(\\)`,
         ),
       );
     },
@@ -128,8 +140,20 @@ describe("Phase 6 scope and conventions", () => {
     );
   });
 
-  it("stores no GST rate, order link or search field (D-033, D-054)", () => {
-    expect(sql).not.toMatch(/gst|order_id|search_vector|tsvector|pg_trgm/i);
+  it("stores no GST rate or order link (D-033, D-054)", () => {
+    expect(sql).not.toMatch(/gst|order_id/i);
+  });
+
+  it("adds search fields only in the Phase 8 search migration (D-054, D-081)", () => {
+    const search = /search_vector|tsvector|pg_trgm/i;
+    for (const d of dirs) {
+      const text = readFileSync(
+        new URL(`${d}/migration.sql`, migrations),
+        "utf8",
+      );
+      expect(search.test(text), d).toBe(d.endsWith("_catalogue_search"));
+    }
+    expect(dirs.filter((d) => d.endsWith("_catalogue_search"))).toHaveLength(1);
   });
 
   it("uses snake_case for every table and column (D-056)", () => {

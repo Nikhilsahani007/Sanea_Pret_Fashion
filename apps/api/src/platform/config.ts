@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 const ORIGIN = /^https?:\/\/[^/\s?#]+$/;
+// A base URL for public images: http(s), host, optional path, ending in "/".
+const MEDIA_BASE = /^https?:\/\/[^/\s?#]+(\/[^\s?#]*)?\/$/;
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 function originSchema(name: string) {
@@ -40,6 +42,29 @@ const schema = z
     IP_HASH_KEY: z
       .string({ error: "IP_HASH_KEY is required" })
       .min(32, { error: "IP_HASH_KEY must be at least 32 characters" }),
+    // Media (D-080, Q8-9, D-088).
+    MEDIA_STORAGE_DIR: z
+      .string({ error: "MEDIA_STORAGE_DIR is required" })
+      .min(1, { error: "MEDIA_STORAGE_DIR is required" }),
+    MEDIA_PUBLIC_BASE_URL: z
+      .string({ error: "MEDIA_PUBLIC_BASE_URL is required" })
+      .regex(MEDIA_BASE, {
+        error:
+          "MEDIA_PUBLIC_BASE_URL must be an http(s) URL ending in / (no query)",
+      }),
+    // Whole numbers 0 to 4, default 2, per API process (T-5). Empty means unset.
+    MEDIA_UPLOAD_QUEUE_WAITING: z
+      .preprocess(
+        (v) => (v === "" ? undefined : v),
+        z
+          .string()
+          .regex(/^[0-4]$/, {
+            error:
+              "MEDIA_UPLOAD_QUEUE_WAITING must be a whole number from 0 to 4",
+          })
+          .optional(),
+      )
+      .transform((v) => (v === undefined ? 2 : Number(v))),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -67,6 +92,9 @@ export type Config = {
   readonly mfaEncryptionKey: Buffer;
   readonly mfaKeyVersion: number;
   readonly ipHashKey: string;
+  readonly mediaStorageDir: string;
+  readonly mediaPublicBaseUrl: string;
+  readonly mediaUploadQueueWaiting: number;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -110,5 +138,8 @@ export function loadConfig(
     mfaEncryptionKey: Buffer.from(e.MFA_ENCRYPTION_KEY, "base64"),
     mfaKeyVersion: e.MFA_ENCRYPTION_KEY_VERSION,
     ipHashKey: e.IP_HASH_KEY,
+    mediaStorageDir: e.MEDIA_STORAGE_DIR,
+    mediaPublicBaseUrl: e.MEDIA_PUBLIC_BASE_URL,
+    mediaUploadQueueWaiting: e.MEDIA_UPLOAD_QUEUE_WAITING,
   };
 }

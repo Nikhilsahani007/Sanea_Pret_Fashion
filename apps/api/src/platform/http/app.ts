@@ -15,7 +15,16 @@ import {
   authRouter,
   type AuthLimits,
 } from "../../modules/auth/router.ts";
+import { catalogueAdminRouter } from "../../modules/catalogue/admin-router.ts";
+import { cataloguePublicRouter } from "../../modules/catalogue/public-router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
+import {
+  createMediaService,
+  mediaRouter,
+  mediaUploadRouter,
+  type MediaOptions,
+} from "../../modules/media/router.ts";
+import { SEARCH_LIMIT, searchRouter } from "../../modules/search/router.ts";
 import { staffRouter } from "../../modules/staff/router.ts";
 import type { Config } from "../config.ts";
 import type { Db } from "../db.ts";
@@ -38,6 +47,10 @@ export type AppOptions = {
   readonly now?: () => Date;
   readonly argon2?: Argon2Params;
   readonly authLimits?: AuthLimits;
+  /** Test seams for the upload queue timings and the image worker. */
+  readonly media?: MediaOptions;
+  /** Test seam: the search rate limit (default 60 per minute per IP). */
+  readonly searchLimit?: { windowMs: number; limit: number };
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -49,11 +62,16 @@ export function createApp({
   now = () => new Date(),
   argon2 = DEFAULT_ARGON2,
   authLimits = DEFAULT_AUTH_LIMITS,
+  media: mediaOptions = {},
+  searchLimit = SEARCH_LIMIT,
 }: AppOptions): Express {
   const deps: AuthDeps | undefined = db
     ? { db, config, logger, now, argon2 }
     : undefined;
+  const media = deps ? createMediaService(deps, mediaOptions) : undefined;
   const app = express();
+  // Read-only view of the media service for tests (queue counters).
+  if (media) app.locals.mediaService = media;
   app.set("trust proxy", config.trustProxy);
   app.disable("x-powered-by");
 
@@ -65,6 +83,8 @@ export function createApp({
   app.use(cookieParser()); // 6. cookies for CSRF and admin sessions
   if (deps) app.use(adminSession(deps)); // 6a. admin session, so CSRF can bind to it
   app.use(csrfProtection(config)); // 7. Origin + token on state-changing methods
+  // 7a. The raw image upload: before the JSON-only body middleware (D-079).
+  if (deps && media) app.use(mediaUploadRouter(deps, media));
   app.use(requireJson); // 8. 415 for non-JSON bodies
   app.use(jsonBody); // 9. 100 KB JSON
 
@@ -74,6 +94,12 @@ export function createApp({
     app.use(authRouter(deps, authLimits));
     app.use(staffRouter(deps));
     app.use(auditRouter(deps));
+    if (media) {
+      app.use(mediaRouter(deps, media));
+      app.use(catalogueAdminRouter(deps, media.storage));
+      app.use(cataloguePublicRouter(deps, media.storage));
+      app.use(searchRouter(deps, media.storage, searchLimit));
+    }
   }
   for (const router of routers) app.use(router);
 

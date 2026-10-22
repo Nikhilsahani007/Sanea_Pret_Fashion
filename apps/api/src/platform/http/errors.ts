@@ -41,19 +41,36 @@ export const API_ERROR_CODES = {
     message: "Send the request body as application/json.",
   },
   RATE_LIMITED: { status: 429, message: "Too many requests. Try again later." },
+  // Upload queue (D-088, QP-3, T-1, T-2; phase-8-plan.md §5.7).
+  UPLOAD_QUEUE_FULL: {
+    status: 429,
+    message: "Too many uploads are in progress. Try again shortly.",
+  },
+  UPLOAD_QUEUE_TIMEOUT: {
+    status: 503,
+    message: "The upload waited too long to start. Nothing was saved.",
+  },
+  UPLOAD_PROCESSING_TIMEOUT: {
+    status: 503,
+    message: "The image took too long to process. Nothing was saved.",
+  },
   INTERNAL_ERROR: { status: 500, message: "Something went wrong." },
 } as const;
 
 export type ApiErrorCode = keyof typeof API_ERROR_CODES;
 
-/** An error that becomes a documented API error response. */
+/**
+ * An error that becomes a documented API error response. The status always
+ * comes from the registry; a route may replace the message (for example the
+ * image upload's 415), never the code or status.
+ */
 export class AppError extends Error {
   readonly code: ApiErrorCode;
   readonly status: number;
   readonly details: unknown;
 
-  constructor(code: ApiErrorCode, details?: unknown) {
-    super(API_ERROR_CODES[code].message);
+  constructor(code: ApiErrorCode, details?: unknown, message?: string) {
+    super(message ?? API_ERROR_CODES[code].message);
     this.name = "AppError";
     this.code = code;
     this.status = API_ERROR_CODES[code].status;
@@ -74,9 +91,10 @@ export function errorBody(
   code: ApiErrorCode,
   requestId: string,
   details?: unknown,
+  message: string = API_ERROR_CODES[code].message,
 ): ErrorBody {
   const body: ErrorBody = {
-    error: { code, message: API_ERROR_CODES[code].message, requestId },
+    error: { code, message, requestId },
   };
   if (details !== undefined) body.error.details = details;
   return body;
@@ -104,10 +122,22 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
   return (err, req, res, _next) => {
     const appError = err instanceof AppError ? err : fromBodyParser(err);
     const requestId = String(req.id ?? "");
+    // The client has gone or a response already started: nothing to write.
+    if (res.headersSent || res.destroyed) {
+      if (!appError) logger.error({ err, requestId }, "unhandled error");
+      return;
+    }
     if (appError) {
       res
         .status(appError.status)
-        .json(errorBody(appError.code, requestId, appError.details));
+        .json(
+          errorBody(
+            appError.code,
+            requestId,
+            appError.details,
+            appError.message,
+          ),
+        );
       return;
     }
     logger.error({ err, requestId }, "unhandled error");

@@ -16,7 +16,7 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 
 ## 2. Conventions
 
-- JSON only. `Content-Type: application/json; charset=utf-8`. Request bodies limited to 100 KB (uploads separate).
+- JSON only. `Content-Type: application/json; charset=utf-8`. Request bodies limited to 100 KB. The one exception is the admin image upload `POST /admin/media`, which takes the raw image bytes (§4, D-079).
 - Money fields are integers in paise, named `…Paise`, plus `currency: "INR"` on order-level objects.
 - Pagination: cursor-based. `?limit=24&cursor=<opaque>`. Responses include `nextCursor`.
 - Dates: ISO 8601 UTC strings.
@@ -42,25 +42,29 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | 401 | `UNAUTHENTICATED`, `SIGN_IN_FAILED` (one generic answer for wrong email, password, code, locked or inactive account; D-066) |
 | 403 | `FORBIDDEN`, `CSRF_FAILED` |
 | 404 | `NOT_FOUND` |
-| 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB) |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`) |
+| 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB; image upload over 15 MB) |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`; on the image upload, a `Content-Type` other than `image/jpeg`, `image/png` or `image/webp`, or file bytes that are not one of those formats or do not match the declared type). The status and code are the same on every route; the `message` is route-specific: JSON routes keep the JSON message, and the image upload has an image-specific message |
 | 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
 | 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
-| 429 | `RATE_LIMITED` |
+| 429 | `RATE_LIMITED` (sent by the rate-limit middleware with `Retry-After` and `RateLimit` headers), `UPLOAD_QUEUE_FULL` (admin image upload only: this API process already has one upload processing and its waiting capacity full, `MEDIA_UPLOAD_QUEUE_WAITING`, default 2; nothing is stored; **no `Retry-After` or `RateLimit` header**, because no reliable wait estimate exists. Sent by the upload queue, not the rate-limit middleware) |
 | 500 | `INTERNAL_ERROR` (no stack traces) |
+| 503 | `UPLOAD_QUEUE_TIMEOUT` (admin image upload only: the upload waited 30 s in the queue without starting; nothing is stored), `UPLOAD_PROCESSING_TIMEOUT` (admin image upload only: the 60 s deadline counted from admission, covering queue wait, body reception and processing, ran out; **the upload is not saved**, and output produced later is discarded. The response does not mean processing has already stopped). Both are sent only while the client is still connected |
 
 ## 3. Public storefront endpoints
 
 ### Catalogue and search
+
+Public catalogue and search responses carry `Cache-Control: public, max-age=60` (Q8-5); admin responses carry `no-store`. Only products that are published, in a published category and with at least one active variant are visible.
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/catalogue/categories` | Published category tree. |
-| GET | `/catalogue/collections` | Published collections. |
-| GET | `/catalogue/collections/:slug` | Collection detail. |
-| GET | `/catalogue/products` | Listing. Query: `category`, `collection`, `size[]`, `colour[]`, `priceMin`, `priceMax`, `inStock`, `sort` (`newest`, `price_asc`, `price_desc`), `limit`, `cursor`. Returns items and facets. |
-| GET | `/catalogue/products/:slug` | Product detail with variants, per-variant `available` (capped display, see §6), images by colour. |
-| GET | `/search` | `q`, plus the same filters. |
-| GET | `/search/suggest` | `q` (≥ 2 chars). Up to 6 product and category suggestions. |
+| GET | `/catalogue/categories` | Published category tree (`name`, `slug`, SEO fields, `children`). A published child of an unpublished parent is not shown. |
+| GET | `/catalogue/collections` | Published collections inside their schedule (`startsAt` ≤ now < `endsAt`, each optional), with the hero image's derivatives. |
+| GET | `/catalogue/collections/:slug` | Collection detail; `404` when not published or outside its schedule. Its products: `/catalogue/products?collection=<slug>`. |
+| GET | `/catalogue/products` | Listing. Query: `category` (slug; includes published sub-categories), `collection` (slug), `size` or `size[]` (size labels, repeatable), `colour` or `colour[]` (colour slugs), `priceMin`, `priceMax` (paise), `inStock` (`true`), `sort` (`newest` default, `price_asc`, `price_desc`), `limit` (1 to 48, default 24), `cursor` (opaque). Size, colour, price and stock filters must all hold for the **same active variant**. Returns `{ items, facets, nextCursor }`: items are summaries (`slug`, `name`, `fromPricePaise`, `currency`, `labels`, `colours`, `soldOut`, `primaryImage`); facets (`sizes`, `colours`, `categories`, `priceBands`) count visible products before the variant filters. Price bands are fixed: under ₹1,000; ₹1,000 to ₹2,000; ₹2,000 to ₹3,000; ₹3,000 to ₹5,000; ₹5,000 and over. Unknown parameters, bad ranges and tampered cursors give `400`. |
+| GET | `/catalogue/products/:slug` | Product detail (§6): active variants with availability, colours, sizes, images by colour (derivatives only), size chart, rich-text description. `404` unless the product is published, its category is published and it has an active variant. |
+| GET | `/search` | `q` (2 to 100 characters), plus the listing filters. `sort` is `relevance` (default; full-text rank plus trigram similarity) or a listing sort. Typo-tolerant (`pg_trgm`). Published, visible products only. 60 requests per minute per IP, shared with suggestions. |
+| GET | `/search/suggest` | `q` (2 to 100 characters). Up to 6 suggestions: up to 2 published categories, then products (`{ categories, products }`, each `slug` and `name`). |
 
 ### Content
 | Method | Path | Description |
@@ -123,8 +127,12 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST | `/admin/products` | GET: O M C F · POST: O M C |
 | GET/PATCH | `/admin/products/:id` | GET: all · PATCH: O M C (price fields: O M only) |
 | POST | `/admin/products/:id/publish` · `/archive` | O M C |
-| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | O M C (price: O M) |
+| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | GET: all · POST: O M (a variant needs a price, Q8-4) · PATCH: O M C (price fields `pricePaise`, `compareAtPricePaise`: O M only; a request from C that contains them is refused whole with `403 FORBIDDEN`) |
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
+| GET/POST/PATCH | `/admin/colours[/:id]` · `/admin/size-charts[/:id]` (Q8-3) | O M C |
+| GET | `/admin/sizes`: the six approved sizes (D-029) in order, `{ items: [{ id, label, position }] }`. Read only; sizes are migration reference data. Added for the admin variant form (`phase-8-ui-plan.md` §10) | O M C |
+| GET | `/admin/collections/:id` (with its product order) | O M C |
+| POST · PATCH/DELETE | `/admin/products/:id/images` · `/admin/products/:id/images/:imageId` (`mediaAssetId`, `colourId?`, `alt`, `role`, `position`) | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
 | GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
 | POST | `/admin/inventory/:variantId/adjustments` `{ delta, reason }` | O M F |
@@ -141,7 +149,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
 | POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
-| POST | `/admin/media` (multipart) · GET `/admin/media` | O M C |
+| POST | `/admin/media`: the raw image bytes as the request body, not multipart (D-079). `Content-Type` must be `image/jpeg`, `image/png` or `image/webp`; at most 15 MB; the file's own bytes must match (D-078). Processed before the response: re-encoded without metadata, AVIF and WebP at 480, 960, 1440 and 2048 px (D-077, Q8-11). Optional header `X-Upload-Filename`: a display name, sanitised and stored; never logged and never used in paths. Returns the media asset with its derivative URLs. One upload is processed at a time per API process, and up to `MEDIA_UPLOAD_QUEUE_WAITING` (default 2) wait. Outcomes: `429 UPLOAD_QUEUE_FULL` when the queue is full; `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting; `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved; `413 PAYLOAD_TOO_LARGE` for a declared or streamed body over 15 MB, including chunked bodies; `415 UNSUPPORTED_MEDIA_TYPE` with an image-specific message. Node's 300 s server request timeout is separate and unchanged. Phase 8 queue policy (D-088; values approved 2026-10-21; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, per process; `phase-8-plan.md` §5.7). · GET `/admin/media` | O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |
@@ -173,7 +181,9 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 }
 ```
 
-`availability` is `IN_STOCK`, `LOW_STOCK` (with `"remaining": n` when n ≤ threshold, used for "Only 2 left" — real numbers only), or `SOLD_OUT`. Exact stock counts above the threshold are not exposed publicly.
+`availability` is `IN_STOCK`, `LOW_STOCK` or `SOLD_OUT` (D-082 as amended by Q8-2). Available means on hand minus reserved. `LOW_STOCK` applies when 0 < available ≤ the variant's `lowStockThreshold`, and only then is `"remaining": n` included, for "Only 2 left" (real numbers only). `IN_STOCK` and `SOLD_OUT` never carry a count, so exact stock above the threshold is not exposed publicly.
+
+`labels` come from an allow-list; in release one it contains only `NEW` (Q8-8). Image `url`s point only to public derivatives; originals are never exposed (Phase 8 safeguard 1). `description` is structured rich text: no HTML, and links only to allowed internal paths (Q8-10, Phase 8 safeguard 2). Its text nodes store their words as a string under the key `text` (R2).
 
 ## 7. Versioning
 

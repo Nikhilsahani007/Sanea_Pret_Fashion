@@ -39,5 +39,36 @@ export default defineConfig(
       "no-restricted-imports": ["error", prismaBan],
     },
   },
+  {
+    // The API never bundles CSS; design tokens are for the two apps (TD-002).
+    files: ["apps/api/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@sanea/shared/tokens/*", "**/shared/src/tokens/**"],
+              message:
+                "Design tokens are CSS for the storefront and admin only (TD-002).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Repository tooling run by Node directly.
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        URL: "readonly",
+        Buffer: "readonly",
+        fetch: "readonly",
+      },
+    },
+  },
   prettier,
 );

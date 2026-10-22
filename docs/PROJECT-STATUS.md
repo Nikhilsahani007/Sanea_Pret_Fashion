@@ -1,12 +1,55 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
-**Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076).** Commit `75f499c` on `phase-7-admin-auth`, in draft PR #5 into `main`, open and unmerged. Decisions D-062 to D-075. CI run 39165512527: unit suite 22 files, 429 tests; database and API suite 11 files, 267 tests; Gitleaks no leaks (`phase-7-plan.md`). **Phase 8 not started**; its planning needs your go-ahead.
+**Phase 9 — Inventory and stock reservation: next. It may start: the Phase 8 gate was recorded on 2026-10-22 (D-089).**
 
-**`main`:** PRs #1 to #4 merged (D-134); `main` at `cb72b6b`, CI run 39162324224 succeeded.
+**Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
+- **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
+- **UI half (`phase-8-ui-plan.md` §9, §10):**
+  - U8-1 to U8-7 were approved on 2026-10-22, with U8-3 changed to include a QR code;
+  - built:
+    - tokens;
+    - the token check;
+    - the admin app on `localhost:5174`;
+    - the shell, sign-in and 2FA set-up with a QR code;
+    - every catalogue screen.
+
+  Results:
+  - **646 unit and component tests, 338 integration tests, 9 end-to-end tests** (installed Edge, disposable stack);
+  - axe clean at 1440, 768 and 390 px;
+  - format, lint, typecheck, admin build and audit clean;
+  - 27 screenshots in `docs/reviews/admin/2026-10-22/`.
+- **Deviations you approved on 2026-10-22:**
+  - jsdom 29.1.1 instead of 30.1.2 (this machine runs Node 24.11.0);
+  - `@testing-library/dom` 10.4.2 (a required peer);
+  - npm `overrides` pinning React 19.3.0, so the tree has one React.
+- **Licence finding (U8-4):** the brand fonts may be self-hosted but not put in a public repository, so they are fetched per environment and not committed (`font-licences.md`).
+- Decisions: D-077 to D-084, Q8-1 to Q8-11, safeguards 1–3, D-087, D-088, QP-1 to QP-7, T-1 to T-7, capacity range 0 to 4 (default 2), R2 (rich-text `text` key), migration `20261021180245_catalogue_search` (approved 2026-10-22), and the child-process image worker (approved 2026-10-22).
+- **Step 5 backend (`phase-8-plan.md` §10e):**
+  - `catalogue` (admin and public), `search` and `media` modules;
+  - the child-process image worker and upload queue;
+  - the development image server;
+  - shared catalogue contracts (`slugSchema`, labels, availability, rich text).
+
+  Results: **577 unit and 337 integration tests passed** on a disposable PostgreSQL 18.6; format, lint and typecheck clean.
+- Commits on `phase-8-catalogue`, all pushed to `origin/phase-8-catalogue`, with no PR and no merge:
+  - `b576a03`: planning;
+  - `762bef4`: the migration;
+  - `a06cd53`: the backend modules;
+  - `68a2f59`: the UI plan;
+  - `a6afed7`: the tokens and token check;
+  - `c923655`: the admin UI;
+  - `2a0158b`: the AVIF timing test;
+  - the gate record follows this update.
+
+**Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076), merged into `main` with PR #5 (merge commit `6593082`).** Commit `75f499c`, decisions D-062 to D-075 (`phase-7-plan.md`).
+
+**Styling:** ST-01 done (2026-10-19). TD-001 decided as option B, CSS Modules for both apps (D-085); TD-002 decided as option B, shared tokens in `packages/shared` (D-086). Tailwind is not in the production project. The throwaway branch `st-01-styling-eval` and its worktree in the session scratchpad still exist locally and are deleted only with your approval.
+
+**`main`:** PRs #1 to #5 merged; `main` at `6593082`.
 
 Phase 6 — Core database schema: gate passed (D-061). Commit `56ef435`, merged into `main` with PR #4. The results below are the Phase 6 record.
 
@@ -42,7 +85,6 @@ Phase 5 — API platform skeleton: gate passed (D-050). Commits `ab355d6`, `512f
 | P5-AC11 Scope | **Pass**: no business routes, database, sessions or authentication; no consumer project references |
 | Graceful shutdown (Linux) | **Pass**: SIGTERM and SIGINT in Docker `node:24.11.0-bookworm-slim`, exit 0 in 16 and 24 ms with an idle keep-alive connection open, stderr empty (`phase-5-plan.md`) |
 | P5-AC12 CI on draft PR #3 and your approval | **Pass**: CI run 39157064172 at `5f55243` (CI and Gitleaks success); gate approved 2026-10-19 (D-050) |
-
 
 **Phase 4 — Shared contracts: gate passed (D-044).** Commit `dc52aad` on `phase-4-shared-contracts`, in draft PR #2 into `phase-3-foundation`. The results below are the Phase 4 record.
 
@@ -80,9 +122,9 @@ Review fixes (approved): phone separators limited to ASCII space, non-breaking s
 
 | Check | Result |
 |-------|--------|
-| Current branch | `phase-7-admin-auth` (from `cb72b6b`) |
-| PR #5 `phase-7-admin-auth` → `main` | `75f499c` before this status commit; open, draft, unmerged |
-| `main` on GitHub | `cb72b6b` (merge of PR #4); PRs #1 to #4 merged (D-134) |
+| Current branch | `phase-8-catalogue` at `6593082` (created 2026-10-20), with the documentation, `sharp` and `.env.example` changes uncommitted. `st-01-results` also points at `6593082`. Local `main` ref still at `cb72b6b`; `origin/main` at `6593082` |
+| PR #5 `phase-7-admin-auth` → `main` | Merged: `6593082` |
+| `main` on GitHub | `6593082` (merge of PR #5); PRs #1 to #5 merged |
 | PR #1 `phase-3-foundation` → `main` | Merged: `03c12bd` |
 | PR #2 `phase-4-shared-contracts` → `main` | Merged: `38a0a85` |
 | PR #3 `phase-5-api-platform` → `main` | Merged: `4f20baa` |
@@ -187,9 +229,9 @@ All of these need V14.
 | Commit and push of the Phase 3 housekeeping | **Done and merged** | `619d175`; included in PR #1 |
 | Committing and pushing `phase-3-foundation` | **Approved and done** | `567e27f` on GitHub |
 | Phase 3 pull request | **Merged** | PR #1; merge commit `03c12bd` |
-| TD-001 styling | **Unresolved** | `technology-decisions.md` |
-| TD-002 shared tokens | **Proposed** | `technology-decisions.md` |
-| ST-01 styling evaluation | **Not approved**; nothing installed | index |
+| TD-001 styling | **Decided: CSS Modules (option B)** | D-085 |
+| TD-002 shared tokens | **Decided: `packages/shared` (option B)** | D-086 |
+| ST-01 styling evaluation | **Approved and done**; Tailwind only on the local throwaway branch | `technology-decisions.md` |
 | Live payments (Phase 18), infrastructure (Phase 19) | **Not approved** | — |
 | D-202, D-203 | **Open**; not blocking | `DECISION-LOG.md` |
 | Phase 6 plan, decisions, setup | **Approved; setup done** | D-051 to D-060 |
@@ -197,25 +239,50 @@ All of these need V14.
 | Commit, push, draft PR #4 for Phase 6 | **Done and merged** | PR #4; merge commit `cb72b6b6` |
 | Phase 6 completion gate | **Passed** | D-061 |
 | Phase 7 plan and migration | **Approved** | D-062 to D-075 |
-| Commit, push, draft PR #5 for Phase 7 | **Done** | `75f499c`; PR #5 open, draft, unmerged |
+| Commit, push, draft PR #5 for Phase 7 | **Done and merged** | PR #5; merge commit `6593082` |
 | Phase 7 completion gate | **Passed** | D-076 |
+| Phase 8 backend plan | **Approved in principle** | `phase-8-plan.md`; D-077 to D-084, Q8-1 to Q8-10 |
+| `sharp` compatibility test | **Passed** | D-087; `phase-8-plan.md` §10a |
+| Q8-11 and safeguards 1–3 | **Approved**; AVIF retest passed | `DECISION-LOG.md` Phase 8; `phase-8-plan.md` §5.6, §10b |
+| Phase 8 step 3: branch, `sharp`, specification amendments | **Authorised and done**; committed in `b576a03` | `phase-8-catalogue` |
+| Phase 8 upload queue policy | **Approved in principle** (D-088, 2026-10-20); QP-1 to QP-7 and T-1 to T-7 **approved 2026-10-21**; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, default 2 | `DECISION-LOG.md`; `phase-8-plan.md` §5.7 |
+| `sharp` timeout test (T-4) | **Run** 2026-10-21; child-process approach **approved and implemented** 2026-10-22 | `phase-8-plan.md` §10c, §10e |
+| Phase 8 migration `20261021180245_catalogue_search` | **Approved 2026-10-22**; committed in `762bef4`; not applied to any kept database | `phase-8-plan.md` §10d |
+| Phase 8 API modules | **Done** (campaign instruction, 2026-10-22); committed in `a06cd53` | `phase-8-plan.md` §10e |
+| Commit and normal push of reviewed Phase 8 work | **Authorised** (campaign instruction, 2026-10-22) | `origin/phase-8-catalogue` |
+| PR for Phase 8 (draft, for CI) | **Authorised and opened**: draft PR #6, CI green; not to be merged | PR #6 |
+| Merging any PR | **Not authorised** | — |
+| Phase 8 UI packages, fonts, axe (U8-1 to U8-7) | **Approved 2026-10-22**, U8-3 with a QR code; deviations approved (jsdom 29.1.1, `@testing-library/dom`, React overrides) | `phase-8-ui-plan.md` §10.1, §10.2 |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
-| Phase 8 planning | Now | Needs your go-ahead; UI parts also need TD-001 and TD-002 (ST-01) |
-| Merge PR #5 | Only with your explicit authorisation | Not authorised |
+| Phase 8 step 5: backend modules | Done | `phase-8-plan.md` §10e |
+| Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md` (`68a2f59`); awaiting U8-1 to U8-7 |
+| Phase 8 tokens, token check, API lint guard | Done | `phase-8-ui-plan.md` §9 |
+| Phase 8 admin shell and catalogue screens | Done | `phase-8-ui-plan.md` §10 |
+| Phase 8 gate | **Passed** (D-089) | `phase-8-plan.md` §10f |
+| Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
 | PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Done in Phase 6 (`database-design.md`, `security-design.md`; no conflicts in `project-requirements.md`) |
-| ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Not approved |
+| ST-01 styling evaluation | After the Phase 3 gate, before Phase 8 | Done; D-085, D-086 |
 | Brand inputs (OD-01, OD-02, B-06) | Before Phases 11 and 12 | Not received |
 | Accountant verification (B-14) | Before live sales | Not started |
 
 ## Blockers for Phase 8
 
-- Phase 7 gate recorded (D-076). Phase 8 backend work (catalogue, media, search API) needs only your go-ahead for planning.
-- Phase 8 UI work (design tokens, admin shell, admin catalogue screens) is blocked by TD-001 and TD-002, which need the ST-01 styling evaluation (B-12).
+- Backend:
+  - **step 4:** the `catalogue_search` migration was approved on 2026-10-22 and committed in `762bef4`;
+  - **steps 4a and 4b:** done 2026-10-21 (capacity range 0 to 4; QP and T approved);
+  - **step 4c:** done; the child-process approach was approved and implemented (2026-10-22);
+  - **step 5:** backend implemented and tested (`phase-8-plan.md` §10e).
+- **Gate evidence:**
+  - backend: `phase-8-plan.md` §10e;
+  - UI: `phase-8-ui-plan.md` §9 and §10, and the screenshots;
+  - CI: run 39829977467 on draft PR #6, all jobs green; P8-AC11 measured on Linux (`phase-8-plan.md` §10f);
+  - gate passed (D-089).
+- **UI:** not blocked. The fonts work through `npm run fonts:fetch` (B-04 partly resolved; the logo and brand colours are still open).
 
 ## Skills audit
 
@@ -223,6 +290,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** decide whether to merge PR #5, authorise Phase 8 planning, or approve ST-01 (the styling evaluation that unblocks Phase 8 UI work).
+**Me:** the Phase 9 plan: inventory, stock movements and the reservation service with its expiry job, plus the admin inventory screens (`MASTER-IMPLEMENTATION-INDEX.md` Phase 9). It will be presented for your approval before any migration or implementation.
 
-**Me, after that:** only the step you authorise; a Phase 8 plan would come with no code or dependencies until you approve it.
+**You:**
+- approve the Phase 9 plan when it is ready;
+- decide whether to keep draft PR #6 open. Merging needs your separate authorisation.
