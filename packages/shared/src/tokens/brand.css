@@ -1,0 +1,75 @@
+/*
+ * Brand primitives (design-system.md §4, §5, §8). The single source of brand
+ * values for the storefront and the admin (TD-002, D-086).
+ *
+ * Components never read these directly: they use the semantic names defined in
+ * storefront.css and admin.css. Contrast for every text and control pair is
+ * recorded in docs/phase-8-ui-plan.md §9.
+ */
+:root {
+  /* Colour (provisional until brand colours are supplied, OD-02) */
+  --sp-blush: #edccbe;
+  --sp-blush-deep: #e8c2b2;
+  --sp-aubergine: #351a2b;
+  --sp-aubergine-muted: #6c4857;
+  --sp-white: #ffffff;
+  --sp-grey-50: #f6f5f5;
+  --sp-grey-100: #ecebeb;
+  --sp-grey-300: #d3cdd0;
+  --sp-grey-500: #857a80;
+  --sp-grey-700: #5a5156;
+  --sp-red: #9b1c1c;
+  --sp-red-wash: #f9eeee;
+  --sp-green: #185a31;
+  --sp-green-wash: #edf5f0;
+
+  /* Type faces. Panchang and Switzer are not self-hosted yet (B-04), so the
+     fallback stacks render until fonts.css declares them. */
+  --sp-font-display:
+    "Panchang", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --sp-font-text: "Switzer", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --sp-weight-regular: 400;
+  --sp-weight-medium: 500;
+  --sp-weight-display: 700;
+
+  /* Five type steps only */
+  --sp-step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --sp-step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --sp-step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --sp-step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --sp-step-monument: clamp(4rem, 13.5vw, 13.75rem);
+  --sp-leading-text: 1.5;
+  --sp-leading-tight: 1.2;
+  --sp-leading-display: 0.9;
+  --sp-tracking-display: -0.03em;
+
+  /* Spacing */
+  --sp-space-1: 0.25rem;
+  --sp-space-2: 0.5rem;
+  --sp-space-3: 0.75rem;
+  --sp-space-4: 1rem;
+  --sp-space-5: 1.25rem;
+  --sp-space-6: 1.5rem;
+  --sp-space-8: 2rem;
+  --sp-space-12: 3rem;
+  --sp-space-16: 4rem;
+
+  /* Controls (design-system.md §6: 48 px buttons, 44 px minimum targets) */
+  --sp-control-height: 3rem;
+  --sp-target-min: 2.75rem;
+  --sp-radius-none: 0;
+  --sp-radius-pill: 999px;
+  --sp-border-width: 1px;
+  --sp-focus-width: 2px;
+  --sp-focus-offset: 2px;
+
+  /* Layout */
+  --sp-measure: 68ch;
+  --sp-page-max: 90rem;
+
+  /* Motion (design-system.md §8) */
+  --sp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --sp-duration-instant: 100ms;
+  --sp-duration-fast: 150ms;
+  --sp-duration-base: 280ms;
+}

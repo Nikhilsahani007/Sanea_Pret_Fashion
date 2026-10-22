@@ -1,0 +1,23 @@
+/*
+ * Storefront semantic layer (design-system.md §5): blush ground, aubergine ink.
+ * The names match admin.css so components read the same properties.
+ */
+:root {
+  --sp-bg: var(--sp-blush);
+  --sp-surface: var(--sp-blush-deep);
+  --sp-surface-alt: var(--sp-blush-deep);
+  --sp-paper: var(--sp-white);
+  --sp-line: var(--sp-aubergine-muted);
+  --sp-field-border: var(--sp-aubergine-muted);
+  --sp-ink: var(--sp-aubergine);
+  --sp-muted: var(--sp-aubergine-muted);
+  --sp-accent: var(--sp-aubergine);
+  --sp-accent-ink: var(--sp-blush);
+  --sp-field-1: var(--sp-aubergine);
+  --sp-field-1-ink: var(--sp-blush);
+  --sp-focus: var(--sp-aubergine);
+  --sp-danger: var(--sp-red);
+  --sp-danger-surface: var(--sp-red-wash);
+  --sp-success: var(--sp-green);
+  --sp-success-surface: var(--sp-green-wash);
+}

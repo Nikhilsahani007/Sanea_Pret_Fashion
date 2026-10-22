@@ -1,11 +1,20 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-21 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
-**Phase 8 — Catalogue, media and catalogue API: backend implemented (step 5); UI half not started.**
-- **Closure state: backend complete with test evidence; the Phase 8 gate is not passed.** It also needs the UI deliverables (tokens, admin shell, catalogue screens) and your review of the test output and admin screenshots (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
+**Phase 8 — Catalogue, media and catalogue API: backend implemented (step 5); UI half in progress: tokens done, admin app waiting for U8-1.**
+- **Closure state: backend complete with test evidence; the Phase 8 gate is not passed.** It also needs the admin shell and catalogue screens and your review of the test output and admin screenshots (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
+- **UI half (`phase-8-ui-plan.md`):**
+  - **Done** (§9), with no new package:
+    - the TD-002 tokens in `packages/shared/src/tokens/`, exported as CSS subpaths;
+    - the hard-coded-value check `npm run check:tokens`, now part of `npm run lint`, with its register and 22 fixture tests;
+    - the API lint guard;
+    - contrast measured for every token pair.
+
+    Results: 599 unit tests; format, lint and typecheck clean.
+  - **Waiting** for your answers to U8-1 to U8-7 (packages, data library, 2FA without QR, fonts, axe, dev port, success colour). The admin shell and catalogue screens need React, which is not installed.
 - Decisions: D-077 to D-084, Q8-1 to Q8-11, safeguards 1–3, D-087, D-088, QP-1 to QP-7, T-1 to T-7, capacity range 0 to 4 (default 2), R2 (rich-text `text` key), migration `20261021180245_catalogue_search` (approved 2026-10-22), and the child-process image worker (approved 2026-10-22).
 - **Step 5 backend (`phase-8-plan.md` §10e):**
   - `catalogue` (admin and public), `search` and `media` modules;
@@ -14,7 +23,12 @@ Last updated: 2026-10-21 · Repository: https://github.com/Nikhilsahani007/Sanea
   - shared catalogue contracts (`slugSchema`, labels, availability, rich text).
 
   Results: **577 unit and 337 integration tests passed** on a disposable PostgreSQL 18.6; format, lint and typecheck clean.
-- Commits on `phase-8-catalogue`: `b576a03` (planning), `762bef4` (migration); the step 5 backend commit follows this update. Pushed to `origin/phase-8-catalogue`; no PR, no merge.
+- Commits on `phase-8-catalogue`, all pushed to `origin/phase-8-catalogue`, with no PR and no merge:
+  - `b576a03`: planning;
+  - `762bef4`: the migration;
+  - `a06cd53`: the backend modules;
+  - `68a2f59`: the UI plan;
+  - the tokens commit follows this update.
 
 **Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076), merged into `main` with PR #5 (merge commit `6593082`).** Commit `75f499c`, decisions D-062 to D-075 (`phase-7-plan.md`).
 
@@ -215,22 +229,24 @@ All of these need V14.
 | Phase 8 backend plan | **Approved in principle** | `phase-8-plan.md`; D-077 to D-084, Q8-1 to Q8-10 |
 | `sharp` compatibility test | **Passed** | D-087; `phase-8-plan.md` §10a |
 | Q8-11 and safeguards 1–3 | **Approved**; AVIF retest passed | `DECISION-LOG.md` Phase 8; `phase-8-plan.md` §5.6, §10b |
-| Phase 8 step 3: branch, `sharp`, specification amendments | **Authorised and done**, uncommitted | `phase-8-catalogue` |
+| Phase 8 step 3: branch, `sharp`, specification amendments | **Authorised and done**; committed in `b576a03` | `phase-8-catalogue` |
 | Phase 8 upload queue policy | **Approved in principle** (D-088, 2026-10-20); QP-1 to QP-7 and T-1 to T-7 **approved 2026-10-21**; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, default 2 | `DECISION-LOG.md`; `phase-8-plan.md` §5.7 |
 | `sharp` timeout test (T-4) | **Run** 2026-10-21; child-process approach **approved and implemented** 2026-10-22 | `phase-8-plan.md` §10c, §10e |
-| Phase 8 migration and API modules | **Not authorised**; not written or started | — |
-| Commit, push, PR for Phase 8 work | **Not authorised** | — |
+| Phase 8 migration `20261021180245_catalogue_search` | **Approved 2026-10-22**; committed in `762bef4`; not applied to any kept database | `phase-8-plan.md` §10d |
+| Phase 8 API modules | **Done** (campaign instruction, 2026-10-22); committed in `a06cd53` | `phase-8-plan.md` §10e |
+| Commit and normal push of reviewed Phase 8 work | **Authorised** (campaign instruction, 2026-10-22) | `origin/phase-8-catalogue` |
+| PR for Phase 8 (draft, for CI) | **Not authorised yet**; needed for P8-AC8 and P8-AC11 | — |
+| Merging any PR | **Not authorised** | — |
+| Phase 8 UI packages, fonts, axe (U8-1 to U8-7) | **Open** | `phase-8-ui-plan.md` §6 |
 
 ## Remaining work
 
 | Task | When | Status |
 |------|------|--------|
 | Phase 8 step 5: backend modules | Done | `phase-8-plan.md` §10e |
-| Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md`; awaiting U8-1 to U8-6 |
-| Phase 8 UI deliverables (tokens, admin shell, catalogue screens) | After U8-1 to U8-6 | Not started: React and Vite plugin not installed |
-
-| Commit the Phase 8 planning, documentation and `sharp` changes | With your approval | Not done |
-| Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | After the backend plan is approved | Unblocked by D-085 and D-086; not written |
+| Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md` (`68a2f59`); awaiting U8-1 to U8-7 |
+| Phase 8 tokens, token check, API lint guard | Done | `phase-8-ui-plan.md` §9 |
+| Phase 8 admin shell and catalogue screens | After U8-1 to U8-7 | Not started: React and the Vite plugin are not installed |
 | Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
 | PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Done in Phase 6 (`database-design.md`, `security-design.md`; no conflicts in `project-requirements.md`) |
@@ -241,12 +257,15 @@ All of these need V14.
 ## Blockers for Phase 8
 
 - Backend:
-  - **step 4:** the `catalogue_search` migration is written and validated, awaiting your approval;
+  - **step 4:** the `catalogue_search` migration was approved on 2026-10-22 and committed in `762bef4`;
   - **steps 4a and 4b:** done 2026-10-21 (capacity range 0 to 4; QP and T approved);
   - **step 4c:** done; the child-process approach was approved and implemented (2026-10-22);
   - **step 5:** backend implemented and tested (`phase-8-plan.md` §10e).
-- Gate evidence: none yet; the Phase 8 gate needs backend and UI evidence (step 8).
-- UI: no longer blocked by styling (D-085, D-086). The UI plan addendum (tokens, admin shell, catalogue screens) has not been written.
+- **Gate evidence:**
+  - backend: `phase-8-plan.md` §10e;
+  - UI: the tokens only (`phase-8-ui-plan.md` §9);
+  - CI has not run (P8-AC8, P8-AC11). It runs only on a PR or a push to `main`.
+- **UI:** blocked on U8-1 (the packages) for the admin shell and screens. The fonts (U8-4, B-04) do not block: fallback stacks render.
 
 ## Skills audit
 
@@ -255,7 +274,14 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 ## Next exact task
 
 **You:**
-- decide U8-1 to U8-6 in `phase-8-ui-plan.md` §6: the admin UI packages with exact versions, the fonts, and an accessibility scan dependency;
+- decide U8-1 to U8-7 in `phase-8-ui-plan.md` §6:
+  - the admin UI packages, with exact versions;
+  - the data library;
+  - 2FA set-up without a QR code;
+  - the fonts;
+  - the accessibility scan dependency;
+  - the dev port;
+  - the measured success colour;
 - later, the Phase 8 gate review, which also needs a draft PR for CI (P8-AC8, P8-AC11).
 
-**Me, after that:** the Phase 8 UI deliverables (tokens, admin shell, catalogue screens), with tests and screenshots. Phases 9 to 12 start only after the Phase 8 gate.
+**Me, after that:** the admin shell and catalogue screens (steps U2 to U4), with tests and screenshots. Phases 9 to 12 start only after the Phase 8 gate.

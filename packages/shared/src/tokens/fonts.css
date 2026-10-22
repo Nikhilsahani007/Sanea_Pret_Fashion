@@ -1,0 +1,10 @@
+/*
+ * Self-hosted brand faces (design-system.md §4): Panchang 700 and Switzer 400
+ * and 500, subset to Latin and Latin-1 Supplement, WOFF2, from Fontshare under
+ * the ITF Free Font Licence.
+ *
+ * The font files are not in the repository yet (B-04, phase-8-ui-plan.md U8-4),
+ * so this file declares no @font-face rules and the fallback stacks in
+ * brand.css render. When the files are added, under ./fonts/ with their
+ * licence, each face gets a rule here with font-display: swap.
+ */

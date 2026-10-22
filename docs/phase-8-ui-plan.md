@@ -1,6 +1,6 @@
 # Phase 8 UI Plan Addendum — Tokens, Admin Shell and Catalogue Screens
 
-Status: **Proposed, for your review. Not approved; nothing installed or built.** · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
+Status: **Proposed, for your review. U8-1 to U8-7 open; nothing installed.** The dependency-free part of step U2 (tokens, token check, API lint guard) is built and checked (§9). · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
 
 This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase-8-plan.md` §10 step 7). The Phase 8 gate needs both halves (index rule 6).
 
@@ -146,6 +146,7 @@ This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase
 | U8-4 | Fonts: Panchang and Switzer are free from Fontshare (ITF Free Font Licence) but not in the repository (B-04). Download and self-host the WOFF2 files now, or keep fallbacks until brand inputs arrive? | **Your choice:** downloading is an external action and adds licensed assets. The licence would be recorded next to the files |
 | U8-5 | Automated accessibility scan: add `@axe-core/playwright` (dev)? | **Yes**, for the admin and later the storefront gates. Its exact version would be proposed at install time |
 | U8-6 | Where the admin build is served in development: Vite dev server on `http://localhost:5174` (matches `ADMIN_ORIGIN` in tests) | Yes |
+| U8-7 | Success colour: `design-system.md` §5 gives `#1F6B3A` and asks for it to be measured when built. Measured, it is **4.34:1 on the storefront blush and 3.97:1 on the card surface**, below 4.5:1. The tokens use `#185A31`, which passes on every ground (§9). Accept it? | **Yes.** It is the same hue, slightly darker. The palette stays provisional until brand colours arrive (OD-02). If you decline, the documented value is restored and success text must never sit on blush |
 
 ## 7. Acceptance criteria (UI half)
 
@@ -163,9 +164,79 @@ This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase
 
 | Step | Work | Needs your approval |
 |------|------|---------------------|
-| U1 | Decide U8-1 to U8-6 | **Yes (next gate)** |
-| U2 | Install the approved packages; tokens, token check and lint guard | Covered by U1 |
+| U1 | Decide U8-1 to U8-7 | **Yes (next gate)** |
+| U2 | Install the approved packages; tokens, token check and lint guard | Covered by U1. **Tokens, token check and lint guard done** (§9); they need no package. The install waits for U8-1 |
 | U3 | Admin app, shell and invite setup; component tests | Covered by U1 |
 | U4 | Catalogue screens; component and end-to-end tests; screenshots | Covered by U1 |
 | U5 | Commit and push the UI work | Covered by your standing commit and push authorisation for reviewed work |
 | U6 | **Phase 8 gate:** your review of the test output and screenshots, plus CI on a draft PR (P8-AC8, P8-AC11), which needs your authorisation to open a PR | **Yes** |
+
+## 9. Progress: tokens, token check and lint guard (2026-10-22)
+
+Built without any new package. U8-1 to U8-7 remain open, so nothing that needs React was started.
+
+**Delivered:**
+- **Tokens** in `packages/shared/src/tokens/`:
+  - `brand.css`: primitives with the `--sp-` prefix (colour, faces and weights, the five type steps, spacing, control sizes, focus, layout widths, motion);
+  - `storefront.css` and `admin.css`: the same 17 semantic names, each `var()` of one primitive;
+  - `fonts.css`: no `@font-face` rules until the font files exist (B-04, U8-4); the fallback stacks render.
+- **Package exports:** four CSS subpaths and `sideEffects: ["**/*.css"]` in `packages/shared/package.json`. Each subpath resolves; a deep path (`@sanea/shared/src/tokens/brand.css`) still fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
+- **Check** `scripts/check-design-tokens.mjs`, with no dependency:
+  - run by `npm run check:tokens`, which `npm run lint` now runs, so CI runs it too;
+  - the register is `docs/design-token-exceptions.md` (empty);
+  - it also checks the token sources: primitives only in `brand.css` with the `--sp-` prefix; both layers define the same names, each from a defined primitive.
+- **API guard:** ESLint `no-restricted-imports` blocks `@sanea/shared/tokens/*` in `apps/api`. Probe through stdin: `import "@sanea/shared/tokens/admin.css"` in `apps/api/src/probe.ts` fails with the TD-002 message.
+
+**Choice within the approved scope (for your review):** the check scans `apps/storefront/src` and `apps/admin/src`, not the API. The API has no stylesheets or style props; its only colour literals are product swatches in the development seed, which are catalogue data. Within TypeScript, it scans only strings under a style key (`color:`, `fill=` and similar) and strings that are entirely a colour, so text such as "Order #1234" is not a finding.
+
+**Fixture tests** (`scripts/check-design-tokens.test.mjs`, 22 tests; `scripts` is now a Vitest project). They cover every TD-002 verification case:
+- a hex value in a module stylesheet fails; `rgb(0 0 0 / 0.4)` fails;
+- `var(--sp-ink)` and `transparent` pass;
+- `CanvasText` inside a forced-colors query passes, and fails outside one;
+- a registered marker passes, on the same line or the line above; an unknown ID fails;
+- files under `packages/shared/src/tokens/` are ignored.
+
+They also cover:
+- named colours and literal font families;
+- `color-mix()` of tokens;
+- selectors, comments, strings and `url()`, which are not findings;
+- line numbers; a marker used in the wrong file; a marker two lines above, which does not count;
+- register rows with missing fields;
+- the token name in the message;
+- the token-source rules;
+- a fixture repository;
+- this repository, which passes.
+
+**Contrast**, measured with the WCAG formula for every pair the semantic layers use (text at least 4.5:1; field borders and focus at least 3:1, WCAG 1.4.11):
+
+| Layer | Pair | Ratio |
+|-------|------|------:|
+| Admin | ink on bg / surface / surface-alt | 14.47 / 15.74 / 13.23 |
+| Admin | muted on bg / surface / surface-alt | 7.03 / 7.65 / 6.43 |
+| Admin | accent-ink on accent | 15.74 |
+| Admin | danger on surface / bg / danger-surface | 8.15 / 7.49 / 7.18 |
+| Admin | success on surface / success-surface | 8.25 / 7.43 |
+| Admin | field-border on surface / bg / surface-alt | 4.12 / 3.79 / 3.47 |
+| Admin | focus on bg / surface | 14.47 / 15.74 |
+| Storefront | ink on bg / surface / paper | 10.48 / 9.59 / 15.74 |
+| Storefront | muted on bg / surface | 5.17 / 4.73 |
+| Storefront | accent-ink on accent | 10.48 |
+| Storefront | danger on bg / surface / paper | 5.43 / 4.96 / 8.15 |
+| Storefront | success on bg / surface / paper | 5.49 / 5.02 / 8.25 (with `#185A31`, U8-7) |
+| Storefront | field-border on paper / bg | 7.77 / 5.17 |
+| Storefront | focus on bg / surface | 10.48 / 9.59 |
+
+`--sp-line` (`grey-300` in the admin) is decorative: table rules and dividers, never a field border or the only sign of state.
+
+**Checks run:**
+
+| Command | Result |
+|---------|--------|
+| `npm run format:check` | Clean |
+| `npm run lint` (ESLint, then the token check) | Clean; "Design tokens: OK (0 registered exceptions in use)" |
+| `npm run typecheck` | Clean |
+| `npm test` | 27 files, **599 tests passed** (577 before, plus 22) |
+
+The database integration suite was not re-run: no API or database file changed.
+
+**Not yet verified, needs the app (U8-1):** bundling, meaning that each app's build contains the primitives and only its own semantic layer. ST-01 showed this on the throwaway branch; it is re-checked with the admin `vite build`.
