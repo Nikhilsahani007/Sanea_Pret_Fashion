@@ -4,7 +4,7 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 9 — Inventory and stock reservation: next. It may start: the Phase 8 gate was recorded on 2026-10-22 (D-089).**
+**Phase 9 — Inventory and stock reservation: plan written (`phase-9-plan.md`, branch `phase-9-inventory`), awaiting your decisions Q9-1 to Q9-5.** It could start because the Phase 8 gate was recorded on 2026-10-22 (D-089).
 
 **Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
 - **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
@@ -290,8 +290,11 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me:** the Phase 9 plan: inventory, stock movements and the reservation service with its expiry job, plus the admin inventory screens (`MASTER-IMPLEMENTATION-INDEX.md` Phase 9). It will be presented for your approval before any migration or implementation.
+**You:** review `phase-9-plan.md` and decide Q9-1 to Q9-5:
+- the low-stock migration;
+- the adjustment types;
+- what can be reserved;
+- the low-stock level route;
+- the reservation TTL and expiry job.
 
-**You:**
-- approve the Phase 9 plan when it is ready;
-- decide whether to keep draft PR #6 open. Merging needs your separate authorisation.
+**Me, after that:** the Phase 9 migration (validated on disposable databases, with a review stop before commit), then the inventory module, the concurrency tests and the admin inventory screens.
