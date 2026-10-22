@@ -226,7 +226,8 @@ All of these need V14.
 | Task | When | Status |
 |------|------|--------|
 | Phase 8 step 5: backend modules | Done | `phase-8-plan.md` §10e |
-| Phase 8 UI plan addendum, then UI deliverables | Now | Not started |
+| Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md`; awaiting U8-1 to U8-6 |
+| Phase 8 UI deliverables (tokens, admin shell, catalogue screens) | After U8-1 to U8-6 | Not started: React and Vite plugin not installed |
 
 | Commit the Phase 8 planning, documentation and `sharp` changes | With your approval | Not done |
 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | After the backend plan is approved | Unblocked by D-085 and D-086; not written |
@@ -253,6 +254,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me:** the Phase 8 UI plan addendum (tokens, admin shell, admin catalogue screens), then the UI deliverables and their checks, then the Phase 8 gate evidence.
+**You:**
+- decide U8-1 to U8-6 in `phase-8-ui-plan.md` §6: the admin UI packages with exact versions, the fonts, and an accessibility scan dependency;
+- later, the Phase 8 gate review, which also needs a draft PR for CI (P8-AC8, P8-AC11).
 
-**You:** the Phase 8 gate review (test output and admin screenshots) once the UI half is done. Phases 9 to 12 start only after that gate.
+**Me, after that:** the Phase 8 UI deliverables (tokens, admin shell, catalogue screens), with tests and screenshots. Phases 9 to 12 start only after the Phase 8 gate.
