@@ -1,6 +1,6 @@
 # Phase 8 UI Plan Addendum — Tokens, Admin Shell and Catalogue Screens
 
-Status: **U8-1 to U8-7 approved by you on 2026-10-22; UI half implemented and tested (§9, §10). Phase 8 gate not passed:** it needs your review and CI on a draft PR (§10.6). · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
+Status: **U8-1 to U8-7 approved by you on 2026-10-22; UI half implemented and tested (§9, §10). Phase 8 gate passed on 2026-10-22 (D-089)**, with CI green on draft PR #6. · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
 
 This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase-8-plan.md` §10 step 7). The Phase 8 gate needs both halves (index rule 6).
 
@@ -428,6 +428,4 @@ Limits:
 - Keyboard-only operation was tested end to end for sign-in only. The other screens use native controls, but they had no full keyboard run and no screen-reader testing.
 - Automated checks do not prove accessibility compliance.
 
-**The Phase 8 gate has not passed.** It still needs:
-- your review of the test output and the screenshots;
-- **CI evidence (P8-AC8, P8-AC11).** CI runs only on pull requests and pushes to `main`, and opening a draft PR has not been authorised.
+**The Phase 8 gate passed on 2026-10-22 (D-089).** CI run 39829977467 on draft PR #6 was green, and P8-AC11 was measured on Linux (`phase-8-plan.md` §10f).

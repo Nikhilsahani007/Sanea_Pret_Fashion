@@ -4,8 +4,10 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 8 — Catalogue, media and catalogue API: backend and UI implemented and tested; the Phase 8 gate is not passed yet.**
-- **Closure state:** it waits for your review of the test output and the admin screenshots, and for CI on a draft PR (P8-AC8, P8-AC11). Opening a PR has not been authorised (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
+**Phase 9 — Inventory and stock reservation: next. It may start: the Phase 8 gate was recorded on 2026-10-22 (D-089).**
+
+**Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
+- **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
 - **UI half (`phase-8-ui-plan.md` §9, §10):**
   - U8-1 to U8-7 were approved on 2026-10-22, with U8-3 changed to include a QR code;
   - built:
@@ -39,7 +41,9 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
   - `a06cd53`: the backend modules;
   - `68a2f59`: the UI plan;
   - `a6afed7`: the tokens and token check;
-  - the admin UI commit follows this update.
+  - `c923655`: the admin UI;
+  - `2a0158b`: the AVIF timing test;
+  - the gate record follows this update.
 
 **Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076), merged into `main` with PR #5 (merge commit `6593082`).** Commit `75f499c`, decisions D-062 to D-075 (`phase-7-plan.md`).
 
@@ -246,7 +250,7 @@ All of these need V14.
 | Phase 8 migration `20261021180245_catalogue_search` | **Approved 2026-10-22**; committed in `762bef4`; not applied to any kept database | `phase-8-plan.md` §10d |
 | Phase 8 API modules | **Done** (campaign instruction, 2026-10-22); committed in `a06cd53` | `phase-8-plan.md` §10e |
 | Commit and normal push of reviewed Phase 8 work | **Authorised** (campaign instruction, 2026-10-22) | `origin/phase-8-catalogue` |
-| PR for Phase 8 (draft, for CI) | **Not authorised yet**; needed for P8-AC8 and P8-AC11 | — |
+| PR for Phase 8 (draft, for CI) | **Authorised and opened**: draft PR #6, CI green; not to be merged | PR #6 |
 | Merging any PR | **Not authorised** | — |
 | Phase 8 UI packages, fonts, axe (U8-1 to U8-7) | **Approved 2026-10-22**, U8-3 with a QR code; deviations approved (jsdom 29.1.1, `@testing-library/dom`, React overrides) | `phase-8-ui-plan.md` §10.1, §10.2 |
 
@@ -258,7 +262,7 @@ All of these need V14.
 | Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md` (`68a2f59`); awaiting U8-1 to U8-7 |
 | Phase 8 tokens, token check, API lint guard | Done | `phase-8-ui-plan.md` §9 |
 | Phase 8 admin shell and catalogue screens | Done | `phase-8-ui-plan.md` §10 |
-| Phase 8 gate: your review; CI on a draft PR | Waiting for you | Draft PR not authorised |
+| Phase 8 gate | **Passed** (D-089) | `phase-8-plan.md` §10f |
 | Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
 | PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Done in Phase 6 (`database-design.md`, `security-design.md`; no conflicts in `project-requirements.md`) |
@@ -276,7 +280,8 @@ All of these need V14.
 - **Gate evidence:**
   - backend: `phase-8-plan.md` §10e;
   - UI: `phase-8-ui-plan.md` §9 and §10, and the screenshots;
-  - CI has not run (P8-AC8, P8-AC11): it runs only on a PR or a push to `main`.
+  - CI: run 39829977467 on draft PR #6, all jobs green; P8-AC11 measured on Linux (`phase-8-plan.md` §10f);
+  - gate passed (D-089).
 - **UI:** not blocked. The fonts work through `npm run fonts:fetch` (B-04 partly resolved; the logo and brand colours are still open).
 
 ## Skills audit
@@ -285,12 +290,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:**
-- **review the Phase 8 evidence:**
-  - `phase-8-ui-plan.md` §10;
-  - `phase-8-plan.md` §10e;
-  - the screenshots in `docs/reviews/admin/2026-10-22/`;
-- **authorise a draft PR** from `phase-8-catalogue` to `main`, so CI runs (P8-AC8, P8-AC11). It would not be merged;
-- **record the Phase 8 gate** if you accept the evidence.
+**Me:** the Phase 9 plan: inventory, stock movements and the reservation service with its expiry job, plus the admin inventory screens (`MASTER-IMPLEMENTATION-INDEX.md` Phase 9). It will be presented for your approval before any migration or implementation.
 
-**Me, after that:** Phase 9 (inventory and reservation), which starts only once the Phase 8 gate is recorded in `DECISION-LOG.md`.
+**You:**
+- approve the Phase 9 plan when it is ready;
+- decide whether to keep draft PR #6 open. Merging needs your separate authorisation.

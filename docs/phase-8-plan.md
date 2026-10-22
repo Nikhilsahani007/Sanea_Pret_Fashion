@@ -471,7 +471,7 @@ Nothing else:
 | 5 | Build the modules and tests; run every local check | **Backend done** 2026-10-22 (§10e) |
 | 6 | Commit, push, open a draft PR into `main` | Yes, each action |
 | 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | **Done** 2026-10-22: written, approved (U8-1 to U8-7) and implemented (`phase-8-ui-plan.md` §9, §10) |
-| 8 | Phase 8 gate: backend and UI evidence | Yes: **next**. Evidence ready; needs your review and CI on a draft PR (P8-AC8, P8-AC11) |
+| 8 | Phase 8 gate: backend and UI evidence | **Passed** 2026-10-22 (D-089) |
 
 ## 10a. Compatibility test results (step 2, 2026-10-19)
 
@@ -686,13 +686,39 @@ The migration is **not applied to any kept database** and is **not committed**. 
 | P8-AC5 | Pass (upload tests) |
 | P8-AC6 | Pass (publishing and availability tests) |
 | P8-AC7 | Pass (audit tests) |
-| P8-AC8 | **Partly:** every local check passes. CI has **not** run: `.github/workflows/ci.yml` runs only on pull requests and pushes to `main`, and opening a draft PR is not authorised |
+| P8-AC8 | **Pass** (§10f): local checks, and CI run 39829977467 on draft PR #6, all jobs green; Gitleaks clean |
 | P8-AC9 | Pass: specifications amended to match |
 | P8-AC10 | Pass: safeguard 1 (storage, image server), safeguard 2 (rich text), safeguard 3 (search triggers) |
-| P8-AC11 | **Open:** the AVIF retest in CI on Linux needs CI |
+| P8-AC11 | **Pass** (§10f): Linux CI 3.73 s and 2.32 s representative, 13.30 s worst case |
 | P8-AC12 | Pass (queue tests, `RATE_LIMITED` headers, config range) |
 
 **Still open for the Phase 8 gate:** the UI half (step 7 addendum, then tokens, admin shell, catalogue screens and their checks); CI evidence (P8-AC8, P8-AC11); your review.
+
+## 10f. CI evidence and the Phase 8 gate (2026-10-22)
+
+**CI:** draft PR #6, `phase-8-catalogue` → `main`, opened under your authorisation and not to be merged.
+- The first run, 39828934079 on `c923655`, passed every job. But its uploads were small test images, so it did not measure P8-AC11.
+- `avif-timing.db-test.ts` (`2a0158b`) now uploads the §10b cases through the real API and child-process worker, with the production deadlines (30 s wait, 60 s total). It writes each time to the CI log.
+
+**Run 39829977467 on `2a0158b`** (Ubuntu 24.04, Node 24.21.0):
+
+| Job | Result |
+|-----|--------|
+| Format, lint, typecheck, test, audit | Success: 646 tests; "Design tokens: OK"; `npm audit` 0 |
+| Database integration tests | Success: 15 files, 341 tests |
+| Secret scan (Gitleaks) | Success |
+
+**P8-AC11:** the whole upload on Linux CI, from request to `201`:
+
+| Case | Input | Time | Limit |
+|------|-------|-----:|------:|
+| Representative: photo-like 4000 × 5000 | 1.9 MB | 3.73 s | 15 s |
+| Representative: photo-like 3000 × 4000 | 1.2 MB | 2.32 s | 15 s |
+| Worst case: pure noise 2048 × 8000 | 11.1 MB | 13.30 s | 60 s |
+
+On Windows the same test took 3.8 to 5.7 s for the representative cases and 16.2 to 18.5 s for the worst case. CI runners are shared hardware, so production-like hardware still needs a check before launch (Phase 19).
+
+**Gate:** passed on 2026-10-22 (D-089), on your instruction to record it once CI was green. Every Phase 8 acceptance criterion is met, with the limits recorded in `phase-8-ui-plan.md` §10.6.
 
 ## 11. Risks
 
