@@ -1,10 +1,36 @@
 /*
  * Self-hosted brand faces (design-system.md §4): Panchang 700 and Switzer 400
- * and 500, subset to Latin and Latin-1 Supplement, WOFF2, from Fontshare under
- * the ITF Free Font Licence.
+ * and 500, the official WOFF2 files from Fontshare under the ITF Free Font
+ * License (FFL v2.0), unmodified: the licence forbids subsetting and format
+ * conversion (§02, §05).
  *
- * The font files are not in the repository yet (B-04, phase-8-ui-plan.md U8-4),
- * so this file declares no @font-face rules and the fallback stacks in
- * brand.css render. When the files are added, under ./fonts/ with their
- * licence, each face gets a rule here with font-display: swap.
+ * The files are not in the repository: the licence forbids making them
+ * available through a repository or a public server, and the repository is
+ * public. `npm run fonts:fetch` puts each environment's own official copy in
+ * the git-ignored `public/fonts/` folder of each app, served from `/fonts/`.
+ * Where they are absent, the fallback stacks in brand.css render.
+ * docs/font-licences.md has the details.
  */
+@font-face {
+  font-family: "Panchang";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Panchang-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Switzer";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Switzer-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Switzer";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Switzer-Medium.woff2") format("woff2");
+}

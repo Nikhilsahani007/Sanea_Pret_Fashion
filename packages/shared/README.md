@@ -58,6 +58,12 @@ Shared contracts for Sanéa Pret: money in paise, INR formatting, Indian mobile 
 
 Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 
+### Permissions
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `PERMISSIONS`, `Permission`, `can(role, permission)` | constant, type, function | The role matrix from `security-design.md` §4 (D-075). The API enforces it; the admin app uses it only to hide controls a role cannot use |
+
 ### Catalogue (Phase 8)
 
 | Export | Kind | Description |

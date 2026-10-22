@@ -33,12 +33,24 @@ Requires Node 24 (see `.nvmrc`) and npm 11.
 ```
 npm ci                 # install exactly what the lock file records
 npm run format:check   # Prettier
-npm run lint           # ESLint
+npm run lint           # ESLint, then the design-token check (check:tokens)
 npm run typecheck      # TypeScript project build, no output
-npm test               # Vitest
+npm test               # Vitest: unit and admin component tests (jsdom)
 npm run audit          # npm audit, high and critical
+npm run fonts:fetch    # Panchang and Switzer from Fontshare into apps/*/public/fonts (git-ignored)
 ```
 
-Playwright browsers are not installed yet. Run `npx playwright install` when the first end-to-end test is added.
+**Admin app** (`apps/admin`, React + Vite, CSS Modules):
+
+```
+npm run dev -w @sanea/admin      # http://localhost:5174, proxies /api to ADMIN_API_URL (default http://127.0.0.1:4000)
+npm run build -w @sanea/admin    # production build in apps/admin/dist
+```
+
+The API must run with `ADMIN_ORIGIN=http://localhost:5174`. The first Owner's set-up link comes from `npm run admin:create-owner -- --email you@example.com`.
+
+**Fonts:** the brand fonts are licensed for self-hosting but may not be placed in a public repository ([font licences](docs/font-licences.md)). Each environment runs `npm run fonts:fetch`; without it, the fallback fonts render.
+
+**End-to-end tests** (Playwright with the installed Microsoft Edge, no browser download): `TEST_DATABASE_URL=… npx playwright test`. See [e2e/README.md](e2e/README.md).
 
 Instructions for Claude Code are in [CLAUDE.md](CLAUDE.md).

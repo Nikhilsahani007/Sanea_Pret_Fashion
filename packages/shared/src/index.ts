@@ -46,6 +46,8 @@ export type { Address, AddressInput } from "./address/address.ts";
 export { OrderStatus, orderStatusSchema } from "./enums/order-status.ts";
 export { PaymentMethod, paymentMethodSchema } from "./enums/payment-method.ts";
 export { AdminRole, adminRoleSchema } from "./enums/admin-role.ts";
+export { PERMISSIONS, can } from "./enums/permissions.ts";
+export type { Permission } from "./enums/permissions.ts";
 
 // Catalogue
 export { SLUG_MAX_LENGTH, SLUG_PATTERN, slugSchema } from "./catalogue/slug.ts";

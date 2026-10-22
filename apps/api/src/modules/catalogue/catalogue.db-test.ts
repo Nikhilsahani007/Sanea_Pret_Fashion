@@ -318,12 +318,30 @@ describe("permissions on the real catalogue routes (P8-AC4)", () => {
     expect(noCsrf.status).toBe(403);
   });
 
-  it("reference data (categories, collections, colours, size charts) is O M C only", async () => {
+  it("lists the six approved sizes in order, read only (D-029)", async () => {
+    const r = await h.get(`${A}/sizes`, s.get(AdminRole.CATALOGUE_EDITOR));
+    expect(r.status).toBe(200);
+    expect(r.headers["cache-control"]).toBe("no-store");
+    expect(r.body.items.map((x: { label: string }) => x.label)).toEqual([
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL",
+      "Free Size",
+    ]);
+    expect((await send("post", `${A}/sizes`, { label: "XS" })).status).toBe(
+      404,
+    );
+  });
+
+  it("reference data (categories, collections, colours, sizes, size charts) is O M C only", async () => {
     const f = s.get(AdminRole.FULFILMENT);
     for (const path of [
       "categories",
       "collections",
       "colours",
+      "sizes",
       "size-charts",
     ]) {
       expect((await h.get(`${A}/${path}`, f)).status, path).toBe(403);

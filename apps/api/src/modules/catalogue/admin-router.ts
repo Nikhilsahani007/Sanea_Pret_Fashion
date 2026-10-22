@@ -34,6 +34,7 @@ export function catalogueAdminRouter(
     "categories",
     "collections",
     "colours",
+    "sizes",
     "size-charts",
     "products",
   ])
@@ -406,6 +407,18 @@ export function catalogueAdminRouter(
         return row;
       });
       res.json(updated);
+    }),
+  );
+
+  // The six approved sizes (D-029): reference data from the migration, read
+  // only, so the admin can create variants (phase-8-ui-plan.md §9).
+  router.get(
+    `${ADMIN}/sizes`,
+    edit, // like the other reference reads: O M C
+    handle(async (_req, res) => {
+      res.json({
+        items: await deps.db.size.findMany({ orderBy: { position: "asc" } }),
+      });
     }),
   );
 

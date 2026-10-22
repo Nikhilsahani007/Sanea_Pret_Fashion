@@ -13,6 +13,7 @@
   "scripts": {
     "lint": "eslint . && npm run check:tokens",
     "check:tokens": "node scripts/check-design-tokens.mjs",
+    "fonts:fetch": "node scripts/fetch-fonts.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -b",
@@ -27,16 +28,25 @@
     "media:serve": "node --env-file-if-exists=.env apps/api/src/modules/media/dev-image-server.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.1",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
     "@types/node": "26.6.5",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
+    "jsdom": "29.1.1",
     "prettier": "3.9.10",
     "prisma": "7.10.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
     "vite": "8.3.4",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }

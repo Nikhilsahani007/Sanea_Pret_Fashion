@@ -9,7 +9,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | ID | Blocker | Blocks | Owner | Safe default |
 |----|---------|--------|-------|--------------|
 | B-03 | The nishorama.com screen recording is not in the repository (OD-01). Motion timing, slide duration and hover behaviour are unverified. | Phase 12 gate | You | Build from the live site; motion stays provisional. |
-| B-04 | No logo, brand colours or brand fonts supplied (OD-02). | Phase 11 final tokens; Phase 12 gate | You | Typeset Panchang wordmark and dealt palette, replaceable through tokens. |
+| B-04 | No logo or brand colours supplied (OD-02). **Fonts resolved for self-hosting** (2026-10-22): Panchang and Switzer come from Fontshare through `npm run fonts:fetch`; not committed (licence, `font-licences.md`). | Phase 11 final tokens; Phase 12 gate | You (logo, colours) | Typeset Panchang wordmark and dealt palette, replaceable through tokens. |
 | B-14 | Accountant verification of GST rates, thresholds, HSN classifications, seller GSTIN and state, and invoice compliance (D-030, D-033). | Live sales (Phase 19 launch). Not the schema. | You and your accountant | No rates are entered for production until verified. |
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |

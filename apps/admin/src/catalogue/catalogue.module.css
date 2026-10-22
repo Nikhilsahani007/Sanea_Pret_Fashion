@@ -1,0 +1,147 @@
+/* Catalogue screens. */
+.twoColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-space-4);
+}
+
+@media (min-width: 48rem) {
+  .twoColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.blocks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-4);
+}
+
+.block {
+  border-left: calc(var(--sp-focus-width) * 2) solid var(--sp-line);
+  padding-left: var(--sp-space-4);
+}
+
+.preview > summary {
+  cursor: pointer;
+  min-height: var(--sp-target-min);
+  display: flex;
+  align-items: center;
+  font-weight: var(--sp-weight-medium);
+}
+
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-3);
+  max-width: var(--sp-measure);
+  padding: var(--sp-space-4);
+  background: var(--sp-paper);
+  border: var(--sp-border-width) solid var(--sp-line);
+}
+
+.previewBody ul,
+.previewBody ol {
+  padding-left: var(--sp-space-6);
+}
+
+.previewLink {
+  text-decoration: underline;
+}
+
+.thumb {
+  width: 6rem;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: var(--sp-surface-alt);
+}
+
+.mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: var(--sp-space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mediaItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-1);
+  font-size: var(--sp-step-small);
+}
+
+.mediaItem img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: var(--sp-surface-alt);
+}
+
+.imageRow {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--sp-space-4);
+  align-items: start;
+  padding: var(--sp-space-4) 0;
+  border-bottom: var(--sp-border-width) solid var(--sp-line);
+}
+
+.swatch {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  vertical-align: middle;
+}
+
+.tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tree .tree {
+  padding-left: var(--sp-space-6);
+}
+
+.treeItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-space-3);
+  padding: var(--sp-space-2) 0;
+  border-bottom: var(--sp-border-width) solid var(--sp-line);
+}
+
+.orderList {
+  list-style: none;
+  counter-reset: order;
+  padding: 0;
+  margin: 0;
+}
+
+.orderItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-space-3);
+  padding: var(--sp-space-2) 0;
+  border-bottom: var(--sp-border-width) solid var(--sp-line);
+}
+
+.sizeTable input {
+  min-width: 5rem;
+}
+
+.plainFieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

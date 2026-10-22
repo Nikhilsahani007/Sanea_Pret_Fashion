@@ -470,8 +470,8 @@ Nothing else:
 | 4c | **Gate:** separately authorise and run the T-4 `sharp` timeout test; record its result; decide the native-work approach (§5.7.2) | **Done:** test run 2026-10-21 (§10c); child-process approach approved 2026-10-22 |
 | 5 | Build the modules and tests; run every local check | **Backend done** 2026-10-22 (§10e) |
 | 6 | Commit, push, open a draft PR into `main` | Yes, each action |
-| 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | **Written 2026-10-22** (`phase-8-ui-plan.md`); awaiting your decisions U8-1 to U8-6 |
-| 8 | Phase 8 gate: backend and UI evidence | Yes |
+| 7 | Phase 8 UI plan addendum (tokens, admin shell, catalogue screens) | **Done** 2026-10-22: written, approved (U8-1 to U8-7) and implemented (`phase-8-ui-plan.md` §9, §10) |
+| 8 | Phase 8 gate: backend and UI evidence | Yes: **next**. Evidence ready; needs your review and CI on a draft PR (P8-AC8, P8-AC11) |
 
 ## 10a. Compatibility test results (step 2, 2026-10-19)
 

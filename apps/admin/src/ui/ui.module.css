@@ -1,0 +1,295 @@
+/* Shared admin components (design-system.md §6): square-cornered flat buttons,
+   48 px controls (44 px minimum), visible labels, errors under fields. */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap, var(--sp-space-4));
+}
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap, var(--sp-space-3));
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--min, 16rem)), 1fr)
+  );
+  gap: var(--gap, var(--sp-space-4));
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-2);
+  min-height: var(--sp-control-height);
+  min-width: var(--sp-target-min);
+  padding: 0 var(--sp-space-5);
+  border: var(--sp-border-width) solid var(--sp-accent);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+  font-weight: var(--sp-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+  touch-action: manipulation;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  opacity: 0.5;
+}
+
+.secondary {
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+  border-color: var(--sp-field-border);
+}
+
+.danger {
+  background: var(--sp-surface);
+  color: var(--sp-danger);
+  border-color: var(--sp-danger);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--sp-ink);
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  padding: 0 var(--sp-space-2);
+}
+
+.small {
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-3);
+}
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-1);
+  min-width: 0;
+}
+
+.label {
+  font-weight: var(--sp-weight-medium);
+}
+
+.optional {
+  color: var(--sp-muted);
+  font-weight: var(--sp-weight-regular);
+}
+
+.hint {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+.control {
+  width: 100%;
+  min-height: var(--sp-control-height);
+  padding: var(--sp-space-2) var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+}
+
+textarea.control {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.control:disabled,
+.control[readonly] {
+  background: var(--sp-surface-alt);
+}
+
+.invalid {
+  border-color: var(--sp-danger);
+  border-width: var(--sp-focus-width);
+}
+
+.error {
+  color: var(--sp-danger);
+  font-size: var(--sp-step-small);
+  font-weight: var(--sp-weight-medium);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-3);
+  min-height: var(--sp-target-min);
+}
+
+.check input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--sp-accent);
+  flex: none;
+}
+
+.fieldset {
+  border: var(--sp-border-width) solid var(--sp-line);
+  margin: 0;
+  padding: var(--sp-space-4);
+  min-width: 0;
+}
+
+.fieldset > legend {
+  padding: 0 var(--sp-space-2);
+  font-weight: var(--sp-weight-medium);
+}
+
+/* Notices */
+.notice {
+  padding: var(--sp-space-3) var(--sp-space-4);
+  border-left: calc(var(--sp-focus-width) * 2) solid var(--sp-line);
+  background: var(--sp-surface);
+}
+
+.notice-error {
+  border-left-color: var(--sp-danger);
+  background: var(--sp-danger-surface);
+}
+
+.notice-success {
+  border-left-color: var(--sp-success);
+  background: var(--sp-success-surface);
+}
+
+.notice-info {
+  border-left-color: var(--sp-ink);
+}
+
+.notice-title {
+  font-weight: var(--sp-weight-medium);
+}
+
+.notice ul {
+  padding-left: var(--sp-space-5);
+}
+
+/* Status chips: text always, colour never alone */
+.chip {
+  display: inline-block;
+  padding: 0 var(--sp-space-2);
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  font-size: var(--sp-step-small);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.chip-PUBLISHED {
+  border-color: var(--sp-success);
+  color: var(--sp-success);
+  background: var(--sp-success-surface);
+}
+
+.chip-ARCHIVED {
+  color: var(--sp-muted);
+  background: var(--sp-surface-alt);
+}
+
+/* Page */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+}
+
+.page-title:focus {
+  outline: none;
+}
+
+.muted {
+  color: var(--sp-muted);
+}
+
+.panel {
+  background: var(--sp-surface);
+  border: var(--sp-border-width) solid var(--sp-line);
+  padding: var(--sp-space-5);
+  min-width: 0;
+}
+
+.panel-title {
+  margin-bottom: var(--sp-space-4);
+}
+
+.table-wrap {
+  /* A containing block, so visually hidden (absolute) labels in cells scroll
+     with the table instead of widening the page. */
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Tables keep their natural width and scroll inside .table-wrap on narrow
+   screens, rather than squeezing columns until words break. */
+.table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.table .code {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--sp-space-3);
+  border-bottom: var(--sp-border-width) solid var(--sp-line);
+  vertical-align: middle;
+}
+
+.table th {
+  font-weight: var(--sp-weight-medium);
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+.numeric,
+.table .numeric {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table-wrap:focus-visible {
+  outline-offset: 0;
+}
+
+.state {
+  padding: var(--sp-space-8) var(--sp-space-4);
+  text-align: center;
+}
+
+.progress {
+  width: 100%;
+  height: var(--sp-space-2);
+  accent-color: var(--sp-accent);
+}
+
+.code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+}

@@ -130,6 +130,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | GET: all · POST: O M (a variant needs a price, Q8-4) · PATCH: O M C (price fields `pricePaise`, `compareAtPricePaise`: O M only; a request from C that contains them is refused whole with `403 FORBIDDEN`) |
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
 | GET/POST/PATCH | `/admin/colours[/:id]` · `/admin/size-charts[/:id]` (Q8-3) | O M C |
+| GET | `/admin/sizes`: the six approved sizes (D-029) in order, `{ items: [{ id, label, position }] }`. Read only; sizes are migration reference data. Added for the admin variant form (`phase-8-ui-plan.md` §10) | O M C |
 | GET | `/admin/collections/:id` (with its product order) | O M C |
 | POST · PATCH/DELETE | `/admin/products/:id/images` · `/admin/products/:id/images/:imageId` (`mediaAssetId`, `colourId?`, `alt`, `role`, `position`) | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |

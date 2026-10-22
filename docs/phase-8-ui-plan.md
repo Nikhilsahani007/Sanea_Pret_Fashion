@@ -1,6 +1,6 @@
 # Phase 8 UI Plan Addendum — Tokens, Admin Shell and Catalogue Screens
 
-Status: **Proposed, for your review. U8-1 to U8-7 open; nothing installed.** The dependency-free part of step U2 (tokens, token check, API lint guard) is built and checked (§9). · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
+Status: **U8-1 to U8-7 approved by you on 2026-10-22; UI half implemented and tested (§9, §10). Phase 8 gate not passed:** it needs your review and CI on a draft PR (§10.6). · Date: 2026-10-22 · Base: `phase-8-catalogue` at `a06cd53` (Phase 8 backend done, `phase-8-plan.md` §10e)
 
 This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase-8-plan.md` §10 step 7). The Phase 8 gate needs both halves (index rule 6).
 
@@ -136,7 +136,7 @@ This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase
 
 `react` 19.3.1 and `react-router` 8.5.0 are the npm `latest` tags but are under two weeks old, so the older patch and minor versions are proposed. Every install is checked with `npm audit` and a lockfile review, as for `sharp`.
 
-## 6. Questions for you
+## 6. Questions for you (decided 2026-10-22: all approved; U8-3 with a QR code; see §10.1)
 
 | # | Question | Recommendation |
 |---|----------|----------------|
@@ -164,10 +164,10 @@ This is the UI half of Phase 8 (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8, `phase
 
 | Step | Work | Needs your approval |
 |------|------|---------------------|
-| U1 | Decide U8-1 to U8-7 | **Yes (next gate)** |
-| U2 | Install the approved packages; tokens, token check and lint guard | Covered by U1. **Tokens, token check and lint guard done** (§9); they need no package. The install waits for U8-1 |
-| U3 | Admin app, shell and invite setup; component tests | Covered by U1 |
-| U4 | Catalogue screens; component and end-to-end tests; screenshots | Covered by U1 |
+| U1 | Decide U8-1 to U8-7 | **Done**: approved 2026-10-22 (§6, §10.1) |
+| U2 | Install the approved packages; tokens, token check and lint guard | **Done** (§9, §10.2) |
+| U3 | Admin app, shell and invite setup; component tests | **Done** (§10) |
+| U4 | Catalogue screens; component and end-to-end tests; screenshots | **Done** (§10) |
 | U5 | Commit and push the UI work | Covered by your standing commit and push authorisation for reviewed work |
 | U6 | **Phase 8 gate:** your review of the test output and screenshots, plus CI on a draft PR (P8-AC8, P8-AC11), which needs your authorisation to open a PR | **Yes** |
 
@@ -240,3 +240,194 @@ They also cover:
 The database integration suite was not re-run: no API or database file changed.
 
 **Not yet verified, needs the app (U8-1):** bundling, meaning that each app's build contains the primitives and only its own semantic layer. ST-01 showed this on the throwaway branch; it is re-checked with the admin `vite build`.
+
+## 10. Implementation and evidence (2026-10-22)
+
+### 10.1 Decisions as approved, and how they were carried out
+
+| # | Your decision | Carried out |
+|---|---------------|-------------|
+| U8-1 | Approve the §5 packages | Installed with exact pins (§10.2). Two version problems were found before use; you decided each the same day (§10.2) |
+| U8-2 | No data-fetching library | A `fetch` wrapper (`apps/admin/src/api/client.ts`) and a small `useResource` hook with loading, ready and error states. `reload()` keeps the screen while it refreshes, so unsaved forms survive |
+| U8-3 | 2FA set-up **with a QR code** | `qr` 0.7.2 encodes the API's `otpauth://` URI in the browser. The matrix is drawn as SVG rectangles: no markup injection, no network, no third-party QR service. See §10.3 |
+| U8-4 | Download and bundle the fonts, subject to the licence | The licence was read from the official download. Self-hosting is allowed, but **distribution through a repository or public server is forbidden**, and this repository is public. So each environment fetches the files with `npm run fonts:fetch` into git-ignored folders; they are not committed. See `font-licences.md` |
+| U8-5 | `@axe-core/playwright` | 4.13.0 (4.14.0 is under two weeks old). Axe runs on every reviewed screen at 1440, 768 and 390 px with the WCAG 2.0, 2.1 and 2.2 A/AA tags |
+| U8-6 | Admin dev server on `localhost:5174` | `apps/admin/vite.config.ts`: dev and preview on `localhost:5174` with `strictPort`; `/api` proxied to `ADMIN_API_URL` (default `http://127.0.0.1:4000`). This matches `ADMIN_ORIGIN` in the API tests and e2e. The storefront port and the API configuration are unchanged |
+| U8-7 | Success green `#185A31` | In `brand.css` since `a6afed7`; contrast measured (§9). The token check passes with no exceptions |
+
+### 10.2 Packages and compatibility
+
+| Package | Version | Where | Note |
+|---------|---------|-------|------|
+| react, react-dom | 19.3.0 | admin | As approved. An npm `overrides` entry pins both for the whole tree (below) |
+| react-router | 8.4.0 | admin | Declarative routes (`BrowserRouter`, `Routes`) |
+| qr | 0.7.2 (2026-09-28; MIT or Apache-2.0; no dependencies) | admin | QR encoding (U8-3). Chosen over `qrcode` (pulls in `yargs` and `pngjs`), `uqr` and `qrcode-generator` because it is maintained in 2026, typed, dependency-free, and returns the raw matrix |
+| @vitejs/plugin-react | 6.1.2 | admin, dev | Its peer `vite ^8` is met; its other peers are optional |
+| @types/react, @types/react-dom | 19.3.0 | admin, dev | |
+| @testing-library/react | 16.3.3 | root, dev | |
+| @testing-library/dom | 10.4.2 (2026-09-13) | root, dev | **A required peer** of the two Testing Library packages, not listed in §5. Approved by you |
+| @testing-library/user-event | 14.6.7 | root, dev | |
+| jsdom | **29.1.1** (2026-04-30) | root, dev | The §5 version, 30.1.2, needs Node `^24.15`, and this machine runs 24.11.0. **Deviation approved by you** |
+| @axe-core/playwright | 4.13.0 (2026-08-11; axe-core 4.13.0, MPL-2.0) | root, dev | Its peer `playwright-core >=1` is met by 1.64.1 |
+
+**Lockfile:** 60 packages added, none removed. The only changes to existing entries are `react` and `react-dom`, from 19.3.1 to 19.3.0:
+- Prisma Studio had pulled in 19.3.1 as a peer (`^18 || ^19`), which made two React copies.
+- The root `overrides` entry, **approved by you**, makes 19.3.0 the only React.
+
+`npm audit` reports 0 vulnerabilities.
+
+**Admin bundle:** 136.95 KB JavaScript and 3.63 KB CSS, gzipped. The CSS contains the brand primitives and only the admin layer. Font URLs stay as `/fonts/…`, and the build copies the fetched files into `dist/fonts/`.
+
+### 10.3 Two-factor set-up with a QR code: security
+
+- **Authority stays where Phase 7 put it.** The single-use invite or reset token (D-069 to D-071) authorises set-up. There is no new route and no change to the API's authentication:
+  - the token is read from the URL fragment, never sent in a query, and removed from the address bar on load;
+  - the secret and URI come only from `POST /admin/auth/invites/enrol`, for that token.
+- **The secret lives only in the component's memory.** It never goes to local or session storage, logs or any other request, and it is discarded after set-up.
+- **Completion needs a valid code.** `POST /invites/accept` verifies a TOTP code before anything is saved:
+  - a wrong code is shown under the field;
+  - a rejected password returns the admin to the password step.
+- **Recovery codes** are shown once, and the admin must confirm they are saved before continuing.
+- **Cancel** leaves without accepting. A later enrolment replaces the pending secret, as Phase 7 designed.
+- **Component tests** (`AcceptInvite.test.tsx`):
+  - successful enrolment;
+  - a wrong code, then a correct one;
+  - a rejected password, and the local password check;
+  - an invalid link, and cancel;
+  - the token never in a URL, the secret never in a request body, and browser storage empty;
+  - the QR matrix **decoded back** to exactly the provisioning URI.
+- **End to end:** each of the four roles enrols with the key shown on screen, then signs in with a code from that key.
+
+### 10.4 What was built
+
+**Shell:**
+- **Sign-in in two steps,** with the recovery-code option, one generic error, and focus moved to the code field.
+- **Account set-up** as in §10.3.
+- **Session:**
+  - loaded from `/me`;
+  - a 401 on any request ends it, with the "Your session has ended" notice;
+  - sign-out keeps the session and reports the error if the request fails.
+- **Role navigation** from the shared permission matrix (below).
+- **Accessibility and layout:**
+  - a skip link;
+  - focus moves to the page heading on navigation;
+  - a Menu button below 64 rem.
+
+**Catalogue:**
+- **Products list:** status and category filters, cursor paging, and text status chips.
+- **New product.**
+- **Product editor:**
+  - details with the slug lock, the `NEW` label, the size chart and SEO fields;
+  - the description block editor;
+  - **variants:**
+    - a colour × size table;
+    - adding variants and changing prices for O M only, with prices read-only for others;
+    - activate and deactivate;
+  - **images:**
+    - upload with progress, and the API's 413, 415, 429 and 503 messages;
+    - required alt text, role and colour;
+    - move up and down, and removal with confirmation;
+  - **publishing:** publish, with problems shown as a checklist, and archive with confirmation.
+- **Categories:** tree, create, edit, and delete with the in-use message.
+- **Collections:** list, create, edit, a schedule in India Standard Time, product order with move buttons, and delete.
+- **Colours,** with a swatch preview.
+- **Size charts,** with a row and column editor.
+- **Media library.**
+
+**States:** every screen has loading, empty, error, forbidden (403) and not-found states. Errors offer a retry and show the request ID. An ended session is handled once, in the shell.
+
+**Choices within the approved scope (for your review):**
+- **Permission matrix shared:** `PERMISSIONS` and `can` moved from the API to `@sanea/shared`, so the admin hides exactly what the API refuses. The API re-exports them. Its parity test against `security-design.md` is unchanged and passes.
+- **New read route `GET /admin/sizes`** (O M C, no-store). The variant form needs the size IDs, and no admin route listed the six approved sizes. It has an integration test and is in `api-specification.md`.
+- **No staff or audit-log links yet.** §3.3 proposed them as links, but those screens are later phases, and dead links are not shipped. In the e2e test the Owner invites staff through the API.
+- **Fulfilment** sees products, variants and images read-only, without category, colour or size names, because reference data is O M C in the API specification.
+- **The description editor uses plain text per block,** with inline syntax converted to and from `richTextSchema`:
+  - inline syntax: `**bold**`, `_italic_` and `[text](/internal/path)`;
+  - a preview is built from React elements;
+  - a stored description that does not match the schema is never overwritten unless the editor explicitly chooses to replace it.
+
+### 10.5 Tests and results
+
+| Command | Result |
+|---------|--------|
+| `npm run format:check` | Clean |
+| `npm run lint` (ESLint, then `check:tokens`) | Clean; "Design tokens: OK (0 registered exceptions in use)" |
+| `npm run typecheck` | Clean, including the admin app and its tests |
+| `npm test` | 34 files, **646 passed**: 599 before, plus 43 admin component tests and 4 font-fetcher tests |
+| `npm run test:integration` (disposable PostgreSQL 18.6) | 14 files, **338 passed**, one of them new (`GET /admin/sizes`) |
+| `npm run build -w @sanea/admin` | Built |
+| `npx playwright test` (installed Edge, disposable stack) | **9 passed** |
+| `npm run audit` | 0 vulnerabilities |
+
+**Component tests** (jsdom) cover:
+- the API client: CSRF headers, error and field mapping, and the expiry hook;
+- sign-in and account set-up;
+- navigation by role, and the session states;
+- the block editor against `richTextSchema`;
+- the role rules in the product editor;
+- validation errors linked to their fields, and the publish checklist;
+- helpers.
+
+**End-to-end tests** run on the production build:
+- the sign-in screen;
+- the Owner's invite through to a keyboard-only first sign-in;
+- invite and sign-in for the Manager, the catalogue editor and fulfilment;
+- the Manager's full catalogue build:
+  - category, colour, size chart and product;
+  - the publish checklist;
+  - the description, the variants, and a synthetic image upload;
+  - publishing, with the product found through the public API and through search;
+  - archiving (the public route returns 404), then publishing again;
+  - a collection and its product order;
+- the catalogue editor: no price controls, and the API returns 403 for a price change and for creating a variant;
+- fulfilment: a read-only editor, a forbidden categories screen, and a 403 from the API;
+- sign-out.
+
+Axe found no violations on any reviewed screen at any width, and nothing scrolls horizontally at 390 px.
+
+**Fixes made after reviewing the screenshots, before committing:**
+- numeric columns were not right-aligned;
+- the page heading showed a focus ring after load;
+- the "created as a draft" notice stayed after publishing;
+- SKUs broke between characters at 390 px. Tables now keep their width and scroll inside a named, focusable region;
+- visually hidden table labels widened the page;
+- the create forms kept their values after saving;
+- "1 sizes".
+
+**Screenshots:** 27, in `docs/reviews/admin/2026-10-22/`, each screen at 1440, 768 and 390 px:
+- sign-in;
+- products and the product editor;
+- categories;
+- collections and the collection editor;
+- colours;
+- size charts;
+- the media library.
+
+The product image is a synthetic grey test image, not product photography.
+
+### 10.6 Acceptance criteria (UI half)
+
+| ID | Status |
+|----|--------|
+| P8-UI-AC1 | **Pass:** the admin imports the tokens through package exports; the check passes with no exceptions; the API import is blocked |
+| P8-UI-AC2 | **Pass:** sign-in with 2FA end to end for every role, and invite to first sign-in |
+| P8-UI-AC3 | **Pass:** create, edit, publish and archive with variants and images; the role rules hold in the UI and the API |
+| P8-UI-AC4 | **Pass:** loading, empty, error, forbidden and expired states, covered by component and end-to-end tests |
+| P8-UI-AC5 | **Pass, with limits** (below) |
+| P8-UI-AC6 | **Pass:** CSS Modules only, no Tailwind, no hard-coded design values; `vite build` passes |
+| P8-UI-AC7 | **Pass:** 27 screenshots saved for your review |
+
+**P8-UI-AC5 in detail.** What passed:
+- axe is clean at three widths;
+- nothing scrolls horizontally at 390 px;
+- errors are linked to their fields;
+- contrast was measured (§9);
+- controls are 48 px, and the tokens set 44 px targets.
+
+Limits:
+- Keyboard-only operation was tested end to end for sign-in only. The other screens use native controls, but they had no full keyboard run and no screen-reader testing.
+- Automated checks do not prove accessibility compliance.
+
+**The Phase 8 gate has not passed.** It still needs:
+- your review of the test output and the screenshots;
+- **CI evidence (P8-AC8, P8-AC11).** CI runs only on pull requests and pushes to `main`, and opening a draft PR has not been authorised.

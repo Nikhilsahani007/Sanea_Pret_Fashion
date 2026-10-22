@@ -4,17 +4,27 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 8 — Catalogue, media and catalogue API: backend implemented (step 5); UI half in progress: tokens done, admin app waiting for U8-1.**
-- **Closure state: backend complete with test evidence; the Phase 8 gate is not passed.** It also needs the admin shell and catalogue screens and your review of the test output and admin screenshots (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
-- **UI half (`phase-8-ui-plan.md`):**
-  - **Done** (§9), with no new package:
-    - the TD-002 tokens in `packages/shared/src/tokens/`, exported as CSS subpaths;
-    - the hard-coded-value check `npm run check:tokens`, now part of `npm run lint`, with its register and 22 fixture tests;
-    - the API lint guard;
-    - contrast measured for every token pair.
+**Phase 8 — Catalogue, media and catalogue API: backend and UI implemented and tested; the Phase 8 gate is not passed yet.**
+- **Closure state:** it waits for your review of the test output and the admin screenshots, and for CI on a draft PR (P8-AC8, P8-AC11). Opening a PR has not been authorised (`MASTER-IMPLEMENTATION-INDEX.md` Phase 8).
+- **UI half (`phase-8-ui-plan.md` §9, §10):**
+  - U8-1 to U8-7 were approved on 2026-10-22, with U8-3 changed to include a QR code;
+  - built:
+    - tokens;
+    - the token check;
+    - the admin app on `localhost:5174`;
+    - the shell, sign-in and 2FA set-up with a QR code;
+    - every catalogue screen.
 
-    Results: 599 unit tests; format, lint and typecheck clean.
-  - **Waiting** for your answers to U8-1 to U8-7 (packages, data library, 2FA without QR, fonts, axe, dev port, success colour). The admin shell and catalogue screens need React, which is not installed.
+  Results:
+  - **646 unit and component tests, 338 integration tests, 9 end-to-end tests** (installed Edge, disposable stack);
+  - axe clean at 1440, 768 and 390 px;
+  - format, lint, typecheck, admin build and audit clean;
+  - 27 screenshots in `docs/reviews/admin/2026-10-22/`.
+- **Deviations you approved on 2026-10-22:**
+  - jsdom 29.1.1 instead of 30.1.2 (this machine runs Node 24.11.0);
+  - `@testing-library/dom` 10.4.2 (a required peer);
+  - npm `overrides` pinning React 19.3.0, so the tree has one React.
+- **Licence finding (U8-4):** the brand fonts may be self-hosted but not put in a public repository, so they are fetched per environment and not committed (`font-licences.md`).
 - Decisions: D-077 to D-084, Q8-1 to Q8-11, safeguards 1–3, D-087, D-088, QP-1 to QP-7, T-1 to T-7, capacity range 0 to 4 (default 2), R2 (rich-text `text` key), migration `20261021180245_catalogue_search` (approved 2026-10-22), and the child-process image worker (approved 2026-10-22).
 - **Step 5 backend (`phase-8-plan.md` §10e):**
   - `catalogue` (admin and public), `search` and `media` modules;
@@ -28,7 +38,8 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
   - `762bef4`: the migration;
   - `a06cd53`: the backend modules;
   - `68a2f59`: the UI plan;
-  - the tokens commit follows this update.
+  - `a6afed7`: the tokens and token check;
+  - the admin UI commit follows this update.
 
 **Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076), merged into `main` with PR #5 (merge commit `6593082`).** Commit `75f499c`, decisions D-062 to D-075 (`phase-7-plan.md`).
 
@@ -237,7 +248,7 @@ All of these need V14.
 | Commit and normal push of reviewed Phase 8 work | **Authorised** (campaign instruction, 2026-10-22) | `origin/phase-8-catalogue` |
 | PR for Phase 8 (draft, for CI) | **Not authorised yet**; needed for P8-AC8 and P8-AC11 | — |
 | Merging any PR | **Not authorised** | — |
-| Phase 8 UI packages, fonts, axe (U8-1 to U8-7) | **Open** | `phase-8-ui-plan.md` §6 |
+| Phase 8 UI packages, fonts, axe (U8-1 to U8-7) | **Approved 2026-10-22**, U8-3 with a QR code; deviations approved (jsdom 29.1.1, `@testing-library/dom`, React overrides) | `phase-8-ui-plan.md` §10.1, §10.2 |
 
 ## Remaining work
 
@@ -246,7 +257,8 @@ All of these need V14.
 | Phase 8 step 5: backend modules | Done | `phase-8-plan.md` §10e |
 | Phase 8 UI plan addendum | Done | `phase-8-ui-plan.md` (`68a2f59`); awaiting U8-1 to U8-7 |
 | Phase 8 tokens, token check, API lint guard | Done | `phase-8-ui-plan.md` §9 |
-| Phase 8 admin shell and catalogue screens | After U8-1 to U8-7 | Not started: React and the Vite plugin are not installed |
+| Phase 8 admin shell and catalogue screens | Done | `phase-8-ui-plan.md` §10 |
+| Phase 8 gate: your review; CI on a draft PR | Waiting for you | Draft PR not authorised |
 | Delete `st-01-styling-eval` branch and its worktree | With your approval | Not done |
 | PRs #1–#4 | **Merged into `main`** | D-134; all used merge commits |
 | Align `database-design.md`, `security-design.md`, `project-requirements.md` with D-029 to D-033 | Before Phase 6 | Done in Phase 6 (`database-design.md`, `security-design.md`; no conflicts in `project-requirements.md`) |
@@ -263,9 +275,9 @@ All of these need V14.
   - **step 5:** backend implemented and tested (`phase-8-plan.md` §10e).
 - **Gate evidence:**
   - backend: `phase-8-plan.md` §10e;
-  - UI: the tokens only (`phase-8-ui-plan.md` §9);
-  - CI has not run (P8-AC8, P8-AC11). It runs only on a PR or a push to `main`.
-- **UI:** blocked on U8-1 (the packages) for the admin shell and screens. The fonts (U8-4, B-04) do not block: fallback stacks render.
+  - UI: `phase-8-ui-plan.md` §9 and §10, and the screenshots;
+  - CI has not run (P8-AC8, P8-AC11): it runs only on a PR or a push to `main`.
+- **UI:** not blocked. The fonts work through `npm run fonts:fetch` (B-04 partly resolved; the logo and brand colours are still open).
 
 ## Skills audit
 
@@ -274,14 +286,11 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 ## Next exact task
 
 **You:**
-- decide U8-1 to U8-7 in `phase-8-ui-plan.md` §6:
-  - the admin UI packages, with exact versions;
-  - the data library;
-  - 2FA set-up without a QR code;
-  - the fonts;
-  - the accessibility scan dependency;
-  - the dev port;
-  - the measured success colour;
-- later, the Phase 8 gate review, which also needs a draft PR for CI (P8-AC8, P8-AC11).
+- **review the Phase 8 evidence:**
+  - `phase-8-ui-plan.md` §10;
+  - `phase-8-plan.md` §10e;
+  - the screenshots in `docs/reviews/admin/2026-10-22/`;
+- **authorise a draft PR** from `phase-8-catalogue` to `main`, so CI runs (P8-AC8, P8-AC11). It would not be merged;
+- **record the Phase 8 gate** if you accept the evidence.
 
-**Me, after that:** the admin shell and catalogue screens (steps U2 to U4), with tests and screenshots. Phases 9 to 12 start only after the Phase 8 gate.
+**Me, after that:** Phase 9 (inventory and reservation), which starts only once the Phase 8 gate is recorded in `DECISION-LOG.md`.
