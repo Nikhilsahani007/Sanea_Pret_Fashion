@@ -4,12 +4,16 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 9 — Inventory and stock reservation: built, tested and committed; migration approved (D-091). The gate waits for CI and your review of the concurrency output.** Plan approved (D-090).
-- **Built:** the migration `20261022233000_inventory_low_stock` (validated, `phase-9-plan.md` §10.1), the `inventory` module (reservations, expiry job, adjustments, admin routes), and the admin Inventory and Stock movements screens.
-- **Results:** 666 unit, 364 integration and 10 end-to-end tests; every concurrency case passes (§10.3).
-- On branch `phase-9-inventory` at `1a2c568`, pushed. Draft PR #7 (into `phase-8-catalogue`) has CI run 39893590775: all jobs green (§10.6).
-- **The gate is not recorded until you approve it.** No coverage exception; recheck on 2026-10-29.
-- **Coverage not measured:** the tool is approved, but its version is under two weeks old until 2026-10-29 (§10.5).
+**Phase 10 — Content management: next; it may start (rule 1 met: the Phase 9 gate is recorded, D-092).** It depends on Phases 7 and 8, both passed. The first step is its plan, for your approval.
+
+**Phase 9 — Inventory and stock reservation: gate passed (D-092, 2026-10-23).**
+- **Evidence:**
+  - commits `14eeacb`, `1a2c568` and `c87ed31` on `phase-9-inventory`;
+  - migration `20261022233000_inventory_low_stock` (D-091);
+  - CI runs 39893590775 and 39893791079 on draft PR #7, all green;
+  - C1 to C12 pass (`phase-9-plan.md` §10.3, §10.6).
+- **Coverage:** the 90% target of `inventory` is unmeasured, with no exception. Recheck `@vitest/coverage-v8` on 2026-10-29.
+- **PRs:** #7 (into `phase-8-catalogue`) and #6 (into `main`) are open, draft and unmerged.
 
 **Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
 - **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
@@ -295,8 +299,15 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** the Phase 9 gate:
-- review the concurrency output in `phase-9-plan.md` §10.3 and the CI run on the Phase 9 draft PR;
-- coverage: no exception; I recheck for a compatible `@vitest/coverage-v8` on 2026-10-29.
+**Me:** the Phase 10 plan (`docs/phase-10-plan.md`), covering:
+- content blocks;
+- navigation;
+- pages, with draft and publish;
+- Rehma Foundation publishing, with Owner verification;
+- the admin content editors.
 
-**Me, after that:** Phase 10 (content management) planning, which starts only once the Phase 9 gate is recorded.
+It is based on `MASTER-IMPLEMENTATION-INDEX.md` Phase 10 and the specifications. No code or migration before you approve it.
+
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` for an exactly compatible release that meets the two-week rule.
+
+**You:** approve the Phase 10 plan when it is ready. Merging PRs #6 and #7 needs your separate authorisation.

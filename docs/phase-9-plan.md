@@ -1,6 +1,6 @@
 # Phase 9 Plan — Inventory and Stock Reservation
 
-Status: **Approved by you on 2026-10-22 (D-090), with Q9-1 to Q9-5 as recommended. Migration review stop before commit; a draft PR for CI is authorised (step 5).** · Date: 2026-10-22 · Base: `phase-9-inventory` from `phase-8-catalogue` at `b6e9223` (Phase 8 gate passed, D-089; draft PR #6 open and unmerged)
+Status: **Phase 9 gate passed on 2026-10-23 (D-092).** Plan approved (D-090); migration approved (D-091). CI green on draft PR #7 (runs 39893590775 and 39893791079). The 90% coverage target is unmeasured (no exception; recheck 2026-10-29). · Date: 2026-10-22 · Updated: 2026-10-23
 
 This plan covers Phase 9 of `MASTER-IMPLEMENTATION-INDEX.md`. The database part, the API and the admin screens each wait for the approvals listed in §10.
 
@@ -214,7 +214,7 @@ None.
 | 3 | Service, job, routes and the concurrency tests | **Done** (§10.2, §10.3), uncommitted |
 | 4 | Admin screens, component and end-to-end tests, screenshots | **Done** (§10.4), uncommitted |
 | 5 | Commit and normal push of reviewed work; CI on a draft PR | Push: standing authorisation. **Draft PR authorised** 2026-10-22 (never merged) |
-| 6 | **Phase 9 gate:** your review of the concurrency test output | **Yes** |
+| 6 | **Phase 9 gate:** your review of the concurrency test output | **Passed** 2026-10-23 (D-092) |
 
 ## 10. Progress and evidence (2026-10-23)
 
@@ -324,4 +324,6 @@ C12 the same reservation released twice concurrently: one release, one RELEASED 
 **Your instructions of 2026-10-23:**
 - PR #7 stays a draft and is not merged.
 - No two-week exception for `@vitest/coverage-v8`. Recheck for an exactly compatible release on **29 October 2026**; until then the 90% target stays explicitly unmeasured.
-- **The Phase 9 gate is not recorded until you review this evidence and approve it.**
+- The Phase 9 gate was recorded only after your review.
+
+**Gate: passed on 2026-10-23 (D-092), on your explicit approval.** Coverage stays unmeasured, with no exception: recheck on 2026-10-29.
