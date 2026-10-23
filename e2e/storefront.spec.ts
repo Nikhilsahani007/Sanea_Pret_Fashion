@@ -92,6 +92,18 @@ test("shell: the logo, announcement, pills and footer come from published conten
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
+  // On a phone the main links move into a menu sheet.
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.getByRole("button", { name: "Menu" }).click();
+  const menu = page.getByRole("dialog", { name: "Menu" });
+  await expect(menu.getByRole("link", { name: "TEST Kurtas" })).toBeVisible();
+  mkdirSync(SHOTS, { recursive: true });
+  await page.waitForTimeout(350);
+  await axe(page, "menu sheet at 390");
+  await page.screenshot({ path: `${SHOTS}/storefront-menu-sheet-390.png` });
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
+  await expect(page.getByRole("button", { name: "Menu" })).toBeFocused();
 });
 
 test("search, size sheet, drawer and /cart: prices from the server, the bag kept across a reload", async ({
@@ -176,6 +188,11 @@ test("search, size sheet, drawer and /cart: prices from the server, the bag kept
   await expect(
     page.getByRole("button", { name: "Bag, 0 items" }),
   ).toBeVisible();
+  await review(page, "storefront-cart-empty");
+
+  await page.goto(`${SHOP}/search?q=zzqqxx`);
+  await expect(page.getByText("No products match.")).toBeVisible();
+  await review(page, "storefront-search-empty");
 });
 
 test("keyboard only: search, choose a size, add, and close the bag", async ({

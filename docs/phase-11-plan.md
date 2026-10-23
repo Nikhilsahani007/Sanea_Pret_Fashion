@@ -304,7 +304,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 | Q11-8 | **Cart rules:** the cookie on first add only; 30 lines; a per-line limit of 10, configurable lower; cart writes 60 per minute per IP; hourly cleanup | **Approved (D-098)**, as listed; the contract is in D-099 |
 | Q11-9 | **Storefront dependencies:** declare the admin's existing versions (§9) | **Approved (D-098).** No new package |
 | Q11-10 | **Lighthouse (gate 6):** A, the `lighthouse` package as a pinned dev dependency, run locally; or B, Edge DevTools Lighthouse run by hand, with the report saved | **A (D-098):** `lighthouse` **13.5.0**, published 2026-09-18 (35 days before this decision); `engines.node` `>=22.19`, which Node 24.11.0 satisfies. The two-week rule is not waived. Fallback to B if the install or its audit fails, or Edge cannot be driven (§9) |
-| Q11-12 | **Stock in the cart (found during implementation).** D-099 says each line carries `available` as an exact count "capped at the line limit". The catalogue never shows exact stock above the low-stock level (D-082 as amended by Q8-2), so that count would reveal up to 10 units the product page hides. | **Open, proposed:** lines carry the catalogue's public state (`IN_STOCK`, `LOW_STOCK` with `remaining`, `SOLD_OUT`) plus an `EXCEEDS_AVAILABLE` warning, as built and marked in `api-specification.md`. Needs a decision identifier from an agreed range (D-101 to D-134 are taken) |
+| Q11-12 | **Stock in the cart (found during implementation).** D-099 says each line carries `available` as an exact count "capped at the line limit". The catalogue never shows exact stock above the low-stock level (D-082 as amended by Q8-2), so that count would reveal up to 10 units the product page hides. | **Approved (D-135):** lines carry the catalogue's public state (`IN_STOCK`, `LOW_STOCK` with `remaining`, `SOLD_OUT`) plus the `EXCEEDS_AVAILABLE` warning; the server keeps enforcing real availability |
 | Q11-11 | **OD-02 outcome:** record it as "logo supplied (raster, vector requested); palette proposed for implementation, not verified brand colours"? | **Recorded (D-096)**, approved in principle; the vector export is still outstanding (B-04) |
 
 ## 11. Acceptance criteria
@@ -391,7 +391,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 
 **Cart module** (`apps/api/src/modules/cart/`): `token.ts` (cookie, hashing), `service.ts` (add, set, view, cleanup), `router.ts` (`/api/v1/cart`, a write limit of 60 per minute per IP), `job.ts` (hourly cleanup, started and stopped in `main.ts`). `CART_FULL` (409) added to the error registry; `CART_MAX_LINE_QUANTITY` (1 to 10, default 10) to the configuration and `.env.example`. Shared contract in `@sanea/shared` (`cart/cart.ts`): request schemas, `CartView`, `CartWarning`.
 
-**Gate output** (`[P11-GATE]` lines from `npm run test:integration`, `apps/api/src/modules/cart/cart.db-test.ts`; all 12 pass):
+**Gate output** (`[P11-GATE]` lines from `apps/api/src/modules/cart/cart.db-test.ts`, re-run on 2026-10-24 after D-135; all 13 pass):
 
 ```
 T11-1 add 2 × ₹1,000: subtotal 200000 paise; price changed to 120000: next GET re-priced (line 240000, subtotal 240000); body with pricePaise or subtotalPaise: 400, quantity unchanged
@@ -399,6 +399,7 @@ T11-2 cart B cannot read, change (404) or remove (404) cart A's line; forged and
 T11-3 stored token_hash = SHA-256(cookie value) (32 bytes); raw token found in 0 of 25 tables and 0 of 24 log lines
 T11-4 quantity 11: 400 (API) and cart_item_quantity_check (database); 6 + 6 capped at 10 with QUANTITY_LIMIT; 31st line: 409 CART_FULL, 30 lines kept; CART_MAX_LINE_QUANTITY=3: add 4 and PATCH 4 refused (400), 3 + 1 capped at 3
 T11-5 quantity 3 with 2 available: accepted, EXCEEDS_AVAILABLE, stock LOW_STOCK remaining 2; deactivated variant: unavailable, no price, outside the subtotal (300000 of 4 units), UNAVAILABLE; product archived: subtotal 0
+T11-5 (Q11-12) 7 on hand, low-stock level 2: line stock {IN_STOCK} with no count, no onHand, reserved or remaining field; 9 in the bag: EXCEEDS_AVAILABLE, still no count; 0 on hand: {SOLD_OUT} and EXCEEDS_AVAILABLE; reserved stays 0
 T11-6 add 3 then set 4: on hand 4, reserved 0 (unchanged), no reservation or stock movement
 T11-7 cart add without the CSRF token, with a wrong token, from the admin origin and from a foreign origin: 403 CSRF_FAILED, no cart created, no cookie
 T11-8 GET /cart with no cookie: 200 empty cart, no-store, no Set-Cookie, no row created
@@ -421,7 +422,7 @@ Changes made from what the checks found:
 | Check | Result |
 |-------|--------|
 | Unit and component (`npm test`) | 713 passed (39 files), including 9 storefront component tests, 5 shared cart schema tests and the cart configuration tests |
-| Integration (`npm run test:integration`) | 402 passed (19 files), including the 12 cart gate tests and 9 cart migration tests |
+| Integration (`npm run test:integration`) | 403 passed (19 files), including the 13 cart gate tests (T11-1 to T11-12 and T11-5 for Q11-12) and 9 cart migration tests |
 | End to end (`npx playwright test`, Edge) | 15 passed: 11 admin, 4 storefront |
 | Lint, design tokens, format, typecheck | clean |
 | Builds | storefront JS 90.48 kB gzipped, CSS 4.15 kB; admin passes |
@@ -467,7 +468,22 @@ These run against the local `vite preview` build, not production hosting.
 
 ### 14.7 Screenshots and open points
 
-- Screenshots: `docs/reviews/storefront/2026-10-24/`: home, search, size sheet, cart drawer, cart, page and coming soon, each at 1440, 768 and 390 px. Product wells are empty champagne blocks: there is no real photography yet.
-- **Open:** Q11-12 (stock in the cart); Q11-5 (the Foundation's name); the vector logo before Phase 12 (B-04); a decision-identifier range after D-100.
+- Screenshots: `docs/reviews/storefront/2026-10-24/`: home, search, search with no results, size sheet, cart drawer, cart, empty cart, page and coming soon, each at 1440, 768 and 390 px; the phone menu sheet at 390 px. Product wells are empty champagne blocks: there is no real photography yet.
+- **Open:** Q11-5 (the Foundation's name); the vector logo before Phase 12 (B-04). Q11-12 approved (D-135); decisions continue from D-135.
 - **Phase 11 gate: not recorded.** It needs your review of these screenshots and results.
 
+### 14.8 Gate checklist (§11 acceptance criteria, reviewed 2026-10-24)
+
+| # | Criterion | Evidence | Status |
+|---|-----------|----------|--------|
+| 1 | Builds and runs at `localhost:5173`; the shell is drawn from published content only | Storefront build; e2e "shell" (announcement, pills, footer from seeded published content); component test "draws no announcement, pills or footer links when nothing is published" | Met |
+| 2 | The supplied logo with "Sanéa Pret" as its name; É correct at every width | e2e finds the images by name ("Sanéa Pret", "Sanéa Pret, Effortless Elegance"); É visible in the header and footer in every screenshot at 1440, 768 and 390 px | Met |
+| 3 | No hard-coded colour, size or font; no Tailwind | Token check clean (colours and fonts); no Tailwind. Spacing, type, controls and borders use tokens; **27 literal layout measures remain** (media-query breakpoints, which cannot use custom properties; container, sheet and logo widths), the same convention as the admin (28), which the check does not measure | **Met for colour and font; sizes for your judgement** |
+| 4 | Every colour pair meets §3.4; axe clean at 390, 768 and 1440 px | Pairs in use are in §3.4; axe reports nothing on every storefront page and sheet tested, at 1440, 1024, 768, 390 and 375 px; Lighthouse accessibility 100 on three pages | Met |
+| 5 | Search and suggestions by keyboard and touch; 429 handled | Component tests (arrow keys, Enter, 2-character threshold, debounce, 429 without retry); e2e keyboard-only run. Touch: exercised by pointer clicks in Edge; **not tested on a touch device** | **Met, except a real touch device** |
+| 6 | A guest adds, changes and removes; the bag survives a reload; the server decides prices | e2e "search, size sheet, drawer and /cart"; T11-1 | Met |
+| 7 | T11-1 to T11-12 pass; migration approved before commit | 13 cart gate tests pass (§14.3); migration approved (D-100) before commit `3497ea0` | Met |
+| 8 | §10 gates 1, 5 and 6 run and recorded | §14.5: Taste lint 0/0; **inspector 3 FAIL and 2 WARN per page, recorded with reasons** (no photography, no first-screen monument or motion until Phase 12); checklist; Lighthouse reports | **Run and recorded; the inspector findings need your acceptance** |
+| 9 | Screenshots of every shell state at three widths | §14.7 list; the menu sheet only at 390 px (it is a phone control). Error states (API down) are covered by component tests, not screenshots | Met, with that limit |
+
+**Gate: not recorded.** It waits for your explicit approval of this evidence.

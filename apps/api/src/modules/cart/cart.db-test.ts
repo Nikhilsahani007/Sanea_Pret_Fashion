@@ -348,6 +348,59 @@ describe("the Phase 11 cart gate", () => {
     );
   });
 
+  it("T11-5 (Q11-12, D-135): lines show only the catalogue's public stock state, never a count above the low-stock level", async () => {
+    // Low-stock level 2 (the default): 7 and 0 on hand.
+    const plenty = await product({ onHand: 7 });
+    const none = await product({ onHand: 0 });
+    const s = await shopper();
+    const one = await s.add(plenty.variants[0]!, 1);
+    const line = one.body.lines[0];
+    expect(line.stock).toEqual({ availability: "IN_STOCK" });
+    expect(Object.keys(line).sort()).toEqual([
+      "available",
+      "colour",
+      "image",
+      "lineTotalPaise",
+      "productName",
+      "productSlug",
+      "quantity",
+      "size",
+      "stock",
+      "unitPricePaise",
+      "variantId",
+    ]);
+    expect(JSON.stringify(one.body)).not.toMatch(/onHand|reserved|remaining/);
+    // Above what is available: warned, and still no count.
+    const nine = await s.add(plenty.variants[0]!, 8);
+    expect(nine.body.lines[0].stock).toEqual({ availability: "IN_STOCK" });
+    expect(nine.body.warnings).toContainEqual({
+      variantId: plenty.variants[0],
+      code: "EXCEEDS_AVAILABLE",
+    });
+    expect(JSON.stringify(nine.body)).not.toMatch(/onHand|reserved|remaining/);
+    // Sold out: the state and the warning, no count.
+    const out = await s.add(none.variants[0]!, 1);
+    const soldOut = out.body.lines.find(
+      (l: { variantId: string }) => l.variantId === none.variants[0],
+    );
+    expect(soldOut.stock).toEqual({ availability: "SOLD_OUT" });
+    expect(out.body.warnings).toContainEqual({
+      variantId: none.variants[0],
+      code: "EXCEEDS_AVAILABLE",
+    });
+    // Stock itself is unchanged by the cart (SR-2).
+    expect(
+      (
+        await h.db.inventoryLevel.findUniqueOrThrow({
+          where: { variantId: plenty.variants[0]! },
+        })
+      ).reserved,
+    ).toBe(0);
+    report(
+      "T11-5 (Q11-12) 7 on hand, low-stock level 2: line stock {IN_STOCK} with no count, no onHand, reserved or remaining field; 9 in the bag: EXCEEDS_AVAILABLE, still no count; 0 on hand: {SOLD_OUT} and EXCEEDS_AVAILABLE; reserved stays 0",
+    );
+  });
+
   it("T11-6: adding to the cart reserves nothing (SR-2)", async () => {
     const { variants } = await product({ onHand: 4 });
     const before = await h.db.inventoryLevel.findUniqueOrThrow({
