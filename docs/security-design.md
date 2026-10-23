@@ -49,7 +49,7 @@ Status: Draft for approval · Date: 2026-10-18 · Target: OWASP ASVS 4.0 Level 2
 | Input validation | Zod schemas on every route for body, query and params. Unknown fields rejected. String lengths bounded. |
 | Output encoding | React escapes by default. CMS rich text is stored as structured JSON and rendered through an allow-list renderer. `dangerouslySetInnerHTML` is banned by lint rule. |
 | SQL injection | Prisma parameterised queries. Raw SQL only through `Prisma.sql` tagged templates, reviewed. |
-| Rate limiting | Sign-in 5/min per IP and per account; enquiries 5/hour per IP; checkout order creation 10/hour per cart; search 60/min per IP. |
+| Rate limiting | Sign-in 5/min per IP and per account; enquiries 5/hour per IP; checkout order creation 10/hour per cart; search 60/min per IP; cart writes 60/min per IP (D-099). |
 | Rate-limit storage | **In memory, single API instance only (D-047).** Counters are not shared between instances or kept across restarts. A shared store is a **mandatory decision before any multi-instance deployment (Phase 19)**. Global default: 300 requests per minute per IP, health endpoint exempt (D-048); stricter per-route limits arrive with the routes that need them. |
 | Bot protection | Honeypot fields and timing checks on enquiry and sign-up forms. A CAPTCHA (e.g. Cloudflare Turnstile) is held in reserve if abuse appears. |
 | Body limits | 100 KB JSON; 15 MB per upload, admin-only route. |

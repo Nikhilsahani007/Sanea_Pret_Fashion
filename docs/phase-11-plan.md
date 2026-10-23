@@ -1,6 +1,6 @@
 # Phase 11 Plan — Storefront Shell, Search and Cart
 
-Status: **Draft for your approval. Planning only: no code, dependency, schema change or migration until you approve this plan and Q11-1 to Q11-11.** · Date: 2026-10-23 · Base: `phase-11-storefront` from `phase-10-content` at `4634762` (Phase 10 gate passed, D-095; draft PRs #6, #7 and #8 open and unmerged)
+Status: **Approved in principle on 2026-10-23 (D-098)**, with Q11-1 to Q11-4 and Q11-6 to Q11-11 as recommended, Q11-10 resolved to option A (§9), and the cart contract reconciled (D-099). **Q11-5 stays open.** The cart migration is a separate approval gate: it stops for your review before commit, and is applied only to disposable test databases until then. · Date: 2026-10-23 · Base: `phase-11-storefront` from `phase-10-content` at `4634762` (Phase 10 gate passed, D-095; draft PRs #6, #7 and #8 open and unmerged)
 
 This plan covers Phase 11 of `MASTER-IMPLEMENTATION-INDEX.md`. It also records the logo you supplied and the proposed palette: both **approved in principle on 2026-10-23 (D-096)**, the palette as proposed implementation colours, not verified brand colours, with the admin palette unchanged. OD-15 is closed (D-097). Q11-5 stays open.
 
@@ -196,15 +196,17 @@ The quantity CHECK holds the per-line ceiling of 10 from `system-design.md` §3.
 ### 5.2 Token and cookie (Q11-8)
 
 - **Token:** a random 256-bit token in cookie `__Host-sp_cart`: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, `Max-Age` 30 days, renewed on each write. Only its SHA-256 hash is stored.
-- **When it is issued:** `GET /cart` does **not** create a cart or cookie (an empty cart is returned). The first `POST /cart/items` creates both. This keeps crawlers and single visits from filling the table. It is a small change to `api-specification.md` ("creates token cookie if absent").
-- **Unknown or expired token:** treated as no cart; the next write issues a new one. Tokens are never logged (the log redaction already covers `cookie` and `token`).
+- **When it is issued (D-099):** `GET /cart` never creates a cart or sets a cookie; without a valid cookie it returns the empty cart. The first **successful** `POST /cart/items` creates both; a refused add (`400`, `403`, `404`, `429`) creates neither. This keeps crawlers and single visits from filling the table.
+- **Contract reconciliation:** `api-specification.md` said `GET /cart` "creates token cookie if absent". No decision in `DECISION-LOG.md` fixed that wording; it came with the D-028 baseline. It is amended by D-099, and `api-specification.md` §3 Cart, `system-design.md` §3 and `security-design.md` (rate limits) now state the same rules.
+- **Renewal:** each successful write renews `Max-Age` and `expires_at` (30 days); reading does not.
+- **Unknown, malformed or expired token:** treated as no cart, with the same response as no cookie; the next successful write issues a new token. Tokens are never logged (the log redaction already covers `cookie` and `token`).
 
 ### 5.3 Routes (`/api/v1/cart`, `no-store`)
 
 | Method | Path | Behaviour |
 |--------|------|-----------|
 | GET | `/cart` | `{ lines, subtotalPaise, currency, itemCount, warnings }`. Each line is re-priced from the current variant (`unitPricePaise`, `lineTotalPaise`), with product name, slug, colour, size, image derivative and `available` (on hand minus reserved, capped at the limit). Lines whose product is no longer visible are returned as unavailable, with no price, and are excluded from the subtotal |
-| POST | `/cart/items` | `{ variantId, quantity }` (strict, 1 to the limit). Adds or increments, capped at the limit. `404` for an unknown, inactive or invisible variant |
+| POST | `/cart/items` | `{ variantId, quantity }` (strict, 1 to the limit). Adds or increments; a total above the limit is capped, with a `QUANTITY_LIMIT` warning. `404` for an unknown, inactive or invisible variant, and no cart is created |
 | PATCH | `/cart/items/:variantId` | `{ quantity }` 0 to the limit; 0 removes |
 | DELETE | `/cart/items/:variantId` | Removes the line |
 
@@ -255,13 +257,16 @@ The quantity CHECK holds the per-line ceiling of 10 from `system-design.md` §3.
 |------|--------|
 | T11-1 | Prices come from the server: a changed variant price shows on the next `GET /cart`; a `price` in the body is refused (strict schema) |
 | T11-2 | Cart isolation: a second token cannot read or change the first cart; a forged or expired token gets an empty cart |
-| T11-3 | Only the hash is stored: the raw token appears in no table or log line |
-| T11-4 | Limits: quantity 11 refused by the API and by the database CHECK; the 31st line gets `409 CART_FULL`; a lowered `CART_MAX_LINE_QUANTITY` is enforced |
+| T11-3 | Only the hash is stored: the raw token appears in no table or log line; the stored hash is the SHA-256 of the cookie value |
+| T11-4 | Limits: quantity 11 refused by the API and by the database CHECK; an increment past the limit is capped with a `QUANTITY_LIMIT` warning; the 31st line gets `409 CART_FULL`; a lowered `CART_MAX_LINE_QUANTITY` is enforced |
 | T11-5 | Availability: quantity above stock is accepted and warned; an inactive variant or unpublished product becomes an unavailable line outside the subtotal |
 | T11-6 | No reservation: adding to the cart leaves `inventory_level.reserved` unchanged (SR-2) |
 | T11-7 | CSRF and Origin: cart writes without the token, or from another origin, are refused |
 | T11-8 | `GET /cart` without a cookie creates no row and sets no cookie |
 | T11-9 | Cleanup: expired carts are deleted once, concurrently safe (two workers) |
+| T11-10 | Cookie and token: the first successful add sets `__Host-sp_cart` with `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, no `Domain`, `Max-Age` 30 days; a write renews it and `expires_at`, a read does not; a refused add (`400`, `403`, `404`, `429`) creates no cart and sets no cookie |
+| T11-11 | Visibility: adding an inactive variant, or a variant of a draft or archived product, or of a product in an unpublished category, gets `404`; an existing line whose product becomes invisible is unavailable, unpriced and outside the subtotal |
+| T11-12 | Rate limit: the 61st cart write in a minute from one IP gets `429 RATE_LIMITED` with `Retry-After` |
 
 The migration is checked on disposable databases: deploy, status, drift exit 0, the CHECKs, and down and up.
 
@@ -281,7 +286,7 @@ The migration is checked on disposable databases: deploy, status, drift exit 0, 
 | Change | Why | Versions |
 |--------|-----|----------|
 | `apps/storefront/package.json`: `react`, `react-dom`, `react-router`, `@sanea/shared`; dev `@vitejs/plugin-react`, `@types/react`, `@types/react-dom` | The storefront app | **The exact versions the admin already uses** (React 19.3.0, React Router 8.4.0, plugin 6.1.2). No new package enters the lockfile |
-| `lighthouse` (root dev dependency), only if Q11-10 is option A | Gate 6, reproducible from the command line | A release at least two weeks old, pinned; checked for compatibility with Node 24.11 first |
+| `lighthouse` **13.5.0** (root dev dependency, exact version; Q11-10 option A, D-098) | Gate 6, reproducible from the command line | Checked 2026-10-23 with `npm view`: published **2026-09-18T14:13:55Z** (35 days old; the two-week rule is met, not waived); `engines.node` `>=22.19`, which Node 24.11.0 satisfies; Apache-2.0; about 28 direct dependencies (including `puppeteer-core`, `chrome-launcher`, `@sentry/node`). Installed with `--save-exact` and `--before` set 14 days back, so no transitive package younger than two weeks enters the lockfile. Run against the installed Edge (`CHROME_PATH`) with error reporting off (`--no-enable-error-reporting`), so Sentry sends nothing. **Fallback to option B** (Edge DevTools Lighthouse, report saved as JSON and HTML in `docs/reviews/storefront/<date>/`) if `npm audit` reports a high or critical issue, or Lighthouse cannot drive Edge |
 
 Nothing else. No Tailwind, no component library, no state or data-fetching library (U8-2 applies to the storefront too).
 
@@ -289,16 +294,16 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 
 | # | Question | Recommendation |
 |---|----------|----------------|
-| Q11-1 | **Logo files.** Use the supplied raster crops for the header and footer now, and request a vector or ≥ 3000 px transparent export for the Phase 12 monument? | **Yes.** Use `logo-wordmark-transparent.png` in the header and `logo-lockup-transparent.png` in the footer. Phase 12 cannot pass its gate on the screenshot crop |
-| Q11-2 | **Display face.** The serif logo next to Panchang headings would clash. | **In Phase 11, headings in Switzer**; Panchang unused. Choose the display face in Phase 12 with the landing page (a licence-checked serif, or none) |
-| Q11-3 | **Palette.** Adopt §3.3 as proposed implementation colours, for the storefront only? | **Approved in principle (D-096): storefront only;** the admin keeps its current tokens. The token change itself is made only after this plan is approved |
-| Q11-4 | **Wordmark text.** Show the logo as supplied ("SANÉA"), with "Sanéa Pret" as its accessible name and in page titles? | **Yes.** `design-system.md` §2 and §3 are updated in Phase 12, when the monument is designed |
-| Q11-5 | **Foundation name.** The caption says "Rahma Foundation" (`@rahmafoundation.in`); the project says "Rehma". Which is correct? | **Your confirmation.** If it is "Rahma", a separately approved change renames the page title, slug and documents (a data migration). Nothing changes until you answer |
-| Q11-6 | **Add to bag in Phase 11** through the card's size sheet (§4.5)? | **Yes**, so the cart is tested end to end. Otherwise the cart is tested through the API only until Phase 13 |
-| Q11-7 | **Links to Phase 13 pages** reach a "coming soon" not-found page until then? | **Yes.** The links are real and need no change later |
-| Q11-8 | **Cart rules:** the cookie on first add only; 30 lines; a per-line limit of 10, configurable lower; cart writes 60 per minute per IP; hourly cleanup | **Yes, as listed** |
-| Q11-9 | **Storefront dependencies:** declare the admin's existing versions (§9) | **Yes.** No new package |
-| Q11-10 | **Lighthouse (gate 6):** A, the `lighthouse` package as a pinned dev dependency, run locally; or B, Edge DevTools Lighthouse run by hand, with the report saved | **A**, if a release at least two weeks old supports Node 24.11; otherwise B |
+| Q11-1 | **Logo files.** Use the supplied raster crops for the header and footer now, and request a vector or ≥ 3000 px transparent export for the Phase 12 monument? | **Approved (D-098).** Use `logo-wordmark-transparent.png` in the header and `logo-lockup-transparent.png` in the footer. Phase 12 cannot pass its gate on the screenshot crop |
+| Q11-2 | **Display face.** The serif logo next to Panchang headings would clash. | **Approved (D-098).** In Phase 11, headings in Switzer; Panchang unused. Choose the display face in Phase 12 with the landing page (a licence-checked serif, or none) |
+| Q11-3 | **Palette.** Adopt §3.3 as proposed implementation colours, for the storefront only? | **Approved (D-096, D-098): storefront only;** the admin keeps its current tokens |
+| Q11-4 | **Wordmark text.** Show the logo as supplied ("SANÉA"), with "Sanéa Pret" as its accessible name and in page titles? | **Approved (D-098).** `design-system.md` §2 and §3 are updated in Phase 12, when the monument is designed |
+| Q11-5 | **Foundation name.** The caption says "Rahma Foundation" (`@rahmafoundation.in`); the project says "Rehma". Which is correct? | **Open.** Until the official name is verified, the existing "Rehma" spelling and `rehma-foundation` slug stay, and the Phase 10 migration is not changed. A rename needs a separate approval |
+| Q11-6 | **Add to bag in Phase 11** through the card's size sheet (§4.5)? | **Approved (D-098)**, so the cart is tested end to end |
+| Q11-7 | **Links to Phase 13 pages** reach a "coming soon" not-found page until then? | **Approved (D-098).** The links are real and need no change later |
+| Q11-8 | **Cart rules:** the cookie on first add only; 30 lines; a per-line limit of 10, configurable lower; cart writes 60 per minute per IP; hourly cleanup | **Approved (D-098)**, as listed; the contract is in D-099 |
+| Q11-9 | **Storefront dependencies:** declare the admin's existing versions (§9) | **Approved (D-098).** No new package |
+| Q11-10 | **Lighthouse (gate 6):** A, the `lighthouse` package as a pinned dev dependency, run locally; or B, Edge DevTools Lighthouse run by hand, with the report saved | **A (D-098):** `lighthouse` **13.5.0**, published 2026-09-18 (35 days before this decision); `engines.node` `>=22.19`, which Node 24.11.0 satisfies. The two-week rule is not waived. Fallback to B if the install or its audit fails, or Edge cannot be driven (§9) |
 | Q11-11 | **OD-02 outcome:** record it as "logo supplied (raster, vector requested); palette proposed for implementation, not verified brand colours"? | **Recorded (D-096)**, approved in principle; the vector export is still outstanding (B-04) |
 
 ## 11. Acceptance criteria
@@ -309,7 +314,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 4. Every colour pair in use meets §3.4; axe reports nothing at 390, 768 and 1440 px.
 5. Search and suggestions work by keyboard and touch; `429` is handled.
 6. A guest can add a size, change the quantity and remove it; the cart survives a reload; the server decides every price.
-7. T11-1 to T11-9 pass; the migration is approved by you before commit.
+7. T11-1 to T11-12 pass; the migration is approved by you before commit.
 8. The §10 gates 1, 5 and 6 are run and their results recorded.
 9. Screenshots of every shell state at three widths are in `docs/reviews/storefront/<date>/`.
 
@@ -317,7 +322,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 
 | Step | Work | Needs your approval |
 |------|------|---------------------|
-| 1 | Approve this plan and Q11-1 to Q11-11 (OD-02 recorded in principle, D-096; OD-15 closed, D-097) | **Yes** |
+| 1 | Approve this plan and Q11-1 to Q11-11 (OD-02 recorded in principle, D-096; OD-15 closed, D-097) | **Done in principle** (D-098, D-099); Q11-5 open |
 | 2 | Storefront dependencies (§9) and the Vite app | Covered by Q11-9 (and Q11-10 for Lighthouse) |
 | 3 | Palette tokens and storefront base styles | Covered by Q11-3 |
 | 4 | The cart migration, validated on disposable databases | **A review stop before commit** |
