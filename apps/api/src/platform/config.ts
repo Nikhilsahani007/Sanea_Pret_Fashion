@@ -78,6 +78,19 @@ const schema = z
           .optional(),
       )
       .transform((v) => (v === undefined ? 15 : Number(v))),
+    // Guest cart line limit (D-099): whole units 1 to 10, default 10. The
+    // database CHECK holds 10, so the setting can only lower it.
+    CART_MAX_LINE_QUANTITY: z
+      .preprocess(
+        (v) => (v === "" ? undefined : v),
+        z
+          .string()
+          .regex(/^(?:[1-9]|10)$/, {
+            error: "CART_MAX_LINE_QUANTITY must be a whole number from 1 to 10",
+          })
+          .optional(),
+      )
+      .transform((v) => (v === undefined ? 10 : Number(v))),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -109,6 +122,7 @@ export type Config = {
   readonly mediaPublicBaseUrl: string;
   readonly mediaUploadQueueWaiting: number;
   readonly reservationTtlMinutes: number;
+  readonly cartMaxLineQuantity: number;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -156,5 +170,6 @@ export function loadConfig(
     mediaPublicBaseUrl: e.MEDIA_PUBLIC_BASE_URL,
     mediaUploadQueueWaiting: e.MEDIA_UPLOAD_QUEUE_WAITING,
     reservationTtlMinutes: e.RESERVATION_TTL_MINUTES,
+    cartMaxLineQuantity: e.CART_MAX_LINE_QUANTITY,
   };
 }

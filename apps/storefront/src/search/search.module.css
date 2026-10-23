@@ -1,0 +1,110 @@
+/* Search box (combobox) and results page (phase-11-plan.md §4.3, §4.4). */
+.box {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.box input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+}
+
+/* The browser's own clear button uses a colour outside the palette. */
+.box input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.submit {
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-4);
+  border: 0;
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+}
+
+.submit:hover {
+  background: var(--sp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.list {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 100%;
+  z-index: 3;
+  list-style: none;
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  background: var(--sp-paper);
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+  min-height: var(--sp-target-min);
+  align-items: center;
+  padding: 0 var(--sp-space-3);
+  cursor: pointer;
+}
+
+.option[aria-selected="true"],
+.option:hover {
+  background: var(--sp-ink);
+  color: var(--sp-paper);
+}
+
+.kind {
+  font-size: var(--sp-step-small);
+}
+
+.busy {
+  position: absolute;
+  inset-block-start: 100%;
+  padding: var(--sp-space-2) var(--sp-space-3);
+  background: var(--sp-paper);
+  font-size: var(--sp-step-small);
+}
+
+.page {
+  display: grid;
+  gap: var(--sp-space-8);
+}
+
+.page > form {
+  max-width: 36rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-space-4);
+}
+
+.count {
+  color: var(--sp-muted);
+}
+
+.sort select {
+  min-height: var(--sp-target-min);
+  margin-inline-start: var(--sp-space-2);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+}
+
+.problem {
+  padding: var(--sp-space-4);
+  background: var(--sp-danger-surface);
+  color: var(--sp-danger);
+}

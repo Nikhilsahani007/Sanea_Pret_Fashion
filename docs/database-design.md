@@ -162,7 +162,7 @@ Search fields are added in Phase 8 with the search module (D-054). A search vect
 
 ### 3.3 Customers and carts
 
-Customer, Address and WishlistItem are **deferred to a later release (D-034).** Release one keeps only Cart and CartItem, with `customerId` left null; `Order.customerId` stays nullable so accounts can be added later without reworking orders.
+Customer, Address and WishlistItem are **deferred to a later release (D-034).** Release one keeps only Cart and CartItem, with no customer link (Phase 11 adds none; accounts add it when scheduled); `Order.customerId` stays nullable so accounts can be added later without reworking orders.
 
 **Customer**: id, email (citext, unique), phone (E.164, `+91…`), firstName, lastName, passwordHash?, emailVerifiedAt?, marketingConsent (bool, with consentAt), codBlocked (bool), createdAt.
 
@@ -170,7 +170,7 @@ Customer, Address and WishlistItem are **deferred to a later release (D-034).** 
 
 **WishlistItem**: customerId + productId (composite PK), createdAt.
 
-**Cart**: id, tokenHash (unique; the raw token is only in the cookie), customerId?, updatedAt, expiresAt.
+**Cart**: id, tokenHash (bytea, exactly 32 bytes, unique; the raw token is only in the cookie), createdAt, updatedAt, expiresAt (after createdAt). No customerId in release one (D-034).
 
 **CartItem**: cartId + variantId (composite PK), quantity (`CHECK 1..10`).
 
@@ -277,7 +277,7 @@ Staff invites, password-reset tokens and MFA recovery codes are designed with ad
 | 8 | `pg_trgm`; `product.search_vector` with its trigger functions, triggers and backfill; GIN and trigram indexes (§3.1, §4) |
 | 9 | Low-stock view `low_stock_variant` and the expression index `inventory_level_low_stock_idx` (migration `20261022233000_inventory_low_stock`, D-090) |
 | 10 | No schema change; data migration `20261023120000_rehma_foundation_page` inserts the `rehma-foundation` page as a `DRAFT` placeholder with `requires_verification` (Q10-9, D-093) |
-| 11 | Cart, CartItem |
+| 11 | Cart, CartItem (migration `20261023180000_guest_cart`; `token_hash` BYTEA of 32 bytes; no customer column until accounts, D-034; `phase-11-plan.md` §14.1). Approved (D-100) |
 | 13 | Enquiry, WhatsAppClick |
 | 15 | Order, OrderItem, OrderStatusEvent, Shipment, Payment, PaymentEvent, Refund; `StockReservation.orderId`; the GST rules model (D-033) |
 | Deferred (D-034) | Customer, Address, WishlistItem, customer sessions |

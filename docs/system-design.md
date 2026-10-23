@@ -70,10 +70,10 @@ All lines of a cart are reserved in one transaction, locking variant rows in a c
 
 ## 3. Cart
 
-- A cart has a random 256-bit token stored in an `httpOnly`, `Secure`, `SameSite=Lax` cookie. (Deferred with accounts, D-034:) customers' carts are linked to their account and merged on sign-in (quantities summed, capped at availability).
+- A cart has a random 256-bit token stored in an `httpOnly`, `Secure`, `SameSite=Lax` cookie (`__Host-sp_cart`); only its SHA-256 hash is stored. The cart and cookie are created by the first successful add, never by reading (D-099). (Deferred with accounts, D-034:) customers' carts are linked to their account and merged on sign-in (quantities summed, capped at availability).
 - Cart lines store variant ID and quantity only. Prices are never taken from the client. Every cart read re-prices from current variant prices.
-- Per-line quantity limit: 10 by default (configurable) to limit hoarding.
-- Carts expire after 30 days of inactivity.
+- Per-line quantity limit: 10 by default (configurable lower; the database CHECK holds 10) to limit hoarding. At most 30 distinct lines per cart (D-099).
+- Carts expire after 30 days of inactivity (the last write); an hourly job deletes them.
 
 ## 4. Checkout
 

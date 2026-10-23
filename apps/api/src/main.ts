@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { ConfigError, loadConfig, type Config } from "./platform/config.ts";
 import { checkDb, createDb } from "./platform/db.ts";
 import { createApp } from "./platform/http/app.ts";
+import { startCartCleanupJob } from "./modules/cart/job.ts";
 import { startExpiryJob } from "./modules/inventory/job.ts";
 import { createLogger } from "./platform/logger.ts";
 
@@ -37,13 +38,14 @@ const server = app.listen(config.port, config.host, () => {
 });
 // Releases expired stock reservations every minute (SR-9).
 const expiryJob = startExpiryJob(db, logger);
+// Deletes carts 30 days after their last write, every hour (D-099).
+const cartJob = startCartCleanupJob(db, logger);
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
   // Close the server first: a late query would reopen the database pool.
   server.close(() => {
-    expiryJob
-      .stop()
+    Promise.all([expiryJob.stop(), cartJob.stop()])
       .then(() => db.$disconnect())
       .then(
         () => process.exit(0),

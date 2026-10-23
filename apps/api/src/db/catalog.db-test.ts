@@ -33,6 +33,7 @@ const CASCADES = new Set([
   "admin_invite.admin_user_id",
   "admin_recovery_code.admin_user_id",
   "admin_session.admin_user_id",
+  "cart_item.cart_id",
   "collection_product.collection_id",
   "collection_product.product_id",
   "product_image.product_id",
@@ -80,6 +81,8 @@ describe("tables and scope", () => {
       "admin_session",
       "admin_user",
       "audit_log",
+      "cart",
+      "cart_item",
       "category",
       "collection",
       "collection_product",
@@ -146,8 +149,8 @@ describe("tables and scope", () => {
         unverified: true,
       },
     ]);
-    // 22 tables, less `size` and `page`, which are checked above.
-    expect(counts).toHaveLength(20);
+    // 24 tables, less `size` and `page`, which are checked above.
+    expect(counts).toHaveLength(22);
   });
 });
 
@@ -243,7 +246,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(25);
+    expect(expected).toHaveLength(27);
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -278,7 +281,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(19);
+    expect(rows).toHaveLength(20);
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

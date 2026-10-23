@@ -1,0 +1,281 @@
+/* Shell layout (design-system.md §6; phase-11-plan.md §4.2). A plain sticky
+   bar on the page ground: no blur, no shadow. Pills: flat champagne with a
+   taupe border (champagne on ivory is 1.54:1, too faint alone; §3.4). */
+.pending {
+  min-height: 100dvh;
+}
+
+.skip {
+  position: absolute;
+  inset-inline-start: var(--sp-space-4);
+  inset-block-start: var(--sp-space-2);
+  z-index: 4;
+  padding: var(--sp-space-3) var(--sp-space-4);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+  transform: translateY(-200%);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+.announcement {
+  background: var(--sp-field-1);
+  color: var(--sp-field-1-ink);
+  text-align: center;
+  font-size: var(--sp-step-small);
+  padding: var(--sp-space-2) var(--sp-space-4);
+}
+
+.announcement a {
+  color: inherit;
+}
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--sp-bg);
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "menu home bag"
+    "search search search";
+  align-items: center;
+  gap: var(--sp-space-3) var(--sp-space-4);
+  max-width: var(--sp-page-max);
+  margin-inline: auto;
+  padding: var(--sp-space-2) var(--sp-space-4);
+}
+
+.menuButton {
+  grid-area: menu;
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.home {
+  grid-area: home;
+  display: block;
+  justify-self: start;
+  padding-block: var(--sp-space-2);
+}
+
+/* About 120 px wide on a phone, 160 px on desktop: within the raster's
+   sharp range at 2x (phase-11-plan.md §3.1). */
+.wordmark {
+  width: 7.5rem;
+  height: auto;
+}
+
+.mainLinks {
+  display: none;
+}
+
+.search {
+  grid-area: search;
+  min-width: 0;
+}
+
+.bag {
+  grid-area: bag;
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-2);
+  border: 0;
+  background: transparent;
+  font-weight: var(--sp-weight-medium);
+}
+
+.bag:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2) var(--sp-space-6);
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+  text-decoration: none;
+}
+
+.links a:hover,
+.links a[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+@media (min-width: 64rem) {
+  .bar {
+    grid-template-columns: auto auto 1fr minmax(16rem, 24rem) auto;
+    grid-template-areas: "home links . search bag";
+    padding-inline: var(--sp-space-8);
+  }
+
+  .wordmark {
+    width: 10rem;
+  }
+
+  .menuButton {
+    display: none;
+  }
+
+  .mainLinks {
+    grid-area: links;
+    display: block;
+  }
+}
+
+.pills {
+  max-width: var(--sp-page-max);
+  margin-inline: auto;
+  padding: 0 var(--sp-space-4) var(--sp-space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pills ul {
+  list-style: none;
+  display: flex;
+  gap: var(--sp-space-2);
+  width: max-content;
+}
+
+.pills a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-4);
+  border: var(--sp-border-width) solid var(--sp-line);
+  border-radius: var(--sp-radius-pill);
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+}
+
+.pills a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.pills a:active {
+  transform: scale(0.97);
+}
+
+.pills a[aria-current="page"] {
+  background: var(--sp-ink);
+  border-color: var(--sp-ink);
+  color: var(--sp-bg);
+}
+
+@media (min-width: 64rem) {
+  .pills {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+.menuSheet .links {
+  flex-direction: column;
+  font-size: var(--sp-step-lead);
+}
+
+.main {
+  max-width: var(--sp-page-max);
+  min-height: 60dvh;
+  margin-inline: auto;
+  padding: var(--sp-space-8) var(--sp-space-4) var(--sp-space-16);
+}
+
+@media (min-width: 64rem) {
+  .main {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+.footer {
+  background: var(--sp-field-1);
+  color: var(--sp-field-1-ink);
+}
+
+.footer a {
+  color: inherit;
+}
+
+.footerInner {
+  display: grid;
+  gap: var(--sp-space-12);
+  max-width: var(--sp-page-max);
+  margin-inline: auto;
+  padding: var(--sp-space-16) var(--sp-space-4);
+}
+
+@media (min-width: 64rem) {
+  .footerInner {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+/* The black logo on the aubergine field (§3.4): inverted, so the ink becomes
+   white, 8.22:1 on deep aubergine. */
+.lockup {
+  width: min(100%, 22rem);
+  height: auto;
+  filter: invert(1);
+}
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--sp-space-8);
+}
+
+.groupTitle {
+  margin-block-end: var(--sp-space-2);
+  font-size: var(--sp-step-body);
+}
+
+.groups .links {
+  flex-direction: column;
+  gap: 0;
+}
+
+.contact {
+  display: grid;
+  gap: var(--sp-space-1);
+  font-style: normal;
+}
+
+.contact a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+}
+
+.social {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2) var(--sp-space-6);
+}
+
+.social a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+}

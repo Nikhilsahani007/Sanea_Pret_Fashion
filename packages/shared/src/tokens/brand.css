@@ -23,6 +23,15 @@
   --sp-green: #185a31;
   --sp-green-wash: #edf5f0;
 
+  /* Storefront palette (D-096): proposed implementation colours, not verified
+     brand colours. Contrast in docs/phase-11-plan.md §3.4. The admin does not
+     use them. */
+  --sp-ivory: #f8f4e9;
+  --sp-soft-black: #111111;
+  --sp-champagne: #d8c3b5;
+  --sp-aubergine-deep: #654653;
+  --sp-taupe: #6d6258;
+
   /* Type faces. Panchang and Switzer are not self-hosted yet (B-04), so the
      fallback stacks render until fonts.css declares them. */
   --sp-font-display:

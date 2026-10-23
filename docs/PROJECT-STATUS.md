@@ -4,7 +4,15 @@ Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Next: Phase 11 — Storefront shell, search and cart: not started.** Dependencies: Phases 8, 9 and 10 passed (D-089, D-092, D-095); TD-001 and TD-002 decided (D-085, D-086). Still needed: your planning authorisation, and OD-02 (logo and brand colours, or acceptance of the typeset Panchang wordmark default; B-04). OD-15 (Panchang's "É") is checked during Phase 11.
+**Next: Phase 12 — Landing page: planning on branch `phase-12-landing` from `phase-11-storefront`.** Its visual gate needs your approval and real assets (B-03, B-04, B-06).
+
+**Phase 11 — Storefront shell, search and cart: gate passed (D-136, 2026-10-24).**
+- **Evidence:** commits `728816b`, `17cc2ea`, `3497ea0`, `408e032`, `5e94807`; CI run 40013302382 on draft PR #9, all green; re-check 22 of 22 cart tests (`phase-11-plan.md` §14).
+- **Accepted limitations:** inspector findings move to Phase 12; 27 literal layout measures; no physical touch-device test; screenshot limits (§14.8).
+- **PRs:** #9 (into `phase-10-content`), #8, #7 and #6 are open, draft and unmerged.
+- **OD-02:** logo supplied 2026-10-23 as a raster screenshot; the logo crop and derived transparent versions are in `docs/brand/` (the screenshot is not committed). **Approved in principle (D-096):** the logo as the visual reference; the palette as proposed implementation colours for the storefront only, not verified brand colours; the admin palette unchanged; the contrast safeguards of §3.4 kept. A vector or ≥ 3000 px export is still needed for Phase 12.
+- **OD-15: closed (D-097)**, É verified in the logo and in Panchang 700 and Switzer 400 and 500 (§3.1).
+- **Q11-5:** the caption says "Rahma Foundation"; the project says "Rehma". Stays open until the official name is verified; the `rehma-foundation` slug and the Phase 10 migration are unchanged.
 
 **Phase 10 — Content management: gate passed (D-095, 2026-10-23).**
 - **Evidence:**
@@ -308,10 +316,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:**
-- authorise Phase 11 planning (planning only, as for Phase 10);
-- answer OD-02: supply the logo and brand colours, or accept the typeset Panchang wordmark and the blush and aubergine palette (replaceable through tokens).
+**Me:** the Phase 12 plan (`phase-12-plan.md`) on `phase-12-landing`, then the landing page with marked placeholders.
 
-**Me, after your authorisation:** write `phase-11-plan.md` on a new branch from `phase-10-content`, with no code, install or migration until you approve it.
+**You:** the vector logo (B-04), real product data and at least eight real product photographs (B-06), and the Nishorama screen recording (B-03); Q11-5 when the Foundation's name is verified; the Phase 12 visual approval.
 
-**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged: no two-week exception).
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged).

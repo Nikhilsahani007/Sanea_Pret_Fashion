@@ -106,6 +106,10 @@ export const HANDWRITTEN_CHECKS = [
   { table: "admin_invite", name: "admin_invite_outcome_check" },
   { table: "admin_invite", name: "admin_invite_pending_mfa_check" },
   { table: "admin_recovery_code", name: "admin_recovery_code_hash_check" },
+  // Phase 11 (guest cart, D-099)
+  { table: "cart", name: "cart_token_hash_check" },
+  { table: "cart", name: "cart_expiry_check" },
+  { table: "cart_item", name: "cart_item_quantity_check" },
 ] as const;
 
 /** Views (Phase 9, Q9-1): read with $queryRaw; Prisma does not model them. */

@@ -15,6 +15,7 @@ import {
   authRouter,
   type AuthLimits,
 } from "../../modules/auth/router.ts";
+import { CART_WRITE_LIMIT, cartRouter } from "../../modules/cart/router.ts";
 import { catalogueAdminRouter } from "../../modules/catalogue/admin-router.ts";
 import { cataloguePublicRouter } from "../../modules/catalogue/public-router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
@@ -54,6 +55,8 @@ export type AppOptions = {
   readonly media?: MediaOptions;
   /** Test seam: the search rate limit (default 60 per minute per IP). */
   readonly searchLimit?: { windowMs: number; limit: number };
+  /** Test seam: the cart write limit (default 60 per minute per IP). */
+  readonly cartLimit?: { windowMs: number; limit: number };
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -67,6 +70,7 @@ export function createApp({
   authLimits = DEFAULT_AUTH_LIMITS,
   media: mediaOptions = {},
   searchLimit = SEARCH_LIMIT,
+  cartLimit = CART_WRITE_LIMIT,
 }: AppOptions): Express {
   const deps: AuthDeps | undefined = db
     ? { db, config, logger, now, argon2 }
@@ -105,6 +109,7 @@ export function createApp({
       app.use(contentPublicRouter(deps, media.storage));
       app.use(cataloguePublicRouter(deps, media.storage));
       app.use(searchRouter(deps, media.storage, searchLimit));
+      app.use(cartRouter(deps, media.storage, cartLimit));
     }
   }
   for (const router of routers) app.use(router);

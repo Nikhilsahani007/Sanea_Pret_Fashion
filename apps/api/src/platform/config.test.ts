@@ -43,6 +43,7 @@ describe("loadConfig()", () => {
       mediaPublicBaseUrl: "http://127.0.0.1:4010/",
       mediaUploadQueueWaiting: 2,
       reservationTtlMinutes: 15,
+      cartMaxLineQuantity: 10,
     });
   });
 
@@ -113,6 +114,12 @@ describe("loadConfig()", () => {
         "RESERVATION_TTL_MINUTES",
       ],
     ),
+    ...["0", "11", "1.5", " 5", "05", "ten"].map(
+      (v): [Record<string, string>, string] => [
+        { CART_MAX_LINE_QUANTITY: v },
+        "CART_MAX_LINE_QUANTITY",
+      ],
+    ),
   ])("rejects %j", (override, name) => {
     const found = problems({ ...valid, ...override });
     expect(found).toHaveLength(1);
@@ -144,6 +151,17 @@ describe("loadConfig()", () => {
       loadConfig({ ...valid, RESERVATION_TTL_MINUTES: "" })
         .reservationTtlMinutes,
     ).toBe(15);
+  });
+
+  it("accepts CART_MAX_LINE_QUANTITY 1 to 10, default 10 (D-099)", () => {
+    for (const v of ["1", "5", "9", "10"])
+      expect(
+        loadConfig({ ...valid, CART_MAX_LINE_QUANTITY: v }).cartMaxLineQuantity,
+      ).toBe(Number(v));
+    expect(loadConfig(valid).cartMaxLineQuantity).toBe(10);
+    expect(
+      loadConfig({ ...valid, CART_MAX_LINE_QUANTITY: "" }).cartMaxLineQuantity,
+    ).toBe(10);
   });
 
   it("requires https origins in production", () => {

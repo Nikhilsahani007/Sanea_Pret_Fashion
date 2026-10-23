@@ -41,7 +41,7 @@ export function testApp(
     db?: Db;
   } & Pick<
     AppOptions,
-    "now" | "argon2" | "authLimits" | "media" | "searchLimit"
+    "now" | "argon2" | "authLimits" | "media" | "searchLimit" | "cartLimit"
   > = {},
 ) {
   const lines: string[] = [];
@@ -63,6 +63,7 @@ export function testApp(
     ...(options.authLimits ? { authLimits: options.authLimits } : {}),
     ...(options.media ? { media: options.media } : {}),
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
+    ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
   });
   return { app, lines, config };
 }

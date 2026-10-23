@@ -1,21 +1,25 @@
 /*
- * Storefront semantic layer (design-system.md §5): blush ground, aubergine ink.
- * The names match admin.css so components read the same properties.
+ * Storefront semantic layer (phase-11-plan.md §3.3, D-096): ivory ground, soft
+ * black ink, champagne surfaces, deep aubergine actions, taupe secondary text
+ * and borders. The names match admin.css so components read the same
+ * properties. Safeguards (§3.4): taupe is never small text on champagne;
+ * champagne surfaces on ivory carry a taupe border; a hover never relies on
+ * the aubergine-to-black step alone.
  */
 :root {
-  --sp-bg: var(--sp-blush);
-  --sp-surface: var(--sp-blush-deep);
-  --sp-surface-alt: var(--sp-blush-deep);
+  --sp-bg: var(--sp-ivory);
+  --sp-surface: var(--sp-champagne);
+  --sp-surface-alt: var(--sp-champagne);
   --sp-paper: var(--sp-white);
-  --sp-line: var(--sp-aubergine-muted);
-  --sp-field-border: var(--sp-aubergine-muted);
-  --sp-ink: var(--sp-aubergine);
-  --sp-muted: var(--sp-aubergine-muted);
-  --sp-accent: var(--sp-aubergine);
-  --sp-accent-ink: var(--sp-blush);
-  --sp-field-1: var(--sp-aubergine);
-  --sp-field-1-ink: var(--sp-blush);
-  --sp-focus: var(--sp-aubergine);
+  --sp-line: var(--sp-taupe);
+  --sp-field-border: var(--sp-taupe);
+  --sp-ink: var(--sp-soft-black);
+  --sp-muted: var(--sp-taupe);
+  --sp-accent: var(--sp-aubergine-deep);
+  --sp-accent-ink: var(--sp-ivory);
+  --sp-field-1: var(--sp-aubergine-deep);
+  --sp-field-1-ink: var(--sp-ivory);
+  --sp-focus: var(--sp-aubergine-deep);
   --sp-danger: var(--sp-red);
   --sp-danger-surface: var(--sp-red-wash);
   --sp-success: var(--sp-green);

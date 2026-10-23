@@ -44,7 +44,7 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | 404 | `NOT_FOUND` |
 | 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB; image upload over 15 MB) |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`; on the image upload, a `Content-Type` other than `image/jpeg`, `image/png` or `image/webp`, or file bytes that are not one of those formats or do not match the declared type). The status and code are the same on every route; the `message` is route-specific: JSON routes keep the JSON message, and the image upload has an image-specific message |
-| 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
+| 409 | `OUT_OF_STOCK`, `CART_FULL` (a cart already has 30 distinct lines, D-099), `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
 | 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
 | 429 | `RATE_LIMITED` (sent by the rate-limit middleware with `Retry-After` and `RateLimit` headers), `UPLOAD_QUEUE_FULL` (admin image upload only: this API process already has one upload processing and its waiting capacity full, `MEDIA_UPLOAD_QUEUE_WAITING`, default 2; nothing is stored; **no `Retry-After` or `RateLimit` header**, because no reliable wait estimate exists. Sent by the upload queue, not the rate-limit middleware) |
 | 500 | `INTERNAL_ERROR` (no stack traces) |
@@ -77,10 +77,17 @@ Public catalogue and search responses carry `Cache-Control: public, max-age=60` 
 ### Cart
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/cart` | Current cart (creates token cookie if absent). Re-priced lines, availability warnings, subtotal. |
-| POST | `/cart/items` | `{ variantId, quantity }`. Adds or increments. |
-| PATCH | `/cart/items/:variantId` | `{ quantity }`. 0 removes. |
-| DELETE | `/cart/items/:variantId` | Remove line. |
+| GET | `/cart` | `{ lines, subtotalPaise, currency, itemCount, warnings }`, `no-store`. **Never creates a cart or sets a cookie (D-099):** with no valid `__Host-sp_cart` cookie it returns the empty cart. Every read re-prices from current variant prices; each line has `variantId`, `productSlug`, `productName`, `colour` (`name`, `swatchHex`), `size`, `quantity`, `available` (true while on sale), `unitPricePaise`, `lineTotalPaise`, `stock` and `image` (derivatives only). `stock` is the catalogue's public state (D-135, amending D-099): `IN_STOCK`, `LOW_STOCK` with `remaining` (only at or below the low-stock level) or `SOLD_OUT` (D-082 as amended by Q8-2); no exact count above the low-stock level, so the cart exposes no more stock than the product page. `warnings: [{ variantId, code }]` with `QUANTITY_LIMIT`, `EXCEEDS_AVAILABLE` or `UNAVAILABLE`. A line that is not on sale has `available: false`, `unitPricePaise`, `lineTotalPaise`, `stock` and `image` null, and is left out of the subtotal; `itemCount` counts every line's units. Reading does not renew the cookie. |
+| POST | `/cart/items` | `{ variantId, quantity }` (strict; 1 to the line limit). Adds or increments; a total above the line limit is capped at the limit and the response carries a `QUANTITY_LIMIT` warning for that line. **The first successful add creates the cart and sets `__Host-sp_cart`** (D-099). `404` for an unknown, inactive or not-visible variant (no cart is created). `409 CART_FULL` for a 31st distinct line. Returns the whole cart |
+| PATCH | `/cart/items/:variantId` | `{ quantity }` (strict; 0 to the line limit); 0 removes. `404` if the cart or line does not exist. Returns the whole cart |
+| DELETE | `/cart/items/:variantId` | Removes the line; `404` if the cart or line does not exist. Returns the whole cart |
+
+Cart rules (D-099, `system-design.md` §3):
+- **Token:** 256 random bits in cookie `__Host-sp_cart` (`HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, no `Domain`, `Max-Age` 30 days, renewed by each successful write). Only its SHA-256 hash is stored. An unknown, malformed or expired token is treated as no cart, without saying which.
+- **Writes** need the CSRF token (`X-CSRF-Token`) and an allow-listed storefront Origin. Prices and totals are never accepted from the client (strict schemas).
+- **Limits:** line quantity 1 to `CART_MAX_LINE_QUANTITY` (1 to 10, default 10; the database CHECK holds 10); at most 30 distinct lines; cart writes 60 per minute per IP (`429 RATE_LIMITED`).
+- **Stock:** adding reserves nothing (SR-2); a quantity above availability is kept with a warning, and checkout refuses it.
+- **Expiry:** carts expire 30 days after the last write; an hourly job deletes expired carts.
 
 ### Checkout
 | Method | Path | Description |
