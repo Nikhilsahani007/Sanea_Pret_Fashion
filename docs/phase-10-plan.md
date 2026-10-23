@@ -329,8 +329,8 @@ This avoids two editors for the same links.
 | 3 | The Rehma data migration, validated on disposable databases | Covered by Q10-9, then **a review stop before commit** (validated, §13.1; **approved, D-094**) |
 | 4 | The `content` module: admin and public routes, gate tests | Covered by step 1 |
 | 5 | Admin editors; component and end-to-end tests; screenshots | Covered by step 1 |
-| 6 | Specification amendments; commit and normal push; CI on a draft PR | **The draft PR needs your authorisation** |
-| 7 | **Phase 10 gate:** your review of the test output | **Yes** |
+| 6 | Specification amendments; commit and normal push; CI on a draft PR | **Done:** `df15048`, draft PR #8 (authorised), CI green (§13.5) |
+| 7 | **Phase 10 gate:** your review of the test output | **Passed** 2026-10-23 (D-095) |
 
 ## 12. Risks
 
@@ -342,7 +342,7 @@ This avoids two editors for the same links.
 | Content linking to removed products | Product rows and navigation are resolved at read time, and invisible targets are dropped; publish refuses missing targets |
 | Placeholder or test content reaches production | No content seeding beyond the Rehma draft placeholder; end-to-end text exists only in disposable databases |
 
-## 13. Evidence (2026-10-23, local; migration approved, D-094; gate awaiting your review)
+## 13. Evidence (2026-10-23; migration approved, D-094; gate passed, D-095)
 
 Run on Windows 11, Node 24.11.0, against a disposable PostgreSQL 18.6 container (`postgres:18.6-alpine`, synthetic data only, no production data or secrets).
 
@@ -387,3 +387,20 @@ T-GATE-10 manual row of 4 (visible, draft, archived, no active variant): only th
 ### 13.4 Changes to earlier-phase tests
 
 The migration adds one `page` row, so tests that assumed an empty `page` table now assert the exact approved state instead: `schema.test.ts` (two data inserts, and the Rehma insert is an unpublished draft with `ON CONFLICT`), `catalog.db-test.ts` (the single Rehma draft; 20 other tables empty), `seed.db-test.ts` (page count excludes the Rehma draft).
+
+### 13.5 CI evidence (2026-10-23)
+
+**Run 39899773210** on draft PR #8 (`phase-10-content` → `phase-9-inventory`, `df15048`; Ubuntu 24.04). All jobs succeeded:
+
+| Job | Result |
+|-----|--------|
+| Format, lint, typecheck, test, audit | 37 files, 688 tests; `npm audit` 0 |
+| Database integration tests | 17 files, 381 tests; all 9 `[P10-GATE]` lines (T-GATE-1 to T-GATE-10) printed and passing |
+| Secret scan (Gitleaks) | Success |
+
+### 13.6 Recorded limitations
+
+- **Migration idempotency** (a re-run leaves one row; an existing `rehma-foundation` row is not overwritten) and the **exact placeholder wording** were verified manually on disposable databases (§13.1). No dedicated automated test covers them: `schema.test.ts` checks the insert's shape (`DRAFT`, `requires_verification`, no published or verified columns, `ON CONFLICT ("slug") DO NOTHING`) and `db/content.db-test.ts` checks the migrated row's status and flags, not the wording.
+- PR #8 stays a draft and is not merged; PRs #6 and #7 likewise.
+
+**Gate: passed on 2026-10-23 (D-095), on your explicit approval.**

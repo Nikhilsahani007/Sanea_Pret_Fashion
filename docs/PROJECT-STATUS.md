@@ -4,9 +4,16 @@ Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 10 — Content management: built, tested, committed and pushed on `phase-10-content`; draft PR for CI. Gate awaiting your review.** Plan approved (D-093); migration `20261023120000_rehma_foundation_page` approved (D-094).
-- **Evidence** (`phase-10-plan.md` §13): 688 unit, 381 integration and 11 end-to-end tests pass; T-GATE-1 to T-GATE-10 pass; lint, format and typecheck clean; admin build passes; `npm audit` 0. Nothing installed.
-- **Gate not passed:** it needs your review of the test output and CI.
+**Next: Phase 11 — Storefront shell, search and cart: not started.** Dependencies: Phases 8, 9 and 10 passed (D-089, D-092, D-095); TD-001 and TD-002 decided (D-085, D-086). Still needed: your planning authorisation, and OD-02 (logo and brand colours, or acceptance of the typeset Panchang wordmark default; B-04). OD-15 (Panchang's "É") is checked during Phase 11.
+
+**Phase 10 — Content management: gate passed (D-095, 2026-10-23).**
+- **Evidence:**
+  - commits `fc4764d` and `df15048` on `phase-10-content`;
+  - migration `20261023120000_rehma_foundation_page` (D-094);
+  - CI run 39899773210 on draft PR #8, all green;
+  - T-GATE-1 to T-GATE-10 pass (`phase-10-plan.md` §13).
+- **Limitation:** migration idempotency and the exact placeholder wording were verified manually, not by dedicated automated tests (§13.6).
+- **PRs:** #8 (into `phase-9-inventory`), #7 (into `phase-8-catalogue`) and #6 (into `main`) are open, draft and unmerged.
 
 **Phase 9 — Inventory and stock reservation: gate passed (D-092, 2026-10-23).**
 - **Evidence:**
@@ -301,8 +308,10 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review the Phase 10 gate evidence (`phase-10-plan.md` §13) and CI on the draft PR; approve or reject the gate.
+**You:**
+- authorise Phase 11 planning (planning only, as for Phase 10);
+- answer OD-02: supply the logo and brand colours, or accept the typeset Panchang wordmark and the blush and aubergine palette (replaceable through tokens).
 
-**Me, after your gate approval:** record the gate in `DECISION-LOG.md`; plan Phase 11 only when you authorise it.
+**Me, after your authorisation:** write `phase-11-plan.md` on a new branch from `phase-10-content`, with no code, install or migration until you approve it.
 
-**Me, on 2026-10-29:** recheck `@vitest/coverage-v8`.
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged: no two-week exception).
