@@ -152,7 +152,11 @@ export function Layout() {
           <Links links={header} label="Main" />
         </div>
       </Sheet>
-      <main id="main" tabIndex={-1} className={s.main}>
+      <main
+        id="main"
+        tabIndex={-1}
+        className={`${s.main} ${location.pathname === "/" ? s.wide : ""}`}
+      >
         <Outlet />
       </main>
       <footer className={s.footer}>

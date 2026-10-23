@@ -26,6 +26,14 @@ test.beforeAll(() => {
 });
 
 async function axe(page: Page, label: string) {
+  // Entrance animations fade content in; measure contrast once they end.
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      // Scroll-driven animations (the monument) never finish; skip them.
+      .filter((a) => a.timeline instanceof DocumentTimeline)
+      .every((a) => a.playState !== "running"),
+  );
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();

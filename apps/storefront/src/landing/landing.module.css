@@ -1,0 +1,311 @@
+/* The landing page (phase-12-plan.md §5; design-system.md §3, §6, §8). The
+   hero is full bleed; the monument is the logo at about 92 % of the width,
+   bottom-anchored on a neutral scrim. Square corners; no resting shadows. */
+.pending {
+  min-height: 100dvh;
+}
+
+.landing {
+  display: grid;
+  gap: var(--sp-space-8);
+}
+
+@media (min-width: 48rem) {
+  .landing {
+    gap: var(--sp-space-16);
+  }
+}
+
+/* The page column for the sections after the hero. */
+.inner {
+  width: 100%;
+  max-width: var(--sp-page-max);
+  margin-inline: auto;
+  padding-inline: var(--sp-space-4);
+}
+
+@media (min-width: 64rem) {
+  .inner {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  min-height: var(--hero-height, 80svh);
+  overflow: hidden;
+  background: var(--sp-field-1);
+  color: var(--sp-field-1-ink);
+}
+
+.field {
+  align-content: end;
+}
+
+.slides {
+  position: absolute;
+  inset: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.03);
+  transition:
+    opacity 600ms var(--sp-ease-out),
+    transform 1200ms var(--sp-ease-out);
+}
+
+.active {
+  opacity: 1;
+  transform: none;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A neutral scrim in the lower part only, so the photograph stays clean
+   above and the white monument and text keep their contrast. */
+.scrim {
+  position: absolute;
+  /* From a third of the way down, so the campaign line and CTA sit on it. */
+  inset: 30% 0 0;
+  /* The one allowed gradient: a neutral scrim under text on a photograph. */
+  /* prettier-ignore */
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--sp-ink) 55%, transparent)); /* taste-skill-ignore */
+}
+
+.slideText {
+  position: absolute;
+  inset-inline: var(--sp-space-4);
+  /* Above the monument: the logo is 236/889 of its width high (about
+     26.5vw at full width), then a gap. */
+  inset-block-end: calc(var(--sp-space-16) + 27vw + var(--sp-space-6));
+  z-index: 1;
+  display: grid;
+  gap: var(--sp-space-4);
+  justify-items: start;
+  max-width: 36rem;
+  color: var(--sp-paper);
+}
+
+.campaign {
+  font-size: var(--sp-step-lead);
+  line-height: var(--sp-leading-tight);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-space-6);
+  background: var(--sp-paper);
+  color: var(--sp-ink);
+  text-decoration: none;
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+}
+
+.cta:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.cta:active {
+  transform: scale(0.97);
+}
+
+.monumentWrap {
+  position: relative;
+  align-self: end;
+  padding: 0 var(--sp-space-4) var(--sp-space-16);
+  pointer-events: none;
+  animation: settle linear both;
+  animation-timeline: view();
+  animation-range: exit 0% exit 100%;
+}
+
+@keyframes settle {
+  to {
+    transform: scale(0.96);
+  }
+}
+
+@media (min-width: 64rem) {
+  .monumentWrap {
+    padding-inline: var(--sp-space-8);
+  }
+
+  .slideText {
+    inset-inline: var(--sp-space-8);
+    inset-block-end: calc(var(--sp-space-16) + 26vw + var(--sp-space-8));
+  }
+}
+
+.controls {
+  position: absolute;
+  inset-inline: var(--sp-space-4);
+  inset-block-end: var(--sp-space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 64rem) {
+  .controls {
+    inset-inline: var(--sp-space-8);
+  }
+}
+
+.dots {
+  display: flex;
+  gap: var(--sp-space-1);
+}
+
+/* The bar is small; the button around it is a 44 px target. */
+.dot {
+  display: grid;
+  place-items: center;
+  width: var(--sp-target-min);
+  height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.dot span {
+  display: block;
+  width: 2rem;
+  height: 0.25rem;
+  background: color-mix(in srgb, var(--sp-paper) 55%, transparent);
+}
+
+.dot[aria-current="true"] span {
+  background: var(--sp-paper);
+}
+
+.pause {
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--sp-paper);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.pause:disabled {
+  opacity: 0.6;
+}
+
+.hero :focus-visible {
+  outline-color: var(--sp-paper);
+}
+
+.row {
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.rowHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--sp-space-4);
+}
+
+.rowTitle {
+  font-size: var(--sp-step-head);
+  letter-spacing: var(--sp-tracking-display);
+}
+
+.arrows {
+  display: none;
+  gap: var(--sp-space-2);
+}
+
+.arrows button {
+  min-width: var(--sp-target-min);
+  min-height: var(--sp-target-min);
+  border: var(--sp-border-width) solid var(--sp-ink);
+  background: transparent;
+  font-size: var(--sp-step-lead);
+}
+
+.arrows button:hover {
+  background: var(--sp-ink);
+  color: var(--sp-bg);
+}
+
+@media (min-width: 64rem) {
+  .arrows {
+    display: flex;
+  }
+}
+
+.track {
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 2 * var(--sp-space-4)) / 2.3);
+  gap: var(--sp-space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+@media (min-width: 64rem) {
+  .track {
+    grid-auto-columns: calc((100% - 4 * var(--sp-space-6)) / 4.5);
+    gap: var(--sp-space-6);
+  }
+}
+
+.cell {
+  scroll-snap-align: start;
+}
+
+.tabbed {
+  display: grid;
+  gap: var(--sp-space-8);
+}
+
+.tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2) var(--sp-space-6);
+}
+
+.tab {
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sp-muted);
+  font-size: var(--sp-step-lead);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--sp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.tab:hover {
+  color: var(--sp-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transform: none;
+  }
+
+  .monumentWrap {
+    animation: none;
+  }
+}

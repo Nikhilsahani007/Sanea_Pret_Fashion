@@ -6,7 +6,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { CartPage } from "./cart/CartPage.tsx";
 import { CartProvider } from "./cart/CartProvider.tsx";
 import { ContentPage } from "./pages/ContentPage.tsx";
-import { Home } from "./pages/Home.tsx";
+import { Landing } from "./landing/Landing.tsx";
 import { SearchPage } from "./search/SearchPage.tsx";
 import { Layout } from "./shell/Layout.tsx";
 import { NotFound } from "./shell/NotFound.tsx";
@@ -15,7 +15,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Landing />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/pages/:slug" element={<ContentPage />} />

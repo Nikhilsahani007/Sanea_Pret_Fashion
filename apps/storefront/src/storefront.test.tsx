@@ -78,7 +78,7 @@ describe("shell", () => {
   it("draws no announcement, pills or footer links when nothing is published", async () => {
     stubApi({});
     renderAt("/");
-    await screen.findByRole("heading", { name: "Find something to wear" });
+    await screen.findByRole("heading", { name: "Sanéa Pret", level: 1 });
     expect(screen.queryByRole("navigation", { name: "Categories" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Menu" })).toBeNull();
     expect(screen.queryByRole("navigation", { name: /links$/ })).toBeNull();

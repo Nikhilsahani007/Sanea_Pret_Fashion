@@ -26,8 +26,24 @@ export type Navigation = {
   } | null;
 };
 
+export type ProductRow = { title: string; items: ProductSummary[] };
+
+export type HeroSlide = {
+  desktopImage: Image;
+  mobileImage: Image;
+  campaignLine: string | null;
+  ctaLabel: string;
+  href: string;
+  focalPoint: { x: number; y: number } | null;
+};
+
+/** `GET /content/home`: published blocks only (Phase 10, D-093). */
 export type Home = {
   announcement: { text: string; href: string | null } | null;
+  hero?: { slides: HeroSlide[] };
+  newIns?: ProductRow | null;
+  row2?: ProductRow | null;
+  tabbedGrid?: { tabs: { label: string; items: ProductSummary[] }[] } | null;
 };
 
 export type Image = {

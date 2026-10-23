@@ -152,6 +152,8 @@ export default async function globalSetup() {
   if (!link) throw new Error("create-owner did not print a link");
   process.env.E2E_OWNER_INVITE_URL = link;
   process.env.E2E_API_URL = `http://127.0.0.1:${API_PORT}`;
+  // For the landing seed's placeholder derivatives (phase-12-plan.md P12-4).
+  process.env.E2E_MEDIA_DIR = media;
 
   return async () => {
     stopping = true;

@@ -8,7 +8,7 @@ import s from "./shell.module.css";
 
 export const BRAND_NAME = "Sanéa Pret";
 /** The logo's own printed tagline, read out with it. */
-const TAGLINE = "Effortless Elegance"; // taste-skill-ignore
+export const TAGLINE = "Effortless Elegance"; // taste-skill-ignore
 
 export function Wordmark() {
   return (
@@ -31,6 +31,25 @@ export function Lockup() {
       alt={`${BRAND_NAME}, ${TAGLINE}`}
       width={889}
       height={334}
+    />
+  );
+}
+
+/**
+ * The monument (phase-12-plan.md P12-1): the wordmark at hero scale. It is
+ * decorative here, since the page's h1 carries the name. Rendered from the
+ * raster crop for development only; the vector export replaces it (B-04).
+ */
+export function Monument() {
+  return (
+    <img
+      className={s.monument}
+      src={wordmark}
+      alt=""
+      aria-hidden="true"
+      width={889}
+      height={236}
+      fetchPriority="high"
     />
   );
 }
