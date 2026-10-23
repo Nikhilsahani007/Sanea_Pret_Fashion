@@ -186,7 +186,7 @@ The product card's "Add" opens a **size and colour sheet** fed by `/catalogue/pr
 ### 5.1 Migration (needs your review before commit)
 
 Tables as in `database-design.md` §3.3:
-- `cart`: `id` (uuid), `token_hash` (text, unique; SHA-256 of the raw token), `customer_id` (nullable; no table yet), `created_at`, `updated_at`, `expires_at`.
+- `cart`: `id` (uuid), `token_hash` (`BYTEA`, unique; SHA-256 of the raw token, exactly 32 bytes by CHECK, as for `admin_session`), `created_at`, `updated_at`, `expires_at`. **As written (§14.1):** `BYTEA` rather than text, following the admin-session convention; **no `customer_id`**: accounts are deferred (D-034), an existing test refuses any `customer` column, and a column that is always null is speculative. Accounts add it when they are scheduled.
 - `cart_item`: `cart_id` and `variant_id` (composite primary key), `quantity` (`CHECK 1..10`), `created_at`, `updated_at`; foreign keys to `cart` (cascade delete) and `product_variant` (restrict).
 - An index on `cart.expires_at` for the cleanup job.
 - `RESTRICT` on the variant is safe: no route deletes products or variants (they are deactivated), and the database refuses a deletion that would orphan a cart line.
@@ -325,7 +325,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 | 1 | Approve this plan and Q11-1 to Q11-11 (OD-02 recorded in principle, D-096; OD-15 closed, D-097) | **Done in principle** (D-098, D-099); Q11-5 open |
 | 2 | Storefront dependencies (§9) and the Vite app | Covered by Q11-9 (and Q11-10 for Lighthouse) |
 | 3 | Palette tokens and storefront base styles | Covered by Q11-3 |
-| 4 | The cart migration, validated on disposable databases | **A review stop before commit** |
+| 4 | The cart migration, validated on disposable databases | **Approved (D-100)** after review |
 | 5 | The `cart` module, cleanup job and integration tests | Covered by step 1 |
 | 6 | Shell, search, size sheet, drawer; component and e2e tests; screenshots; §10 gates | Covered by step 1 |
 | 7 | Commit, normal push, CI on a draft PR | **The draft PR needs your authorisation** |
@@ -340,3 +340,49 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 | Carts filling the database | Cookie only on first add; 30 lines; rate limit; hourly cleanup |
 | The cart shows a price that checkout later changes | Every cart read re-prices; checkout re-prices again and refuses changes (Phase 15) |
 | The foundation's name is wrong on the site | Q11-5 before anything about it is shown; the page stays a 404 until the Owner verifies it |
+
+## 14. Progress and evidence (2026-10-23)
+
+### 14.1 Step 2: the cart migration (approved, D-100)
+
+**Migration** `prisma/migrations/20261023180000_guest_cart/migration.sql`: two new tables, three indexes, two foreign keys, three handwritten CHECKs. No existing table, row or constraint changes; no data.
+
+| Object | Definition |
+|--------|------------|
+| `cart` | `id` UUID `uuidv7()`; `token_hash` BYTEA NOT NULL; `created_at`, `updated_at`, `expires_at` TIMESTAMPTZ(3) |
+| `cart_item` | `cart_id`, `variant_id` UUID (composite primary key); `quantity` INTEGER; `created_at`, `updated_at` TIMESTAMPTZ(3) |
+| Indexes | `cart_token_hash_key` (unique), `cart_expires_at_idx` (cleanup job), `cart_item_variant_id_idx` |
+| Foreign keys | `cart_item_cart_id_fkey` → `cart` **ON DELETE CASCADE**; `cart_item_variant_id_fkey` → `product_variant` **ON DELETE RESTRICT** |
+| CHECKs | `cart_token_hash_check` `octet_length = 32`; `cart_expiry_check` `expires_at > created_at`; `cart_item_quantity_check` `quantity BETWEEN 1 AND 10` |
+
+**Schema:** models `Cart` and `CartItem`; `ProductVariant.cartItems`. Generated with `prisma migrate diff` from a database at the Phase 10 state, then the CHECKs added by hand and registered in `apps/api/src/db/handwritten.ts`.
+
+**Differences from §5.1 as planned:** `BYTEA` instead of text for the hash; no `customer_id` (reasons in §5.1).
+
+**Validation on disposable databases** (container `postgres:18.6-alpine` on loopback, synthetic data only):
+
+| Check | Result |
+|-------|--------|
+| Fresh database, `prisma migrate deploy` | 6 migrations applied; `migrate status` up to date; `migrate diff --exit-code` 0 (no drift) |
+| Re-run `migrate deploy` | "No pending migrations to apply" |
+| Upgrade from the Phase 10 state through Prisma, with a category, product, colour, variant and the Rehma draft present | `migrate status` lists only `20261023180000_guest_cart`; deploy applies it; the variant (129900 paise) and the Rehma page (`DRAFT`) unchanged; up to date; drift 0 |
+| Down and up | Tables dropped and the migration record removed: drift reported (exit 2); deploy re-applies it; drift 0 |
+| CHECKs on the upgraded database | Quantity 11: `cart_item_quantity_check`; quantity 10 accepted |
+| Variant in a cart deleted | `violates RESTRICT setting of foreign key constraint "cart_item_variant_id_fkey"` |
+| Cart deleted | Its lines deleted (0 left) |
+
+**Tests:**
+- `apps/api/src/db/cart.db-test.ts` (new, 9 tests): 32-byte hash only (31 and 33 refused); unique hash; expiry after creation; the exact column list (no price, total or customer column); quantity 0, −1 and 11 refused, 10 accepted, an update to 11 refused; one line per variant; unknown cart or variant refused; lines deleted with their cart; a variant in a cart cannot be deleted.
+- `schema.test.ts`: the approved table list gains `cart` and `cart_item`; a new static test checks the hash column, the unique index, no price or token column, the cascade and restrict rules, the quantity CHECK, and that the migration alters only its own tables.
+- `catalog.db-test.ts`: table list, foreign-key count (25 → 27), cascade list (`cart_item.cart_id`), uuid primary keys (19 → 20), empty-table count (20 → 22).
+
+**Results** (final files): unit 692 passed (37 files); integration 390 passed (18 files); typecheck, lint, design tokens and format clean.
+
+### 14.2 Step 1: storefront foundation
+
+- `apps/storefront/package.json`: the admin's exact versions (React 19.3.0, React Router 8.4.0, `@vitejs/plugin-react` 6.1.2, types 19.3.0). `npm install` changed only the storefront's own entry in `package-lock.json`; no package was added.
+- Vite on `localhost:5173` with the `/api` proxy; `index.html` (`lang="en-IN"`); global styles on the shared tokens; the placeholder `src/index.ts` removed.
+- Tokens: five proposed primitives in `brand.css` (D-096); `storefront.css` mapped to them; `admin.css` unchanged. The token check passes.
+- The logo: `src/assets/logo-wordmark.png` in the header (120 px wide on a phone, 160 px on desktop), `logo-lockup.png` in the footer, inverted to white on deep aubergine (8.22:1). Accessible name "Sanéa Pret".
+- Production build passes (JS 82.45 kB gzipped). Screenshots at 390 and 1440 px checked: the logo, É and footer render.
+

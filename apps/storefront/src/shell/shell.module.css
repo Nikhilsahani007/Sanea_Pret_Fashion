@@ -1,0 +1,87 @@
+/* Shell layout (design-system.md §6; phase-11-plan.md §4.2). A plain sticky
+   bar on the page ground: no blur, no shadow. */
+.skip {
+  position: absolute;
+  inset-inline-start: var(--sp-space-4);
+  inset-block-start: var(--sp-space-2);
+  z-index: 3;
+  padding: var(--sp-space-3) var(--sp-space-4);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+  transform: translateY(-200%);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--sp-bg);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-6);
+  max-width: var(--sp-page-max);
+  min-height: var(--sp-space-16);
+  margin-inline: auto;
+  padding-inline: var(--sp-space-4);
+}
+
+.home {
+  display: block;
+  padding-block: var(--sp-space-2);
+}
+
+/* About 120 px wide on a phone, 160 px on desktop: within the raster's
+   sharp range at 2x (phase-11-plan.md §3.1). */
+.wordmark {
+  width: 7.5rem;
+  height: auto;
+}
+
+@media (min-width: 48rem) {
+  .bar {
+    padding-inline: var(--sp-space-8);
+  }
+
+  .wordmark {
+    width: 10rem;
+  }
+}
+
+.main {
+  max-width: var(--sp-page-max);
+  min-height: 60dvh;
+  margin-inline: auto;
+  padding: var(--sp-space-8) var(--sp-space-4) var(--sp-space-16);
+}
+
+@media (min-width: 48rem) {
+  .main {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+.footer {
+  background: var(--sp-field-1);
+  color: var(--sp-field-1-ink);
+}
+
+.footerInner {
+  max-width: var(--sp-page-max);
+  margin-inline: auto;
+  padding: var(--sp-space-16) var(--sp-space-4);
+}
+
+/* The black logo on the aubergine field (§3.4): inverted, so the ink becomes
+   white, 8.22:1 on deep aubergine. */
+.lockup {
+  width: min(100%, 22rem);
+  height: auto;
+  filter: invert(1);
+}

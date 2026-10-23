@@ -138,6 +138,8 @@ describe("Phase 6 scope and conventions", () => {
         "admin_session",
         "admin_user",
         "audit_log",
+        "cart",
+        "cart_item",
         "category",
         "collection",
         "collection_product",
@@ -209,6 +211,31 @@ describe("Phase 6 scope and conventions", () => {
     );
     expect(sql).toMatch(/"token_hash" BYTEA NOT NULL/);
     expect(schema).not.toMatch(/^\s+token\s/m);
+  });
+
+  it("stores only the cart token's hash and never a price in the cart (D-099)", () => {
+    const cart = readFileSync(
+      new URL("20261023180000_guest_cart/migration.sql", migrations),
+      "utf8",
+    );
+    expect(cart).toMatch(/"token_hash" BYTEA NOT NULL/);
+    expect(cart).toContain('CREATE UNIQUE INDEX "cart_token_hash_key"');
+    const ddl = cart.replace(/--.*$/gm, "");
+    expect(ddl).not.toMatch(/"token" |paise|price/i);
+    expect(cart).toMatch(
+      /"cart_item" ADD CONSTRAINT "[a-z_]+" FOREIGN KEY \("cart_id"\) REFERENCES "cart"\("id"\) ON DELETE CASCADE/,
+    );
+    expect(cart).toMatch(
+      /"cart_item" ADD CONSTRAINT "[a-z_]+" FOREIGN KEY \("variant_id"\) REFERENCES "product_variant"\("id"\) ON DELETE RESTRICT/,
+    );
+    expect(cart).toMatch(/CHECK \("quantity" BETWEEN 1 AND 10\)/);
+    // Only new tables: nothing existing is altered, dropped or filled.
+    expect(ddl).not.toMatch(/DROP |INSERT INTO|UPDATE "/);
+    expect(
+      [...ddl.matchAll(/ALTER TABLE "([a-z_]+)"/g)].every((m) =>
+        ["cart", "cart_item"].includes(m[1]!),
+      ),
+    ).toBe(true);
   });
 
   it("makes admin email case-insensitive and unique", () => {
