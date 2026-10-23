@@ -1,6 +1,6 @@
 # Phase 11 Plan — Storefront Shell, Search and Cart
 
-Status: **Approved in principle on 2026-10-23 (D-098)**, with Q11-1 to Q11-4 and Q11-6 to Q11-11 as recommended, Q11-10 resolved to option A (§9), and the cart contract reconciled (D-099). **Q11-5 stays open.** The cart migration is a separate approval gate: it stops for your review before commit, and is applied only to disposable test databases until then. · Date: 2026-10-23 · Base: `phase-11-storefront` from `phase-10-content` at `4634762` (Phase 10 gate passed, D-095; draft PRs #6, #7 and #8 open and unmerged)
+Status: **Gate passed on 2026-10-24 (D-136).** Approved in principle on 2026-10-23 (D-098), with Q11-1 to Q11-4 and Q11-6 to Q11-11 as recommended, Q11-10 resolved to option A (§9), and the cart contract reconciled (D-099). **Q11-5 stays open.** The cart migration is a separate approval gate: it stops for your review before commit, and is applied only to disposable test databases until then. · Date: 2026-10-23 · Base: `phase-11-storefront` from `phase-10-content` at `4634762` (Phase 10 gate passed, D-095; draft PRs #6, #7 and #8 open and unmerged)
 
 This plan covers Phase 11 of `MASTER-IMPLEMENTATION-INDEX.md`. It also records the logo you supplied and the proposed palette: both **approved in principle on 2026-10-23 (D-096)**, the palette as proposed implementation colours, not verified brand colours, with the admin palette unchanged. OD-15 is closed (D-097). Q11-5 stays open.
 
@@ -486,4 +486,8 @@ These run against the local `vite preview` build, not production hosting.
 | 8 | §10 gates 1, 5 and 6 run and recorded | §14.5: Taste lint 0/0; **inspector 3 FAIL and 2 WARN per page, recorded with reasons** (no photography, no first-screen monument or motion until Phase 12); checklist; Lighthouse reports | **Run and recorded; the inspector findings need your acceptance** |
 | 9 | Screenshots of every shell state at three widths | §14.7 list; the menu sheet only at 390 px (it is a phone control). Error states (API down) are covered by component tests, not screenshots | Met, with that limit |
 
-**Gate: not recorded.** It waits for your explicit approval of this evidence.
+### 14.9 CI and the gate
+
+- **CI run 40013302382** on draft PR #9 (`phase-11-storefront` → `phase-10-content`, `5e94807`; Ubuntu 24.04): format, lint, typecheck, test, audit (39 files, 713 tests; design tokens OK; `npm audit` 0), database integration tests (19 files, 403 tests, all 13 `[P11-GATE]` lines), Gitleaks: all success.
+- **Re-check** on 2026-10-24 at `5e94807` on a disposable PostgreSQL 18.6: 22 of 22 cart contract and migration tests pass.
+- **Gate: passed on 2026-10-24 (D-136)**, on your explicit approval, accepting the limitations recorded in §14.8 as they stand: the inspector findings move to Phase 12; the 27 literal layout measures stay; no physical touch-device test; the screenshot limits.

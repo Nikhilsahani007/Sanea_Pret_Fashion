@@ -4,7 +4,12 @@ Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 11 — Storefront shell, search and cart: built and tested; gate awaiting your review.** Plan D-098, cart contract D-099, migration D-100 (`3497ea0`). Evidence in `phase-11-plan.md` §14: 713 unit, 402 integration (12 cart gate tests) and 15 end-to-end tests; Taste lint clean; inspector results recorded with reasons; Lighthouse 13.5.0 accessibility 100 and performance 93 to 94 on three pages. Q11-12 approved (D-135): the cart shows public stock states only.
+**Next: Phase 12 — Landing page: planning on branch `phase-12-landing` from `phase-11-storefront`.** Its visual gate needs your approval and real assets (B-03, B-04, B-06).
+
+**Phase 11 — Storefront shell, search and cart: gate passed (D-136, 2026-10-24).**
+- **Evidence:** commits `728816b`, `17cc2ea`, `3497ea0`, `408e032`, `5e94807`; CI run 40013302382 on draft PR #9, all green; re-check 22 of 22 cart tests (`phase-11-plan.md` §14).
+- **Accepted limitations:** inspector findings move to Phase 12; 27 literal layout measures; no physical touch-device test; screenshot limits (§14.8).
+- **PRs:** #9 (into `phase-10-content`), #8, #7 and #6 are open, draft and unmerged.
 - **OD-02:** logo supplied 2026-10-23 as a raster screenshot; the logo crop and derived transparent versions are in `docs/brand/` (the screenshot is not committed). **Approved in principle (D-096):** the logo as the visual reference; the palette as proposed implementation colours for the storefront only, not verified brand colours; the admin palette unchanged; the contrast safeguards of §3.4 kept. A vector or ≥ 3000 px export is still needed for Phase 12.
 - **OD-15: closed (D-097)**, É verified in the logo and in Panchang 700 and Switzer 400 and 500 (§3.1).
 - **Q11-5:** the caption says "Rahma Foundation"; the project says "Rehma". Stays open until the official name is verified; the `rehma-foundation` slug and the Phase 10 migration are unchanged.
@@ -311,8 +316,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review the Phase 11 evidence and gate checklist (`phase-11-plan.md` §14.8, `docs/reviews/storefront/2026-10-24/`) and CI on the draft PR; approve or reject the gate.
+**Me:** the Phase 12 plan (`phase-12-plan.md`) on `phase-12-landing`, then the landing page with marked placeholders.
 
-**Still open:** Q11-5 (the Foundation's name); the vector logo before Phase 12 (B-04).
+**You:** the vector logo (B-04), real product data and at least eight real product photographs (B-06), and the Nishorama screen recording (B-03); Q11-5 when the Foundation's name is verified; the Phase 12 visual approval.
 
 **Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged).
