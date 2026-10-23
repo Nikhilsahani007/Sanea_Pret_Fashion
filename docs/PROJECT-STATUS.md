@@ -4,7 +4,10 @@ Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Next: Phase 11 — Storefront shell, search and cart: not started.** Dependencies: Phases 8, 9 and 10 passed (D-089, D-092, D-095); TD-001 and TD-002 decided (D-085, D-086). Still needed: your planning authorisation, and OD-02 (logo and brand colours, or acceptance of the typeset Panchang wordmark default; B-04). OD-15 (Panchang's "É") is checked during Phase 11.
+**Phase 11 — Storefront shell, search and cart: plan written (`phase-11-plan.md`, branch `phase-11-storefront` from `4634762`), awaiting your approval and decisions Q11-1 to Q11-11.** Dependencies met: Phases 8, 9 and 10 passed (D-089, D-092, D-095); TD-001 and TD-002 decided (D-085, D-086). Planning only: no code, dependency, schema change or migration.
+- **OD-02:** logo supplied 2026-10-23 as a raster screenshot; the logo crop and derived transparent versions are in `docs/brand/` (the screenshot is not committed). **Approved in principle (D-096):** the logo as the visual reference; the palette as proposed implementation colours for the storefront only, not verified brand colours; the admin palette unchanged; the contrast safeguards of §3.4 kept. A vector or ≥ 3000 px export is still needed for Phase 12.
+- **OD-15: closed (D-097)**, É verified in the logo and in Panchang 700 and Switzer 400 and 500 (§3.1).
+- **Q11-5:** the caption says "Rahma Foundation"; the project says "Rehma". Stays open until the official name is verified; the `rehma-foundation` slug and the Phase 10 migration are unchanged.
 
 **Phase 10 — Content management: gate passed (D-095, 2026-10-23).**
 - **Evidence:**
@@ -309,9 +312,9 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 ## Next exact task
 
 **You:**
-- authorise Phase 11 planning (planning only, as for Phase 10);
-- answer OD-02: supply the logo and brand colours, or accept the typeset Panchang wordmark and the blush and aubergine palette (replaceable through tokens).
+- review `phase-11-plan.md` and the logo files in `docs/brand/`;
+- decide Q11-1 to Q11-11, including the palette (Q11-3), the foundation's spelling (Q11-5) and the OD-02 record (Q11-11).
 
-**Me, after your authorisation:** write `phase-11-plan.md` on a new branch from `phase-10-content`, with no code, install or migration until you approve it.
+**Me, after your approval:** storefront dependencies (existing versions only), palette tokens, the cart migration with a review stop before commit, the `cart` module, then the shell, search and drawer.
 
-**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged: no two-week exception).
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged).
