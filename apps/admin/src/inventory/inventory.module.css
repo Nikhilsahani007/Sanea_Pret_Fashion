@@ -1,0 +1,22 @@
+/* Inventory screens. Status chips always carry text; colour is never alone. */
+.low {
+  border-color: var(--sp-danger);
+  color: var(--sp-danger);
+  background: var(--sp-danger-surface);
+}
+
+.soldOut {
+  border-color: var(--sp-ink);
+  color: var(--sp-accent-ink);
+  background: var(--sp-accent);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--sp-space-4);
+}
+
+.preview {
+  font-variant-numeric: tabular-nums;
+}

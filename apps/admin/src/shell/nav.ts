@@ -4,10 +4,27 @@
 // added with those phases; no link points at a screen that does not exist.
 import { can, type AdminRole, type Permission } from "@sanea/shared";
 
-export type NavItem = { to: string; label: string; permission: Permission };
+export type NavItem = {
+  to: string;
+  label: string;
+  permission: Permission;
+  /** Current only on this exact path, not on paths below it. */
+  end?: boolean;
+};
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { to: "/products", label: "Products", permission: "products.view" },
+  {
+    to: "/inventory",
+    label: "Inventory",
+    permission: "products.view",
+    end: true,
+  },
+  {
+    to: "/inventory/movements",
+    label: "Stock movements",
+    permission: "inventory.adjust",
+  },
   {
     to: "/categories",
     label: "Categories",

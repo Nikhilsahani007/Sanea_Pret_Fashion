@@ -11,7 +11,9 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import sharp from "sharp";
 
 const ADMIN = "http://localhost:5174";
-const SHOTS = "docs/reviews/admin/2026-10-22";
+// One folder per run date (India time), so a later run never overwrites the
+// screenshots recorded as an earlier gate's evidence.
+const SHOTS = `docs/reviews/admin/${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date())}`;
 const WIDTHS = [1440, 768, 390] as const;
 const PASSWORD = "e2e passphrase for testing only";
 type Role = "OWNER" | "MANAGER" | "CATALOGUE_EDITOR" | "FULFILMENT";
@@ -208,6 +210,8 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
   await signInByKeyboard(page, "owner@e2e.example.test", "OWNER");
   expect(await navLabels(page)).toEqual([
     "Products",
+    "Inventory",
+    "Stock movements",
     "Categories",
     "Collections",
     "Colours",
@@ -234,9 +238,9 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
 });
 
 for (const [role, email, name, nav] of [
-  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 6],
-  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 6],
-  ["FULFILMENT", "fulfilment@e2e.example.test", "Farid Fulfilment", 1],
+  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 8],
+  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 7],
+  ["FULFILMENT", "fulfilment@e2e.example.test", "Farid Fulfilment", 3],
 ] as const) {
   test(`${role}: invite set-up and sign-in through the shell`, async ({
     browser,
@@ -532,6 +536,141 @@ test("Fulfilment: views products only; catalogue editing refused in the UI and t
   });
   expect(r.status()).toBe(403);
   await context.close();
+});
+
+test("Inventory: fulfilment receives and adjusts stock; the public product follows; the editor only views", async ({
+  browser,
+}) => {
+  const api = process.env.E2E_API_URL!;
+  const publicVariant = async (sku: string) => {
+    const r = await (
+      await browser.newContext()
+    ).request.get(`${api}/api/v1/catalogue/products/rose-silk-kurta`);
+    const body = (await r.json()) as {
+      variants: { sku: string; availability: string; remaining?: number }[];
+    };
+    return body.variants.find((v) => v.sku === sku);
+  };
+  expect(await publicVariant("E2E-ROSE-S")).toMatchObject({
+    availability: "SOLD_OUT",
+  });
+
+  const { context, page } = await as(browser, "FULFILMENT");
+  await page.goto("/inventory");
+  const rowS = page.getByRole("row").filter({ hasText: "E2E-ROSE-S" });
+  await expect(rowS.getByText("Sold out")).toBeVisible();
+
+  // Receive 5, then remove 2 damaged units (reason required).
+  await page
+    .getByRole("button", { name: "Change stock for E2E-ROSE-S" })
+    .click();
+  const change = page.getByRole("form", {
+    name: "Change stock for E2E-ROSE-S",
+  });
+  await change.getByLabel("Units").fill("5");
+  await expect(
+    change.getByText("On hand will change from 0 to 5; available from 0 to 5."),
+  ).toBeVisible();
+  await change.getByRole("button", { name: "Save stock change" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "E2E-ROSE-S: on hand 0 → 5." }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Change stock for E2E-ROSE-S" })
+    .click();
+  await change.getByLabel("Kind of change").selectOption("ADJUSTMENT");
+  await change.getByLabel("Units").fill("2");
+  await change.getByLabel("Reason").fill("Two damaged in the e2e test");
+  await change.getByRole("button", { name: "Save stock change" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "E2E-ROSE-S: on hand 5 → 3." }),
+  ).toBeVisible();
+
+  // Removing more than on hand is refused before sending.
+  await page
+    .getByRole("button", { name: "Change stock for E2E-ROSE-S" })
+    .click();
+  await change.getByLabel("Kind of change").selectOption("CORRECTION");
+  await change.getByLabel("Units").fill("4");
+  await change.getByLabel("Reason").fill("Recount");
+  await change.getByRole("button", { name: "Save stock change" }).click();
+  await expect(change.getByLabel("Units")).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await expect(
+    change.getByText("On hand cannot go below 0.").first(),
+  ).toBeVisible();
+
+  // Low-stock level 4: available 3 is low; the filter and the public page agree.
+  const level = page.getByRole("form", {
+    name: "Low-stock level for E2E-ROSE-S",
+  });
+  await level.getByLabel("Low-stock level").fill("4");
+  await level.getByRole("button", { name: "Save low-stock level" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "low-stock level set to 4" }),
+  ).toBeVisible();
+  // The box follows the URL, so wait for it rather than using check().
+  await page.getByLabel("Low stock only").click();
+  await expect(page.getByLabel("Low stock only")).toBeChecked();
+  await expect(
+    page
+      .getByRole("row")
+      .filter({ hasText: "E2E-ROSE-S" })
+      .getByText("Low stock"),
+  ).toBeVisible();
+  expect(await publicVariant("E2E-ROSE-S")).toMatchObject({
+    availability: "LOW_STOCK",
+    remaining: 3,
+  });
+  await page.getByLabel("Low stock only").click();
+  await expect(page.getByLabel("Low stock only")).not.toBeChecked();
+  await review(page, "inventory");
+
+  // The ledger shows both changes, with who made them.
+  await page.goto("/inventory/movements");
+  const ledger = page.getByRole("table");
+  await expect(
+    ledger.getByRole("row").filter({ hasText: "Two damaged in the e2e test" }),
+  ).toContainText("−2");
+  await expect(
+    ledger.getByRole("row").filter({ hasText: "Received" }).first(),
+  ).toContainText("Farid Fulfilment");
+  await review(page, "stock-movements");
+  await context.close();
+
+  // The catalogue editor views stock only; the API refuses a change.
+  const editor = await as(browser, "CATALOGUE_EDITOR");
+  await editor.page.goto("/inventory");
+  await expect(
+    editor.page.getByText("Your role can view stock but not change it."),
+  ).toBeVisible();
+  await expect(
+    editor.page.getByRole("button", { name: /Change stock/ }),
+  ).toHaveCount(0);
+  await editor.page.goto("/inventory/movements");
+  await expect(
+    editor.page.getByText("You do not have access to this"),
+  ).toBeVisible();
+  const variantId = (
+    (await (
+      await editor.page.request.get(
+        `${ADMIN}/api/v1/admin/inventory?sku=E2E-ROSE-S`,
+      )
+    ).json()) as {
+      items: { variantId: string }[];
+    }
+  ).items[0]!.variantId;
+  const refused = await editor.page.request.post(
+    `${ADMIN}/api/v1/admin/inventory/${variantId}/adjustments`,
+    {
+      data: { type: "RECEIVED", delta: 1 },
+      headers: { "X-CSRF-Token": await csrf(editor.page), Origin: ADMIN },
+    },
+  );
+  expect(refused.status()).toBe(403);
+  await editor.context.close();
 });
 
 test("sign-out ends the session; the shell then asks for sign-in", async ({

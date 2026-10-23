@@ -21,6 +21,8 @@ describe("navigation by role", () => {
       navFor(ADMINS[role].role).map((i) => i.label);
     const full = [
       "Products",
+      "Inventory",
+      "Stock movements",
       "Categories",
       "Collections",
       "Colours",
@@ -29,8 +31,15 @@ describe("navigation by role", () => {
     ];
     expect(labels("OWNER")).toEqual(full);
     expect(labels("MANAGER")).toEqual(full);
-    expect(labels("CATALOGUE_EDITOR")).toEqual(full);
-    expect(labels("FULFILMENT")).toEqual(["Products"]);
+    // Catalogue editors view stock but cannot adjust it or read movements.
+    expect(labels("CATALOGUE_EDITOR")).toEqual(
+      full.filter((l) => l !== "Stock movements"),
+    );
+    expect(labels("FULFILMENT")).toEqual([
+      "Products",
+      "Inventory",
+      "Stock movements",
+    ]);
   });
 
   it("renders the role's links, name and role in the shell", async () => {
@@ -42,6 +51,8 @@ describe("navigation by role", () => {
     const nav = screen.getByRole("navigation", { name: "Admin" });
     expect([...nav.querySelectorAll("a")].map((a) => a.textContent)).toEqual([
       "Products",
+      "Inventory",
+      "Stock movements",
     ]);
     expect(
       screen

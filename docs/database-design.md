@@ -275,7 +275,7 @@ Staff invites, password-reset tokens and MFA recovery codes are designed with ad
 | **6** | Category, Collection, CollectionProduct, Product, Colour, Size (reference rows), SizeChart, ProductVariant, ProductImage, MediaAsset; InventoryLevel, StockMovement, StockReservation (without `orderId`); AdminUser, AdminSession, AuditLog; ContentBlock, Page, NavigationItem, StoreSetting |
 | 7 | AdminInvite, AdminRecoveryCode; `admin_user` 2FA columns (`mfa_key_version`, `mfa_enabled_at`, `mfa_last_used_step`). Admin password-reset tokens are replaced by Owner-issued reset invites (D-071) |
 | 8 | `pg_trgm`; `product.search_vector` with its trigger functions, triggers and backfill; GIN and trigram indexes (§3.1, §4) |
-| 9 | Low-stock view and its index |
+| 9 | Low-stock view `low_stock_variant` and the expression index `inventory_level_low_stock_idx` (migration `20261022233000_inventory_low_stock`, D-090) |
 | 11 | Cart, CartItem |
 | 13 | Enquiry, WhatsAppClick |
 | 15 | Order, OrderItem, OrderStatusEvent, Shipment, Payment, PaymentEvent, Refund; `StockReservation.orderId`; the GST rules model (D-033) |

@@ -35,6 +35,11 @@ export const API_ERROR_CODES = {
     status: 409,
     message: "This change conflicts with the current state.",
   },
+  // Stock reservation refused (SR-4): details list every line's real availability.
+  OUT_OF_STOCK: {
+    status: 409,
+    message: "Some items are no longer available in the quantity requested.",
+  },
   PAYLOAD_TOO_LARGE: { status: 413, message: "The request body is too large." },
   UNSUPPORTED_MEDIA_TYPE: {
     status: 415,

@@ -293,3 +293,14 @@ textarea.control {
   letter-spacing: 0.05em;
   overflow-wrap: anywhere;
 }
+
+/* A button that reads as a link inside dense tables (filters a list). */
+.linkButton {
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

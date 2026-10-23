@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { ConfigError, loadConfig, type Config } from "./platform/config.ts";
 import { checkDb, createDb } from "./platform/db.ts";
 import { createApp } from "./platform/http/app.ts";
+import { startExpiryJob } from "./modules/inventory/job.ts";
 import { createLogger } from "./platform/logger.ts";
 
 let config: Config;
@@ -34,15 +35,20 @@ const app = createApp({ config, logger, db });
 const server = app.listen(config.port, config.host, () => {
   logger.info({ host: config.host, port: config.port }, "api listening");
 });
+// Releases expired stock reservations every minute (SR-9).
+const expiryJob = startExpiryJob(db, logger);
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
   // Close the server first: a late query would reopen the database pool.
   server.close(() => {
-    db.$disconnect().then(
-      () => process.exit(0),
-      () => process.exit(1),
-    );
+    expiryJob
+      .stop()
+      .then(() => db.$disconnect())
+      .then(
+        () => process.exit(0),
+        () => process.exit(1),
+      );
   });
   setTimeout(() => process.exit(1), 10_000).unref();
 }

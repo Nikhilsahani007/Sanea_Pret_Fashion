@@ -4,7 +4,16 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 9 — Inventory and stock reservation: next. It may start: the Phase 8 gate was recorded on 2026-10-22 (D-089).**
+**Phase 10 — Content management: next; it may start (rule 1 met: the Phase 9 gate is recorded, D-092).** It depends on Phases 7 and 8, both passed. The first step is its plan, for your approval.
+
+**Phase 9 — Inventory and stock reservation: gate passed (D-092, 2026-10-23).**
+- **Evidence:**
+  - commits `14eeacb`, `1a2c568` and `c87ed31` on `phase-9-inventory`;
+  - migration `20261022233000_inventory_low_stock` (D-091);
+  - CI runs 39893590775 and 39893791079 on draft PR #7, all green;
+  - C1 to C12 pass (`phase-9-plan.md` §10.3, §10.6).
+- **Coverage:** the 90% target of `inventory` is unmeasured, with no exception. Recheck `@vitest/coverage-v8` on 2026-10-29.
+- **PRs:** #7 (into `phase-8-catalogue`) and #6 (into `main`) are open, draft and unmerged.
 
 **Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
 - **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
@@ -290,8 +299,15 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me:** the Phase 9 plan: inventory, stock movements and the reservation service with its expiry job, plus the admin inventory screens (`MASTER-IMPLEMENTATION-INDEX.md` Phase 9). It will be presented for your approval before any migration or implementation.
+**Me:** the Phase 10 plan (`docs/phase-10-plan.md`), covering:
+- content blocks;
+- navigation;
+- pages, with draft and publish;
+- Rehma Foundation publishing, with Owner verification;
+- the admin content editors.
 
-**You:**
-- approve the Phase 9 plan when it is ready;
-- decide whether to keep draft PR #6 open. Merging needs your separate authorisation.
+It is based on `MASTER-IMPLEMENTATION-INDEX.md` Phase 10 and the specifications. No code or migration before you approve it.
+
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` for an exactly compatible release that meets the two-week rule.
+
+**You:** approve the Phase 10 plan when it is ready. Merging PRs #6 and #7 needs your separate authorisation.

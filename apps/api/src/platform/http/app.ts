@@ -18,6 +18,7 @@ import {
 import { catalogueAdminRouter } from "../../modules/catalogue/admin-router.ts";
 import { cataloguePublicRouter } from "../../modules/catalogue/public-router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
+import { inventoryRouter } from "../../modules/inventory/router.ts";
 import {
   createMediaService,
   mediaRouter,
@@ -97,6 +98,7 @@ export function createApp({
     if (media) {
       app.use(mediaRouter(deps, media));
       app.use(catalogueAdminRouter(deps, media.storage));
+      app.use(inventoryRouter(deps));
       app.use(cataloguePublicRouter(deps, media.storage));
       app.use(searchRouter(deps, media.storage, searchLimit));
     }

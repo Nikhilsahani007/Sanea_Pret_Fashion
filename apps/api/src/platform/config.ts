@@ -65,6 +65,19 @@ const schema = z
           .optional(),
       )
       .transform((v) => (v === undefined ? 2 : Number(v))),
+    // Stock reservation hold (SR-3, Q9-5): whole minutes 5 to 60, default 15.
+    RESERVATION_TTL_MINUTES: z
+      .preprocess(
+        (v) => (v === "" ? undefined : v),
+        z
+          .string()
+          .regex(/^(?:[5-9]|[1-5][0-9]|60)$/, {
+            error:
+              "RESERVATION_TTL_MINUTES must be a whole number from 5 to 60",
+          })
+          .optional(),
+      )
+      .transform((v) => (v === undefined ? 15 : Number(v))),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -95,6 +108,7 @@ export type Config = {
   readonly mediaStorageDir: string;
   readonly mediaPublicBaseUrl: string;
   readonly mediaUploadQueueWaiting: number;
+  readonly reservationTtlMinutes: number;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -141,5 +155,6 @@ export function loadConfig(
     mediaStorageDir: e.MEDIA_STORAGE_DIR,
     mediaPublicBaseUrl: e.MEDIA_PUBLIC_BASE_URL,
     mediaUploadQueueWaiting: e.MEDIA_UPLOAD_QUEUE_WAITING,
+    reservationTtlMinutes: e.RESERVATION_TTL_MINUTES,
   };
 }

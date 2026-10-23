@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_TRIGGERS,
+  HANDWRITTEN_VIEWS,
   SEARCH_TRIGGERS,
 } from "./handwritten.ts";
 
@@ -48,6 +49,10 @@ describe("migration SQL contains every handwritten object", () => {
 
   it.each(HANDWRITTEN_FUNCTIONS)("function %s", (name) => {
     expect(sql).toContain(`CREATE FUNCTION "${name}"(`);
+  });
+
+  it.each(HANDWRITTEN_VIEWS)("view $name", ({ name }) => {
+    expect(sql).toContain(`CREATE VIEW "${name}" AS`);
   });
 
   it.each(HANDWRITTEN_CHECKS)("CHECK $name on $table", ({ table, name }) => {

@@ -42,6 +42,7 @@ describe("loadConfig()", () => {
       mediaStorageDir: "/var/lib/sanea/media",
       mediaPublicBaseUrl: "http://127.0.0.1:4010/",
       mediaUploadQueueWaiting: 2,
+      reservationTtlMinutes: 15,
     });
   });
 
@@ -106,6 +107,12 @@ describe("loadConfig()", () => {
         "MEDIA_UPLOAD_QUEUE_WAITING",
       ],
     ),
+    ...["4", "61", "0", "15.5", "1e1", " 15", "015", "fifteen"].map(
+      (v): [Record<string, string>, string] => [
+        { RESERVATION_TTL_MINUTES: v },
+        "RESERVATION_TTL_MINUTES",
+      ],
+    ),
   ])("rejects %j", (override, name) => {
     const found = problems({ ...valid, ...override });
     expect(found).toHaveLength(1);
@@ -124,6 +131,19 @@ describe("loadConfig()", () => {
       loadConfig({ ...valid, MEDIA_UPLOAD_QUEUE_WAITING: "" })
         .mediaUploadQueueWaiting,
     ).toBe(2);
+  });
+
+  it("accepts RESERVATION_TTL_MINUTES 5 to 60, default 15 (SR-3, Q9-5)", () => {
+    for (const v of ["5", "9", "10", "15", "59", "60"])
+      expect(
+        loadConfig({ ...valid, RESERVATION_TTL_MINUTES: v })
+          .reservationTtlMinutes,
+      ).toBe(Number(v));
+    expect(loadConfig(valid).reservationTtlMinutes).toBe(15);
+    expect(
+      loadConfig({ ...valid, RESERVATION_TTL_MINUTES: "" })
+        .reservationTtlMinutes,
+    ).toBe(15);
   });
 
   it("requires https origins in production", () => {

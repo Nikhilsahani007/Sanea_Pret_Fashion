@@ -102,7 +102,7 @@ function AppShell() {
           <ul className={s.navList}>
             {items.map((item) => (
               <li key={item.to}>
-                <NavLink to={item.to} className={s.navLink}>
+                <NavLink to={item.to} end={item.end} className={s.navLink}>
                   {item.label}
                 </NavLink>
               </li>
