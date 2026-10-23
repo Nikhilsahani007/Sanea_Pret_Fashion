@@ -108,6 +108,20 @@ export const HANDWRITTEN_CHECKS = [
   { table: "admin_recovery_code", name: "admin_recovery_code_hash_check" },
 ] as const;
 
+/** Views (Phase 9, Q9-1): read with $queryRaw; Prisma does not model them. */
+export const HANDWRITTEN_VIEWS = [
+  {
+    name: "low_stock_variant",
+    columns: [
+      "variant_id",
+      "on_hand",
+      "reserved",
+      "available",
+      "low_stock_threshold",
+    ],
+  },
+] as const;
+
 /** Reference rows inserted by the migration (D-029, D-058), in order. */
 export const APPROVED_SIZES = [
   "S",

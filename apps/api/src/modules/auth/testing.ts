@@ -54,7 +54,7 @@ export async function adminHarness(
     searchLimit?: { windowMs: number; limit: number };
   } = {},
 ) {
-  const { db, drop } = await createTestDatabase();
+  const { db, drop, name: dbName } = await createTestDatabase();
   let current = new Date("2026-10-19T10:00:00.000Z");
   const clock = {
     now: () => current,
@@ -169,6 +169,8 @@ export async function adminHarness(
 
   return {
     db,
+    /** For a second client, for example a larger pool in concurrency tests. */
+    dbName,
     drop,
     app,
     lines,

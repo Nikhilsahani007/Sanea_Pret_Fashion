@@ -144,3 +144,43 @@ export type MediaAsset = {
 
 export type Page<T> = { items: T[]; nextCursor: string | null };
 export type List<T> = { items: T[] };
+
+// Inventory (Phase 9, phase-9-plan.md §3.4)
+export type StockRow = {
+  variantId: string;
+  sku: string;
+  productId: string;
+  productName: string;
+  productStatus: Status;
+  colour: string;
+  size: string;
+  isActive: boolean;
+  onHand: number;
+  reserved: number;
+  available: number;
+  lowStockThreshold: number;
+  lowStock: boolean;
+};
+
+export type MovementType =
+  | "RECEIVED"
+  | "ADJUSTMENT"
+  | "RESERVED"
+  | "RELEASED"
+  | "SHIPPED"
+  | "RETURNED"
+  | "RESTOCKED"
+  | "CORRECTION";
+
+export type Movement = {
+  id: string;
+  variantId: string;
+  sku: string;
+  type: MovementType;
+  onHandDelta: number;
+  reservedDelta: number;
+  reason: string | null;
+  referenceType: string | null;
+  actorName: string | null;
+  createdAt: string;
+};

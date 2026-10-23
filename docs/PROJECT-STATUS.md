@@ -4,7 +4,11 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 9 — Inventory and stock reservation: plan written (`phase-9-plan.md`, branch `phase-9-inventory`), awaiting your decisions Q9-1 to Q9-5.** It could start because the Phase 8 gate was recorded on 2026-10-22 (D-089).
+**Phase 9 — Inventory and stock reservation: built, tested and committed; migration approved (D-091). The gate waits for CI and your review of the concurrency output.** Plan approved (D-090).
+- **Built:** the migration `20261022233000_inventory_low_stock` (validated, `phase-9-plan.md` §10.1), the `inventory` module (reservations, expiry job, adjustments, admin routes), and the admin Inventory and Stock movements screens.
+- **Results:** 666 unit, 364 integration and 10 end-to-end tests; every concurrency case passes (§10.3).
+- On branch `phase-9-inventory`, pushed; a draft PR for CI follows.
+- **Coverage not measured:** the tool is approved, but its version is under two weeks old until 2026-10-29 (§10.5).
 
 **Phase 8 — Catalogue, media and catalogue API: gate passed (D-089, 2026-10-22).**
 - **CI:** run 39829977467 on draft PR #6 (open, draft, not merged) was green. P8-AC11 was measured on Linux: 3.73 s and 2.32 s for the representative uploads, 13.30 s for the worst case (`phase-8-plan.md` §10f).
@@ -290,11 +294,8 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**You:** review `phase-9-plan.md` and decide Q9-1 to Q9-5:
-- the low-stock migration;
-- the adjustment types;
-- what can be reserved;
-- the low-stock level route;
-- the reservation TTL and expiry job.
+**You:** the Phase 9 gate:
+- review the concurrency output in `phase-9-plan.md` §10.3 and the CI run on the Phase 9 draft PR;
+- decide on the coverage tool's two-week exception (§10.5).
 
-**Me, after that:** the Phase 9 migration (validated on disposable databases, with a review stop before commit), then the inventory module, the concurrency tests and the admin inventory screens.
+**Me, after that:** Phase 10 (content management) planning, which starts only once the Phase 9 gate is recorded.

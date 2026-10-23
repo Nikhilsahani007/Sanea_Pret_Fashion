@@ -134,9 +134,10 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET | `/admin/collections/:id` (with its product order) | O M C |
 | POST · PATCH/DELETE | `/admin/products/:id/images` · `/admin/products/:id/images/:imageId` (`mediaAssetId`, `colourId?`, `alt`, `role`, `position`) | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
-| GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
-| POST | `/admin/inventory/:variantId/adjustments` `{ delta, reason }` | O M F |
-| GET | `/admin/inventory/movements` | O M F |
+| GET | `/admin/inventory`. Query: `lowStock=true` (read through the `low_stock_variant` view), `sku` (prefix, case-insensitive), `productId`, `limit` (1 to 100, default 50), `cursor` (the last SKU). Ordered by SKU. Returns `{ items, nextCursor }`. Each item: `variantId`, `sku`, `productId`, `productName`, `productStatus`, `colour`, `size`, `isActive`, `onHand`, `reserved`, `available` (on hand − reserved), `lowStockThreshold`, `lowStock` (active and available ≤ threshold) | all |
+| POST | `/admin/inventory/:variantId/adjustments` `{ type, delta, reason? }` (Q9-2):<br>• `type`: `RECEIVED` (`delta` > 0; reason optional), `ADJUSTMENT` or `CORRECTION` (reason 3 to 200 characters required).<br>• `delta`: a non-zero integer from −10 000 to 10 000.<br>On hand never goes below reserved: `409 CONFLICT` with `details: [{ code: "STOCK_BELOW_RESERVED", onHand, reserved }]` (SR-12).<br>`201` with `{ onHand, reserved, lowStockThreshold }`.<br>One movement (actor, reference `ADMIN`) and one audit row; the reason is not copied to the audit log | O M F |
+| PATCH | `/admin/inventory/:variantId` `{ lowStockThreshold: 0..1000 }` (Q9-4). Audited; no movement | O M F |
+| GET | `/admin/inventory/movements`. Query: `variantId`, `type`, `from`, `to` (ISO with offset; `to` after `from`), `limit`, `cursor` (movement id). Newest first. Each item: `id`, `variantId`, `sku`, `type`, `onHandDelta`, `reservedDelta`, `reason`, `referenceType`, `actorName` (never an email), `createdAt` | O M F |
 | GET | `/admin/orders` (filters: status, method, date, needsAttention) | O M F |
 | GET | `/admin/orders/:orderNumber` | O M F |
 | POST | `/admin/orders/:orderNumber/transitions` `{ toStatus, note?, shipment? }` | O M F (cancel: O M) |

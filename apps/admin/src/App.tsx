@@ -13,6 +13,8 @@ import { ProductEditor } from "./catalogue/ProductEditor.tsx";
 import { ProductNew } from "./catalogue/ProductNew.tsx";
 import { ProductsList } from "./catalogue/ProductsList.tsx";
 import { SizeCharts } from "./catalogue/SizeCharts.tsx";
+import { Inventory } from "./inventory/Inventory.tsx";
+import { Movements } from "./inventory/Movements.tsx";
 import { RequireSession } from "./shell/AppShell.tsx";
 import { Notice, PageHeader, Stack } from "./ui/feedback.tsx";
 
@@ -46,6 +48,8 @@ export function AppRoutes() {
         <Route path="/colours" element={<Colours />} />
         <Route path="/size-charts" element={<SizeCharts />} />
         <Route path="/media" element={<MediaLibrary />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory/movements" element={<Movements />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

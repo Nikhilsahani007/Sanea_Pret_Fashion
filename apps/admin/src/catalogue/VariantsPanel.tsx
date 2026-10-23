@@ -3,6 +3,7 @@
 // switch variants on or off. Stock is shown read-only; adjustments arrive in
 // Phase 9. The API refuses anything a role may not do, whatever is shown here.
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router";
 
 import { api, toApiError, withMessage, type ApiError } from "../api/client.ts";
 import type { ProductDetail, Variant } from "../api/types.ts";
@@ -76,6 +77,13 @@ export function VariantsPanel({ product, reference, onChange }: Props) {
         ) : null}
         {message ? <Notice tone="success" title={message} /> : null}
         {rowError ? <Notice tone="error" title={rowError.message} /> : null}
+        {variants.length > 0 ? (
+          <p>
+            <Link to={`/inventory?product=${product.id}`}>
+              Stock for these variants
+            </Link>
+          </p>
+        ) : null}
         {variants.length === 0 ? (
           <p className={ui.muted}>
             No variants yet. A product needs at least one active variant to be

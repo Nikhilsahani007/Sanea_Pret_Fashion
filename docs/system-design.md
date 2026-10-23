@@ -59,6 +59,15 @@ WHERE "variantId" = $variantId
 
 All lines of a cart are reserved in one transaction, locking variant rows in a consistent order (sorted by variant ID) to avoid deadlocks. If any line fails, the whole transaction rolls back and the response lists each line's real availability.
 
+### 2.3 Reservation service and expiry job (Phase 9, D-090)
+
+- **Lock order everywhere:** `stock_reservation` rows first, then `inventory_level` rows sorted by variant ID. Reservations, releases and the expiry job therefore cannot deadlock.
+- **Reservable (SR-14 as applied):** an active variant of a `PUBLISHED` product. Other lines count as available 0. Category status is not checked, because it already gates publishing (D-083).
+- **Reservation time:** `RESERVATION_TTL_MINUTES`, from 5 to 60, default 15. Expiry uses the database clock.
+- **Expiry job:** runs in every API process every 60 s. It claims due reservations with `FOR UPDATE SKIP LOCKED`, so several processes are safe and each reservation expires once. It stops with the server, waiting for a run in progress.
+- **Lazy release:** reserving a variant first expires its own due holds, so a stale hold never refuses a shopper. Public availability can lag by at most one job interval, plus the 60 s catalogue cache (Q8-5).
+- **Movements:** every reservation, release, expiry and adjustment writes one `stock_movement` per variant and cause (SR-11). The ledger reconciles with the levels (`phase-9-plan.md` C10).
+
 ## 3. Cart
 
 - A cart has a random 256-bit token stored in an `httpOnly`, `Secure`, `SameSite=Lax` cookie. (Deferred with accounts, D-034:) customers' carts are linked to their account and merged on sign-in (quantities summed, capped at availability).

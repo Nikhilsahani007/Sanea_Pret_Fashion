@@ -14,6 +14,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_TRIGGERS,
+  HANDWRITTEN_VIEWS,
   SEARCH_TRIGGERS,
 } from "./handwritten.ts";
 import { createTestDatabase } from "./testing/database.ts";
@@ -148,6 +149,25 @@ describe("handwritten objects exist in the live catalogue", () => {
         `SELECT 1 FROM pg_proc WHERE proname = '${name}' AND pronamespace = 'public'::regnamespace`,
       ),
     ).toHaveLength(1);
+  });
+
+  it("every view is listed, with its columns in order, and no unlisted ones", async () => {
+    const views = await q<{ name: string }>(
+      `SELECT viewname AS name FROM pg_views WHERE schemaname = 'public'`,
+    );
+    expect(views.map((v) => v.name).sort()).toEqual(
+      HANDWRITTEN_VIEWS.map((v) => v.name).sort(),
+    );
+    for (const view of HANDWRITTEN_VIEWS) {
+      const cols = await q<{ c: string }>(
+        `SELECT column_name AS c FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = '${view.name}' ORDER BY ordinal_position`,
+      );
+      expect(
+        cols.map((c) => c.c),
+        view.name,
+      ).toEqual([...view.columns]);
+    }
   });
 
   it("every CHECK constraint, validated, and no unlisted ones", async () => {
