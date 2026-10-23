@@ -4,7 +4,7 @@ Last updated: 2026-10-22 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 10 — Content management: next; it may start (rule 1 met: the Phase 9 gate is recorded, D-092).** It depends on Phases 7 and 8, both passed. The first step is its plan, for your approval.
+**Phase 10 — Content management: plan written (`phase-10-plan.md`, branch `phase-10-content` from `688dbf3`), awaiting your approval and decisions Q10-1 to Q10-9.** It depends on Phases 7 and 8, both passed; rule 1 is met (D-092). No code, schema change or migration yet.
 
 **Phase 9 — Inventory and stock reservation: gate passed (D-092, 2026-10-23).**
 - **Evidence:**
@@ -299,15 +299,14 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me:** the Phase 10 plan (`docs/phase-10-plan.md`), covering:
-- content blocks;
-- navigation;
-- pages, with draft and publish;
-- Rehma Foundation publishing, with Owner verification;
-- the admin content editors.
+**You:**
+- review `phase-10-plan.md`;
+- decide Q10-1 to Q10-9: the block registry, hero slides, the single source for pills and footer links, social links, unpublish and discard, page images, no page deletion, Rehma draft-version binding, and the Rehma placeholder migration and its wording.
 
-It is based on `MASTER-IMPLEMENTATION-INDEX.md` Phase 10 and the specifications. No code or migration before you approve it.
+**Me, after your approval:**
+- the shared content schemas;
+- the Rehma data migration, with a review stop before commit;
+- the `content` module and gate tests;
+- the admin editors.
 
-**Me, on 2026-10-29:** recheck `@vitest/coverage-v8` for an exactly compatible release that meets the two-week rule.
-
-**You:** approve the Phase 10 plan when it is ready. Merging PRs #6 and #7 needs your separate authorisation.
+**Me, on 2026-10-29:** recheck `@vitest/coverage-v8`.

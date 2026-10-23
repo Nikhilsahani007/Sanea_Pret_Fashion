@@ -227,3 +227,4 @@ Proposed and approved in principle on 2026-10-19, together with Q8-1 to Q8-10, Q
 | 2026-10-23 | Phase 9 migration approved (D-091); Phase 9 committed and pushed; draft PR for CI. |
 | 2026-10-23 | Your Phase 9 review instructions: PR #7 stays a draft and unmerged; no two-week exception for `@vitest/coverage-v8` (recheck 2026-10-29; coverage stays unmeasured); the Phase 9 gate is recorded only after your explicit approval. CI run 39893590775 on PR #7: all jobs success (`phase-9-plan.md` §10.6). |
 | 2026-10-23 | **Phase 9 gate passed (D-092)**, on your explicit approval. Phase 10 (content management) may start with its plan. |
+| 2026-10-23 | Phase 10 plan written (`phase-10-plan.md`, branch `phase-10-content` from `688dbf3`), proposing Q10-1 to Q10-9. Planning only: no code, schema change, migration or install. |
