@@ -308,3 +308,20 @@ C12 the same reservation released twice concurrently: one release, one RELEASED 
 - **Coverage:** `testing-strategy.md` §6 asks for 90% line coverage of `inventory`. You approved `@vitest/coverage-v8` on 2026-10-23, but it was **not installed**: it must match Vitest exactly (5.0.5), and 5.0.5 was released on 2026-10-15, under the two-week rule. Older releases require older Vitest. It can be installed from 2026-10-29, or sooner with an exception from you. Until then coverage is not measured.
 - **Order-dependent behaviour:** SR-6 to SR-8 and SR-10 depend on orders (Phases 15 and 16). `release` is ready for them.
 - **Phase 9 gate:** needs the migration review, a commit, CI on a draft PR (authorised), and your review of §10.3.
+
+### 10.6 CI evidence (2026-10-23); gate not recorded
+
+**Run 39893590775** on draft PR #7 (`phase-9-inventory` → `phase-8-catalogue`, `1a2c568`; Ubuntu 24.04). All jobs succeeded:
+
+| Job | Result |
+|-----|--------|
+| Format, lint, typecheck, test, audit | 35 files, 666 tests; "Design tokens: OK"; `npm audit` 0 |
+| Database integration tests | 16 files, 364 tests: `inventory.db-test.ts` 22, `db/inventory.db-test.ts` 24; the template migration and drift check pass |
+| Secret scan (Gitleaks) | Success |
+
+**`[P9-CONC]` on Linux CI:** identical to §10.3, except C8 (scheduling-dependent): 8 reserved, 4 adjustments applied, 6 refused (`STOCK_BELOW_RESERVED`); on hand 8, reserved 8. The invariant held.
+
+**Your instructions of 2026-10-23:**
+- PR #7 stays a draft and is not merged.
+- No two-week exception for `@vitest/coverage-v8`. Recheck for an exactly compatible release on **29 October 2026**; until then the 90% target stays explicitly unmeasured.
+- **The Phase 9 gate is not recorded until you review this evidence and approve it.**

@@ -224,3 +224,4 @@ Proposed and approved in principle on 2026-10-19, together with Q8-1 to Q8-10, Q
 | 2026-10-22 | Phase 9 plan approved (D-090). |
 | 2026-10-23 | Phase 9 built and tested (`phase-9-plan.md` §10): the migration validated on disposable databases; inventory module, expiry job, admin routes and screens. 666 unit, 364 integration and 10 end-to-end tests; concurrency cases C1 to C12 pass. Uncommitted, awaiting your migration review. |
 | 2026-10-23 | Phase 9 migration approved (D-091); Phase 9 committed and pushed; draft PR for CI. |
+| 2026-10-23 | Your Phase 9 review instructions: PR #7 stays a draft and unmerged; no two-week exception for `@vitest/coverage-v8` (recheck 2026-10-29; coverage stays unmeasured); the Phase 9 gate is recorded only after your explicit approval. CI run 39893590775 on PR #7: all jobs success (`phase-9-plan.md` §10.6). |
