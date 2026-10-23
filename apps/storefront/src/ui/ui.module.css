@@ -1,0 +1,111 @@
+/* Shared UI: the side sheet (the only floating surface with a shadow,
+   design-system.md §6) and the flat square button. */
+.sheet {
+  position: fixed;
+  inset-block: 0;
+  width: min(100vw, 30rem);
+  max-width: 100vw;
+  max-height: none;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--sp-bg);
+  color: var(--sp-ink);
+  /* The one floating surface, a modal dialog, keeps its elevation (§6). */
+  box-shadow: 0 0 2rem color-mix(in srgb, var(--sp-ink) 25%, transparent); /* taste-skill-ignore */
+}
+
+.right {
+  inset-inline: auto 0;
+}
+
+.left {
+  inset-inline: 0 auto;
+}
+
+.sheet::backdrop {
+  background: color-mix(in srgb, var(--sp-ink) 40%, transparent);
+}
+
+.sheet[open] {
+  animation: slide-in var(--sp-duration-base) var(--sp-ease-out);
+}
+
+.left[open] {
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+.sheetInner {
+  display: grid;
+  gap: var(--sp-space-6);
+  min-height: 100%;
+  align-content: start;
+  padding: var(--sp-space-6) var(--sp-space-4) var(--sp-space-12);
+}
+
+@media (min-width: 48rem) {
+  .sheetInner {
+    padding-inline: var(--sp-space-8);
+  }
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+}
+
+.close {
+  min-width: var(--sp-target-min);
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-2);
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-space-6);
+  border: 0;
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+  text-decoration: none;
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+}
+
+/* Hover changes the fill and adds an underline (§3.4: never the colour step
+   alone). */
+.button:hover:not(:disabled) {
+  background: var(--sp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+}

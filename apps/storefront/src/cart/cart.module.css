@@ -1,0 +1,162 @@
+/* Cart lines, drawer and page (phase-11-plan.md §4.6). Square corners, no
+   resting shadows; surfaces separated by tone. Taupe text only on ivory or
+   white, never on champagne (§3.4). */
+.page {
+  display: grid;
+  gap: var(--sp-space-8);
+  max-width: 48rem;
+}
+
+.cart {
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.lines {
+  list-style: none;
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 6rem 1fr auto;
+  gap: var(--sp-space-4);
+  align-items: start;
+}
+
+/* A 4:5 well; it stays an ivory-on-champagne block until real images exist. */
+.thumb {
+  aspect-ratio: 4 / 5;
+  background: var(--sp-surface);
+  overflow: hidden;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail {
+  display: grid;
+  gap: var(--sp-space-1);
+}
+
+.name {
+  font-weight: var(--sp-weight-medium);
+}
+
+.name a {
+  text-decoration: none;
+}
+
+.name a:hover {
+  text-decoration: underline;
+}
+
+.meta,
+.muted {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+.notice {
+  font-size: var(--sp-step-small);
+  color: var(--sp-danger);
+}
+
+.error {
+  padding: var(--sp-space-3) var(--sp-space-4);
+  background: var(--sp-danger-surface);
+  color: var(--sp-danger);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-space-4);
+  margin-block-start: var(--sp-space-2);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: var(--sp-border-width) solid var(--sp-field-border);
+}
+
+.stepper button {
+  min-width: var(--sp-target-min);
+  min-height: var(--sp-target-min);
+  border: 0;
+  background: transparent;
+  font-size: var(--sp-step-lead);
+  line-height: 1;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: var(--sp-paper);
+}
+
+.stepper button:disabled {
+  color: var(--sp-muted);
+}
+
+.stepper output {
+  min-width: 2ch;
+  text-align: center;
+}
+
+.remove {
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.price {
+  font-weight: var(--sp-weight-medium);
+  white-space: nowrap;
+}
+
+.summary {
+  display: grid;
+  gap: var(--sp-space-3);
+  padding-block-start: var(--sp-space-6);
+  border-block-start: var(--sp-border-width) solid var(--sp-line);
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+  font-weight: var(--sp-weight-medium);
+}
+
+.checkout {
+  min-height: var(--sp-control-height);
+  border: 0;
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+}
+
+/* Disabled until Phase 15: soft black on champagne (11.14:1) keeps the
+   words readable; the label says why. */
+.checkout:disabled {
+  background: var(--sp-surface);
+  color: var(--sp-ink);
+}
+
+.empty {
+  display: grid;
+  gap: var(--sp-space-3);
+}
+
+.pageLink {
+  margin-block-start: var(--sp-space-6);
+  font-size: var(--sp-step-small);
+}

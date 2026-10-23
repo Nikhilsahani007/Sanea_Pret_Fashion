@@ -40,6 +40,11 @@ export const API_ERROR_CODES = {
     status: 409,
     message: "Some items are no longer available in the quantity requested.",
   },
+  // Guest cart (D-099): a 31st distinct line.
+  CART_FULL: {
+    status: 409,
+    message: "Your bag is full. Remove an item to add another.",
+  },
   PAYLOAD_TOO_LARGE: { status: 413, message: "The request body is too large." },
   UNSUPPORTED_MEDIA_TYPE: {
     status: 415,

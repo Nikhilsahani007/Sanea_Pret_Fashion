@@ -304,6 +304,7 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 | Q11-8 | **Cart rules:** the cookie on first add only; 30 lines; a per-line limit of 10, configurable lower; cart writes 60 per minute per IP; hourly cleanup | **Approved (D-098)**, as listed; the contract is in D-099 |
 | Q11-9 | **Storefront dependencies:** declare the admin's existing versions (§9) | **Approved (D-098).** No new package |
 | Q11-10 | **Lighthouse (gate 6):** A, the `lighthouse` package as a pinned dev dependency, run locally; or B, Edge DevTools Lighthouse run by hand, with the report saved | **A (D-098):** `lighthouse` **13.5.0**, published 2026-09-18 (35 days before this decision); `engines.node` `>=22.19`, which Node 24.11.0 satisfies. The two-week rule is not waived. Fallback to B if the install or its audit fails, or Edge cannot be driven (§9) |
+| Q11-12 | **Stock in the cart (found during implementation).** D-099 says each line carries `available` as an exact count "capped at the line limit". The catalogue never shows exact stock above the low-stock level (D-082 as amended by Q8-2), so that count would reveal up to 10 units the product page hides. | **Open, proposed:** lines carry the catalogue's public state (`IN_STOCK`, `LOW_STOCK` with `remaining`, `SOLD_OUT`) plus an `EXCEEDS_AVAILABLE` warning, as built and marked in `api-specification.md`. Needs a decision identifier from an agreed range (D-101 to D-134 are taken) |
 | Q11-11 | **OD-02 outcome:** record it as "logo supplied (raster, vector requested); palette proposed for implementation, not verified brand colours"? | **Recorded (D-096)**, approved in principle; the vector export is still outstanding (B-04) |
 
 ## 11. Acceptance criteria
@@ -385,4 +386,88 @@ Nothing else. No Tailwind, no component library, no state or data-fetching libra
 - Tokens: five proposed primitives in `brand.css` (D-096); `storefront.css` mapped to them; `admin.css` unchanged. The token check passes.
 - The logo: `src/assets/logo-wordmark.png` in the header (120 px wide on a phone, 160 px on desktop), `logo-lockup.png` in the footer, inverted to white on deep aubergine (8.22:1). Accessible name "Sanéa Pret".
 - Production build passes (JS 82.45 kB gzipped). Screenshots at 390 and 1440 px checked: the logo, É and footer render.
+
+### 14.3 Steps 5 and 6: the cart API and the storefront (2026-10-24)
+
+**Cart module** (`apps/api/src/modules/cart/`): `token.ts` (cookie, hashing), `service.ts` (add, set, view, cleanup), `router.ts` (`/api/v1/cart`, a write limit of 60 per minute per IP), `job.ts` (hourly cleanup, started and stopped in `main.ts`). `CART_FULL` (409) added to the error registry; `CART_MAX_LINE_QUANTITY` (1 to 10, default 10) to the configuration and `.env.example`. Shared contract in `@sanea/shared` (`cart/cart.ts`): request schemas, `CartView`, `CartWarning`.
+
+**Gate output** (`[P11-GATE]` lines from `npm run test:integration`, `apps/api/src/modules/cart/cart.db-test.ts`; all 12 pass):
+
+```
+T11-1 add 2 × ₹1,000: subtotal 200000 paise; price changed to 120000: next GET re-priced (line 240000, subtotal 240000); body with pricePaise or subtotalPaise: 400, quantity unchanged
+T11-2 cart B cannot read, change (404) or remove (404) cart A's line; forged and malformed tokens: empty cart, 404 identical to no line; after 31 days: empty, 404, and the next add issues a new token
+T11-3 stored token_hash = SHA-256(cookie value) (32 bytes); raw token found in 0 of 25 tables and 0 of 24 log lines
+T11-4 quantity 11: 400 (API) and cart_item_quantity_check (database); 6 + 6 capped at 10 with QUANTITY_LIMIT; 31st line: 409 CART_FULL, 30 lines kept; CART_MAX_LINE_QUANTITY=3: add 4 and PATCH 4 refused (400), 3 + 1 capped at 3
+T11-5 quantity 3 with 2 available: accepted, EXCEEDS_AVAILABLE, stock LOW_STOCK remaining 2; deactivated variant: unavailable, no price, outside the subtotal (300000 of 4 units), UNAVAILABLE; product archived: subtotal 0
+T11-6 add 3 then set 4: on hand 4, reserved 0 (unchanged), no reservation or stock movement
+T11-7 cart add without the CSRF token, with a wrong token, from the admin origin and from a foreign origin: 403 CSRF_FAILED, no cart created, no cookie
+T11-8 GET /cart with no cookie: 200 empty cart, no-store, no Set-Cookie, no row created
+T11-9 53 expired (50 made here, 3 from earlier cases) and 5 live carts, two cleanups in parallel (batch 7): deleted 25 + 28 = 53, each once; 5 live kept; expired lines gone; a third run deletes 0
+T11-10 first add sets __Host-sp_cart (43-character token; HttpOnly, Secure, SameSite=Lax, Path=/, Max-Age=2592000, no Domain); GET a day later: no Set-Cookie, expiry unchanged; PATCH: cookie re-sent, expiry +1 day; refused adds (404 unknown variant, 400 quantity 0): no cart, no cookie (403 in T11-7, 429 in T11-12)
+T11-11 add an inactive variant, a draft product's, an archived product's, a product in a draft category: 404 each, no cart; a non-uuid variant in the path: 404 (an existing line that stops being on sale: T11-5)
+T11-12 60 cart writes then the 61st: 429 RATE_LIMITED, Retry-After 60 s, no cart, no cookie; GET still 200
+```
+
+**Storefront** (`apps/storefront/src/`): the shell (announcement, header with the logo, main links, search combobox and bag; a menu sheet on phones; category pills; footer menus, contact and social links), `/search` with sorting and "Load more", the size and colour sheet, the cart drawer and `/cart`, `/pages/:slug` rendered from structured JSON, and not found (with "coming soon" for Phase 13 paths). A small fetch client with the guest CSRF token; no new library. The shell is drawn once the menus and announcement are known, so they never move the page (CLS).
+
+Changes made from what the checks found:
+- **Focus:** the native modal `<dialog>` keeps the page inert but let Tab leave for the browser; the sheet now wraps Tab and Shift+Tab. After an add, the bag opens only once the size sheet has closed, so closing the bag returns focus to the card's "Add".
+- **Names:** the header, page and option labels are distinct and complete ("Add … to bag", "Remove …, colour, size", "…, product").
+- **Layout shift:** search CLS went from 0.128 to 0.029 by drawing the shell once.
+- **Headings:** card names are `h2` under the page's `h1` (Lighthouse heading order).
+
+### 14.4 Results (2026-10-24, final files)
+
+| Check | Result |
+|-------|--------|
+| Unit and component (`npm test`) | 713 passed (39 files), including 9 storefront component tests, 5 shared cart schema tests and the cart configuration tests |
+| Integration (`npm run test:integration`) | 402 passed (19 files), including the 12 cart gate tests and 9 cart migration tests |
+| End to end (`npx playwright test`, Edge) | 15 passed: 11 admin, 4 storefront |
+| Lint, design tokens, format, typecheck | clean |
+| Builds | storefront JS 90.48 kB gzipped, CSS 4.15 kB; admin passes |
+| `npm run audit` | 0 vulnerabilities |
+
+### 14.5 `design-system.md` §10 gates 1, 5 and 6
+
+**Gate 1, Taste.**
+- `lint.mjs apps/storefront/src`: **0 FAIL, 0 WARN.** Two lines carry `taste-skill-ignore`: the sheet's elevation (the one modal surface, §6) and the logo's printed tagline in its alt text.
+- `inspect.mjs` on `/`, `/search?q=Storefront` and `/cart` (synthetic data): **3 FAIL, 2 WARN on each page, the same rules.** Recorded, not hidden, with reasons:
+
+| Rule | Why it stands in Phase 11 |
+|------|---------------------------|
+| `few-pictures` (FAIL) | No real product or campaign photography exists (B-06, D-120). Stock or found pictures may not stand in for the brand's products. Product wells stay empty until real images are uploaded |
+| `focal-point` (FAIL) | These are utility pages (shell, search, bag). The first-screen monument is the landing page's, Phase 12, and needs the vector logo (B-04) |
+| `still-page` (FAIL) | The motion here is on interaction (sheets slide in, presses scale); load and scroll entrances belong to the landing page and the motion audit (gate 4), Phase 12 |
+| `palette-cream` (WARN) | Ivory `#F8F4E9` is your approved palette (D-096), and the logo's own ground |
+| `no-footage` (WARN) | No footage exists |
+
+**Gate 5, UI UX Pro Max checklist.**
+- **Contrast:** every pair in use is in §3.4; axe reports nothing at 1440, 1024, 768, 390 and 375 px on every storefront page tested.
+- **Focus:** one visible ring (deep aubergine); sheets keep focus inside and return it on close; a skip link is the first stop.
+- **Targets:** 44 px minimum for header buttons, pills, steppers, size buttons and close buttons.
+- **Reduced motion:** honoured globally; motion uses transform only.
+- **Widths:** no horizontal scroll at 375, 390, 768, 1024 and 1440 px.
+- **Forms and feedback:** visible labels; errors and stock notices in words, never colour alone; live announcements for bag changes and result counts.
+
+**Gate 6, Lighthouse** (option A, D-098: `lighthouse` 13.5.0 driving Microsoft Edge 155, mobile form factor, simulated throttling). Reports, JSON and HTML, in `docs/reviews/storefront/2026-10-24/lighthouse-*`:
+
+| Page | Performance | Accessibility | FCP | LCP | TBT | CLS |
+|------|------------:|--------------:|----:|----:|----:|----:|
+| `/` | 94 | 100 | 2.0 s | 2.9 s | 10 ms | 0 |
+| `/search?q=Storefront` | 93 | 100 | 2.0 s | 3.0 s | 20 ms | 0.029 |
+| `/cart` | 94 | 100 | 2.0 s | 2.9 s | 30 ms | 0 |
+
+These run against the local `vite preview` build, not production hosting.
+
+**Not run in Phase 11** (not in the index's verification for this phase): gate 2 (Taste critique rounds), gate 3 (side-by-side with nishorama.com) and gate 4 (motion audit). They belong with the landing page, Phase 12.
+
+### 14.6 Dependencies
+
+`lighthouse` **13.5.0**, exact, root dev dependency, installed on 2026-10-24 with `npm install -D -E lighthouse@13.5.0 --before=2026-10-10`, so no package younger than two weeks entered the lockfile: 100 packages added, `npm audit` 0. npm warned that `@opentelemetry/sdk-trace-base@2.12.0` (through `@sentry/node`) is deprecated; it is not a vulnerability, and error reporting is off. The storefront declares only the admin's existing versions. Nothing else was added.
+
+### 14.7 Screenshots and open points
+
+- Screenshots: `docs/reviews/storefront/2026-10-24/`: home, search, size sheet, cart drawer, cart, page and coming soon, each at 1440, 768 and 390 px. Product wells are empty champagne blocks: there is no real photography yet.
+- **Open:** Q11-12 (stock in the cart); Q11-5 (the Foundation's name); the vector logo before Phase 12 (B-04); a decision-identifier range after D-100.
+- **Phase 11 gate: not recorded.** It needs your review of these screenshots and results.
 

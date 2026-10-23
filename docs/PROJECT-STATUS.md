@@ -4,7 +4,7 @@ Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 11 — Storefront shell, search and cart: plan approved in principle (D-098), cart contract reconciled (D-099); implementation started.** Step 1 (storefront foundation) built; step 2 (cart migration `20261023180000_guest_cart`) validated on disposable databases and **approved (D-100)**, with the `BYTEA` hash and no `customer_id` (`phase-11-plan.md` §14). Next: the `cart` module and the storefront shell. **Gate pending.** Branch `phase-11-storefront` from `4634762`. Dependencies met: Phases 8, 9 and 10 passed (D-089, D-092, D-095); TD-001 and TD-002 decided (D-085, D-086). The cart migration stops for your review before commit. Lighthouse: option A, `lighthouse` 13.5.0 (two-week rule met).
+**Phase 11 — Storefront shell, search and cart: built and tested; gate awaiting your review.** Plan D-098, cart contract D-099, migration D-100 (`3497ea0`). Evidence in `phase-11-plan.md` §14: 713 unit, 402 integration (12 cart gate tests) and 15 end-to-end tests; Taste lint clean; inspector results recorded with reasons; Lighthouse 13.5.0 accessibility 100 and performance 93 to 94 on three pages. **Open: Q11-12** (stock in the cart, a proposed amendment to D-099).
 - **OD-02:** logo supplied 2026-10-23 as a raster screenshot; the logo crop and derived transparent versions are in `docs/brand/` (the screenshot is not committed). **Approved in principle (D-096):** the logo as the visual reference; the palette as proposed implementation colours for the storefront only, not verified brand colours; the admin palette unchanged; the contrast safeguards of §3.4 kept. A vector or ≥ 3000 px export is still needed for Phase 12.
 - **OD-15: closed (D-097)**, É verified in the logo and in Panchang 700 and Switzer 400 and 500 (§3.1).
 - **Q11-5:** the caption says "Rahma Foundation"; the project says "Rehma". Stays open until the official name is verified; the `rehma-foundation` slug and the Phase 10 migration are unchanged.
@@ -311,8 +311,11 @@ Unchanged from the previous update. Keep `design-taste-frontend`, `ui-ux-pro-max
 
 ## Next exact task
 
-**Me (authorised, D-098 to D-100):** the `cart` module with T11-1 to T11-12; the storefront shell, search, pills, size picker, drawer and `/cart` page; Lighthouse 13.5.0 under the recorded policy (fallback: Edge DevTools, report saved).
+**You:**
+- review the Phase 11 evidence (`phase-11-plan.md` §14, `docs/reviews/storefront/2026-10-24/`) and decide the gate;
+- decide Q11-12 (stock in the cart) and an identifier range for decisions after D-100;
+- Q11-5 when the Foundation's name is verified; the vector logo before Phase 12.
 
-**You:** an identifier range for decisions after D-100 (D-101 to D-134 are taken); Q11-5 when the Foundation's name is verified; the vector logo before Phase 12; the Phase 11 gate review when its evidence is ready.
+**Me:** CI on a draft PR if you authorise one; record the gate only after your approval.
 
 **Me, on 2026-10-29:** recheck `@vitest/coverage-v8` (decision unchanged).

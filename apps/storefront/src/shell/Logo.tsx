@@ -7,6 +7,8 @@ import wordmark from "../assets/logo-wordmark.png";
 import s from "./shell.module.css";
 
 export const BRAND_NAME = "Sanéa Pret";
+/** The logo's own printed tagline, read out with it. */
+const TAGLINE = "Effortless Elegance"; // taste-skill-ignore
 
 export function Wordmark() {
   return (
@@ -26,7 +28,7 @@ export function Lockup() {
     <img
       className={s.lockup}
       src={lockup}
-      alt={`${BRAND_NAME}, Effortless Elegance`}
+      alt={`${BRAND_NAME}, ${TAGLINE}`}
       width={889}
       height={334}
     />

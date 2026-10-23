@@ -11,6 +11,13 @@ Playwright tests for full admin and, later, shopper journeys (`docs/testing-stra
 - **Accessibility and layout:** axe (WCAG 2.2 AA tags) and a horizontal-scroll check at 1440, 768 and 390 px.
 - **Screenshots** for review, written to `docs/reviews/admin/<date>/`.
 
+`storefront.spec.ts` (Phase 11, `docs/phase-11-plan.md` §8) seeds synthetic data (`support/seed-storefront.ts`) and covers:
+- **Shell:** the logo, announcement, pills and footer from published content.
+- **Shopping:** header search to a result, a size added through the sheet, quantity changes in the drawer, the bag kept across a reload, the `/cart` page.
+- **Keyboard only:** search, size, add and close, with focus kept inside the sheets.
+- **Pages:** a published page, the unpublished Rehma page as not found, Phase 13 links as coming soon.
+- **Accessibility and layout:** axe and horizontal scroll at 1440, 768 and 390 px (screenshots to `docs/reviews/storefront/<date>/`), plus 1024 and 375 px.
+
 ## How to run
 
 1. Start a disposable PostgreSQL 18 on loopback, for example:
@@ -25,8 +32,8 @@ Playwright tests for full admin and, later, shopper journeys (`docs/testing-stra
 
 The global setup (`global-setup.ts`):
 - creates and migrates the database `sanea_test_e2e`;
-- builds the admin;
-- starts the API (`support/api-server.ts`, test-only, with higher auth rate limits), the development image server and `vite preview` on `http://localhost:5174`;
+- builds the admin and the storefront;
+- starts the API (`support/api-server.ts`, test-only, with higher auth rate limits), the development image server, and `vite preview` for the admin on `http://localhost:5174` and the storefront on `http://localhost:5173`;
 - creates the first Owner's invite with `admin:create-owner`.
 
 Secrets are random, held in memory and never printed. Teardown stops everything, drops the database and deletes the media folder. Stop the container afterwards.

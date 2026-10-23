@@ -1,6 +1,7 @@
-// End-to-end stack for the admin (phase-8-ui-plan.md §4): a fresh disposable
-// database, the API, the development image server, and the admin production
-// build served by `vite preview` on http://localhost:5174 (U8-6).
+// End-to-end stack (phase-8-ui-plan.md §4, phase-11-plan.md §8): a fresh
+// disposable database, the API, the development image server, and the admin
+// and storefront production builds served by `vite preview` on
+// http://localhost:5174 (U8-6) and http://localhost:5173.
 //
 // Needs TEST_DATABASE_URL: a disposable PostgreSQL on loopback whose database
 // name starts with sanea_test (D-059). Secrets are generated here, kept in
@@ -17,6 +18,7 @@ import { fileURLToPath } from "node:url";
 export const API_PORT = 4100;
 export const IMAGE_PORT = 4101;
 export const ADMIN_URL = "http://localhost:5174";
+export const STOREFRONT_URL = "http://localhost:5173";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const node = process.execPath;
@@ -80,7 +82,7 @@ export default async function globalSetup() {
     LOG_LEVEL: "warn",
     HOST: "127.0.0.1",
     PORT: String(API_PORT),
-    STOREFRONT_ORIGIN: "http://localhost:5173",
+    STOREFRONT_ORIGIN: STOREFRONT_URL,
     ADMIN_ORIGIN: ADMIN_URL,
     CSRF_SECRET: randomBytes(32).toString("base64url"),
     DATABASE_URL: dbUrl.toString(),
@@ -104,6 +106,12 @@ export default async function globalSetup() {
     env,
     stdio: "pipe",
   });
+  // The storefront's production build too (Phase 11), served the same way.
+  execFileSync(node, [vite, "build", "--logLevel", "warn"], {
+    cwd: join(root, "apps", "storefront"),
+    env,
+    stdio: "pipe",
+  });
 
   start("api", ["e2e/support/api-server.ts"], env);
   start("images", ["apps/api/src/modules/media/dev-image-server.ts"], env);
@@ -115,7 +123,14 @@ export default async function globalSetup() {
   );
   await waitFor(`http://127.0.0.1:${API_PORT}/api/v1/health`, "API");
   await waitFor(`http://127.0.0.1:${IMAGE_PORT}/`, "image server");
+  start(
+    "storefront",
+    [vite, "preview"],
+    { ...env, STOREFRONT_API_URL: `http://127.0.0.1:${API_PORT}` },
+    join(root, "apps", "storefront"),
+  );
   await waitFor(`${ADMIN_URL}/sign-in`, "admin preview");
+  await waitFor(`${STOREFRONT_URL}/`, "storefront preview");
 
   // The first Owner's one-time set-up link (D-069), exactly as an operator gets it.
   const out = execFileSync(

@@ -52,6 +52,7 @@ export async function adminHarness(
     env?: Record<string, string>;
     media?: MediaOptions;
     searchLimit?: { windowMs: number; limit: number };
+    cartLimit?: { windowMs: number; limit: number };
   } = {},
 ) {
   const { db, drop, name: dbName } = await createTestDatabase();
@@ -66,6 +67,7 @@ export async function adminHarness(
     ...(options.env ? { config: testConfig(options.env) } : {}),
     ...(options.media ? { media: options.media } : {}),
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
+    ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
     db,
     now: clock.now,
     argon2: FAST_ARGON2,

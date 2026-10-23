@@ -1,0 +1,174 @@
+/* Product cards and the size sheet (design-system.md §6). Square corners;
+   champagne wells; labels at 13 px sentence case on a flat chip. */
+.grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-space-8) var(--sp-space-4);
+}
+
+@media (min-width: 48rem) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-space-12) var(--sp-space-6);
+  }
+}
+
+.card {
+  display: grid;
+  gap: var(--sp-space-2);
+  align-content: start;
+}
+
+.well {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  background: var(--sp-surface);
+  overflow: hidden;
+}
+
+.well img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.label {
+  position: absolute;
+  inset-block-start: var(--sp-space-2);
+  inset-inline-start: var(--sp-space-2);
+  padding: var(--sp-space-1) var(--sp-space-2);
+  background: var(--sp-bg);
+  color: var(--sp-ink);
+  font-size: var(--sp-step-small);
+}
+
+.cardName {
+  font-size: var(--sp-step-body);
+  font-weight: var(--sp-weight-regular);
+}
+
+.cardName a {
+  text-decoration: none;
+}
+
+.cardName a:hover {
+  text-decoration: underline;
+}
+
+.cardPrice {
+  font-weight: var(--sp-weight-medium);
+}
+
+.add {
+  justify-self: start;
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-4);
+  border: var(--sp-border-width) solid var(--sp-ink);
+  border-radius: var(--sp-radius-none);
+  background: transparent;
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+}
+
+.add:hover:not(:disabled) {
+  background: var(--sp-ink);
+  color: var(--sp-bg);
+}
+
+.add:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.add:disabled {
+  border-color: var(--sp-muted);
+  color: var(--sp-muted);
+}
+
+.stack {
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--sp-space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldset legend {
+  margin-block-end: var(--sp-space-3);
+  font-weight: var(--sp-weight-medium);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-2);
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-line);
+  cursor: pointer;
+}
+
+.swatch:has(input:checked) {
+  border-color: var(--sp-ink);
+  border-width: calc(var(--sp-border-width) * 2);
+  padding-inline: calc(var(--sp-space-3) - var(--sp-border-width));
+}
+
+.swatch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.swatch:has(input:focus-visible) {
+  outline: var(--sp-focus-width) solid var(--sp-focus);
+  outline-offset: var(--sp-focus-offset);
+}
+
+.chip {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--sp-border-width) solid var(--sp-line);
+}
+
+.size {
+  min-width: var(--sp-control-height);
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-line);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+}
+
+.size[aria-pressed="true"] {
+  background: var(--sp-ink);
+  color: var(--sp-bg);
+  border-color: var(--sp-ink);
+}
+
+.size:disabled {
+  color: var(--sp-muted);
+  text-decoration: line-through;
+  background: transparent;
+}
+
+.hint {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}

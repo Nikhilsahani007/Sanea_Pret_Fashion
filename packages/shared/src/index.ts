@@ -88,6 +88,18 @@ export type {
   SocialNetwork,
 } from "./content/blocks.ts";
 
+// Guest cart (D-099)
+export {
+  CART_CURRENCY,
+  CART_LINE_CEILING,
+  CART_MAX_LINES,
+  CartWarning,
+  EMPTY_CART,
+  cartItemAddSchema,
+  cartItemUpdateSchema,
+} from "./cart/cart.ts";
+export type { CartImage, CartLine, CartView } from "./cart/cart.ts";
+
 // Validation
 export {
   VALIDATION_CODES,
