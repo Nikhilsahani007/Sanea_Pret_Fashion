@@ -199,6 +199,20 @@ Editable storefront content is modelled as typed blocks, not free HTML:
 - Publishing copies draft to published and writes an audit entry. The storefront reads only published content, cached for 60 seconds and invalidated on publish.
 - Pages (About, Rehma Foundation, policies) use structured rich text (headings, paragraphs, lists, links, images). Stored as JSON and rendered through an allow-listed renderer, never as raw HTML. In every rich-text document (pages and product descriptions), text nodes store their words as a string under the key `text` (R2, 2026-10-22).
 
+### 7.1 As built in Phase 10 (D-093)
+
+- **Fixed block registry (Q10-1):** each key has one type and one shared schema.
+  - Hero slides are one block of 1 to 5 slides (Q10-2).
+  - Category pills and footer link groups are navigation menus; the `FOOTER` block holds only contact and social details (Q10-3).
+  - The only external links are `https` social links on allow-listed hosts (Q10-4).
+- **Draft, publish, unpublish and discard** for blocks and pages (Q10-5). Navigation has no draft: a link appears only while its target is public.
+- **Public responses** are built from published fields only. Product rows use the catalogue's visibility rules. A non-public page is a 404 identical to an unknown slug, with `no-store`.
+- **Rehma Foundation:**
+  - O M edit; the Owner alone verifies and publishes, with `verified: true` bound to the reviewed `draftVersion` (Q10-8);
+  - the page CHECKs refuse publication without verification;
+  - the row is created as a draft placeholder by migration `20261023120000_rehma_foundation_page` (Q10-9).
+- **Audit:** every content write is audited with SHA-256 hashes of the before and after JSON, never the text.
+
 ## 8. Search and filtering
 
 - PostgreSQL full-text search (`tsvector` on name, description, category, collection, colour names) plus `pg_trgm` for typo tolerance and prefix suggestions. The vector uses the `simple` configuration and is kept current by database triggers (D-081, Q8-1; `database-design.md` §3.1).

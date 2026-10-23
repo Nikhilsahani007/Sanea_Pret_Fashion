@@ -13,6 +13,10 @@ import { ProductEditor } from "./catalogue/ProductEditor.tsx";
 import { ProductNew } from "./catalogue/ProductNew.tsx";
 import { ProductsList } from "./catalogue/ProductsList.tsx";
 import { SizeCharts } from "./catalogue/SizeCharts.tsx";
+import { BlockEditor } from "./content/BlockEditor.tsx";
+import { ContentHome } from "./content/ContentHome.tsx";
+import { NavigationEditor } from "./content/NavigationEditor.tsx";
+import { PageEditor } from "./content/PageEditor.tsx";
 import { Inventory } from "./inventory/Inventory.tsx";
 import { Movements } from "./inventory/Movements.tsx";
 import { RequireSession } from "./shell/AppShell.tsx";
@@ -49,6 +53,13 @@ export function AppRoutes() {
         <Route path="/size-charts" element={<SizeCharts />} />
         <Route path="/media" element={<MediaLibrary />} />
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/content" element={<ContentHome />} />
+        <Route path="/content/blocks/:key" element={<BlockEditor />} />
+        <Route path="/content/pages/:slug" element={<PageEditor />} />
+        <Route
+          path="/content/navigation/:menu"
+          element={<NavigationEditor />}
+        />
         <Route path="/inventory/movements" element={<Movements />} />
         <Route path="*" element={<NotFound />} />
       </Route>

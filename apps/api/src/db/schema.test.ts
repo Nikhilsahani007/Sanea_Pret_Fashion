@@ -111,7 +111,21 @@ describe("reference data", () => {
     const rows = [...(insert?.[1] ?? "").matchAll(/\('([^']+)', (\d+)\)/g)];
     expect(rows.map((r) => r[1])).toEqual([...APPROVED_SIZES]);
     expect(rows.map((r) => Number(r[2]))).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(sql.match(/INSERT INTO/g)).toHaveLength(1);
+    // The only other reference row: the Rehma Foundation draft (Q10-9, D-093).
+    expect(sql.match(/INSERT INTO "[a-z_]+"/g)).toEqual([
+      'INSERT INTO "size"',
+      'INSERT INTO "page"',
+    ]);
+  });
+
+  it("creates the Rehma Foundation page only as an unpublished draft that needs verification (Q10-9)", () => {
+    const insert = /INSERT INTO "page"[^;]+;/.exec(sql)?.[0] ?? "";
+    expect(insert).toContain("'rehma-foundation'");
+    expect(insert).toContain("'DRAFT'");
+    expect(insert).toMatch(/"requires_verification"/);
+    expect(insert).toMatch(/,\s*true,/);
+    expect(insert).not.toMatch(/published_body|verified_at|verified_by/);
+    expect(insert).toContain('ON CONFLICT ("slug") DO NOTHING');
   });
 });
 

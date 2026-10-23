@@ -184,3 +184,48 @@ export type Movement = {
   actorName: string | null;
   createdAt: string;
 };
+
+// Content (Phase 10, phase-10-plan.md §3.8)
+export type BlockView = {
+  key: string;
+  type: string;
+  draft: Record<string, unknown> | null;
+  published: Record<string, unknown> | null;
+  publishedAt: string | null;
+  updatedAt: string | null;
+  unpublishedChanges: boolean;
+};
+
+export type PageView = {
+  id: string;
+  slug: string;
+  title: string;
+  draftBody?: unknown;
+  publishedBody?: unknown;
+  status: Status;
+  requiresVerification: boolean;
+  verifiedAt: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  draftVersion: string;
+  unpublishedChanges: boolean;
+};
+
+export type Target =
+  | { kind: "CATEGORY" | "COLLECTION" | "PRODUCT" | "PAGE"; id: string }
+  | { kind: "PATH"; path: string };
+
+export type NavTarget =
+  | { kind: "CATEGORY" | "COLLECTION" | "PRODUCT" | "PAGE"; id: string }
+  | { kind: "URL"; url: string };
+
+export type MenuView = {
+  menu: string;
+  maxItems: number;
+  items: {
+    label: string;
+    target: NavTarget;
+    href: string | null;
+    hidden: boolean;
+  }[];
+};

@@ -59,9 +59,34 @@ export {
   INTERNAL_LINK_PATTERN,
   RICH_TEXT_LIMITS,
   isInternalLink,
+  pageRichTextSchema,
+  plainTextSchema,
   richTextSchema,
 } from "./catalogue/rich-text.ts";
-export type { RichText } from "./catalogue/rich-text.ts";
+export type { PageRichText, RichText } from "./catalogue/rich-text.ts";
+
+// Content (Phase 10)
+export {
+  CONTENT_BLOCKS,
+  CONTENT_BLOCK_KEYS,
+  NAV_MENUS,
+  SOCIAL_HOSTS,
+  contentTargetSchema,
+  isAllowedSocialUrl,
+  isContentBlockKey,
+  isNavMenu,
+  navItemSchema,
+  navMenuSchema,
+  productSourceSchema,
+} from "./content/blocks.ts";
+export type {
+  ContentBlockKey,
+  ContentTarget,
+  NavItem,
+  NavMenu,
+  ProductSource,
+  SocialNetwork,
+} from "./content/blocks.ts";
 
 // Validation
 export {

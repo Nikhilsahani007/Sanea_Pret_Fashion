@@ -64,12 +64,13 @@ describe("development seed", () => {
     }
   });
 
-  it("adds no sizes and touches no admin, media or content table", async () => {
+  it("adds no sizes and touches no admin, media or content table (beyond the migration's Rehma draft)", async () => {
     const [row] = await db.$queryRawUnsafe<{ n: number }[]>(
       `SELECT (SELECT count(*) FROM "admin_user") + (SELECT count(*) FROM "admin_session")
             + (SELECT count(*) FROM "audit_log") + (SELECT count(*) FROM "media_asset")
             + (SELECT count(*) FROM "product_image") + (SELECT count(*) FROM "content_block")
-            + (SELECT count(*) FROM "page") + (SELECT count(*) FROM "navigation_item")
+            + (SELECT count(*) FROM "page" WHERE "slug" <> 'rehma-foundation' OR "status" <> 'DRAFT')
+            + (SELECT count(*) FROM "navigation_item")
             + (SELECT count(*) FROM "store_setting") + (SELECT count(*) FROM "collection")
             + (SELECT count(*) FROM "size_chart") + (SELECT count(*) FROM "stock_reservation") AS n`,
     );
