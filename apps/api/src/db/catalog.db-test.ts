@@ -120,7 +120,7 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("inserts exactly the six approved sizes and no other rows", async () => {
+  it("inserts exactly the six approved sizes, the Rehma draft, and no other rows", async () => {
     const sizes = await q<{ label: string; position: number }>(
       `SELECT "label", "position" FROM "size" ORDER BY "position"`,
     );
@@ -129,10 +129,25 @@ describe("tables and scope", () => {
     const counts = await q<{ t: string; n: number }>(
       `SELECT relname AS t, (xpath('/row/n/text()', query_to_xml(format('SELECT count(*) AS n FROM %I', relname), false, true, '')))[1]::text::int AS n
        FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r'
-         AND relname NOT IN ('size', '_prisma_migrations')`,
+         AND relname NOT IN ('size', 'page', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(21);
+    // The Rehma Foundation placeholder (Q10-9): a draft, unpublished, unverified.
+    expect(
+      await q(
+        `SELECT "slug", "status"::text AS "status", "requires_verification" AS "rv", "published_body" IS NULL AS "unpublished", "verified_at" IS NULL AS "unverified" FROM "page"`,
+      ),
+    ).toEqual([
+      {
+        slug: "rehma-foundation",
+        status: "DRAFT",
+        rv: true,
+        unpublished: true,
+        unverified: true,
+      },
+    ]);
+    // 22 tables, less `size` and `page`, which are checked above.
+    expect(counts).toHaveLength(20);
   });
 });
 

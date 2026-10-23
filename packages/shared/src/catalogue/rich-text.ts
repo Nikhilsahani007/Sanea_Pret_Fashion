@@ -94,3 +94,49 @@ export type RichText = z.infer<typeof richTextSchema>;
 
 /** An empty document, for new products. */
 export const EMPTY_RICH_TEXT: RichText = { type: "doc", content: [] };
+
+/**
+ * Pages only (Phase 10, Q10-6): an image block referencing a media asset, with
+ * required alt text. Product descriptions keep refusing images.
+ */
+const imageBlock = strict({
+  type: z.literal("image"),
+  mediaAssetId: z.uuid({ error: "INVALID" }),
+  alt: z
+    .string()
+    .trim()
+    .min(1, { error: "REQUIRED" })
+    .max(200, { error: "TOO_LONG" })
+    .refine((t) => !CONTROL.test(t), { error: "TEXT_INVALID_CHARACTERS" })
+    .refine((t) => !HTML_LIKE.test(t), { error: "INVALID" }),
+  caption: z
+    .string()
+    .trim()
+    .max(200, { error: "TOO_LONG" })
+    .refine((t) => !CONTROL.test(t), { error: "TEXT_INVALID_CHARACTERS" })
+    .refine((t) => !HTML_LIKE.test(t), { error: "INVALID" })
+    .optional(),
+});
+
+export const pageRichTextSchema = strict({
+  type: z.literal("doc"),
+  content: z
+    .array(z.union([paragraph, heading, list, imageBlock]))
+    .max(RICH_TEXT_LIMITS.blocks),
+});
+
+export type PageRichText = z.infer<typeof pageRichTextSchema>;
+
+/**
+ * Plain text for content fields (labels, campaign lines): trimmed, bounded,
+ * never markup or control characters, the same refusals as rich text.
+ */
+export function plainTextSchema(min: number, max: number) {
+  return z
+    .string()
+    .trim()
+    .min(min, { error: min > 0 ? "REQUIRED" : "TOO_SHORT" })
+    .max(max, { error: "TOO_LONG" })
+    .refine((t) => !CONTROL.test(t), { error: "TEXT_INVALID_CHARACTERS" })
+    .refine((t) => !HTML_LIKE.test(t), { error: "INVALID" });
+}

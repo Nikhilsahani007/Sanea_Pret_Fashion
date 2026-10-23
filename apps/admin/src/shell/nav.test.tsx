@@ -23,6 +23,7 @@ describe("navigation by role", () => {
       "Products",
       "Inventory",
       "Stock movements",
+      "Content",
       "Categories",
       "Collections",
       "Colours",

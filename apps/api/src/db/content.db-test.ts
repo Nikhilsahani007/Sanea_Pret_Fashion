@@ -1,6 +1,6 @@
 // Content rules: Rehma Foundation verification guard (D-010), block
 // publishing pairs and navigation targets, enforced by PostgreSQL.
-import { afterAll, beforeAll, describe, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { PrismaClient } from "../generated/prisma/client.ts";
 import { createTestDatabase } from "./testing/database.ts";
@@ -55,11 +55,18 @@ describe("Rehma Foundation page", () => {
       "page_verification_required_check",
     ));
 
-  it("can be drafted with the requirement", () =>
-    expectAccepted(
-      db,
-      pageSql("rehma-foundation", { requires_verification: "true" }),
-    ));
+  it("exists as the migration's draft, with the requirement (Q10-9)", async () => {
+    const rows = await db.$queryRawUnsafe<
+      { status: string; rv: boolean; published: boolean; verified: boolean }[]
+    >(
+      `SELECT "status"::text AS "status", "requires_verification" AS "rv",
+        "published_body" IS NOT NULL AS "published", "verified_at" IS NOT NULL AS "verified"
+       FROM "page" WHERE "slug" = 'rehma-foundation'`,
+    );
+    expect(rows).toEqual([
+      { status: "DRAFT", rv: true, published: false, verified: false },
+    ]);
+  });
 
   it("cannot be published before verification", () =>
     expectCheck(

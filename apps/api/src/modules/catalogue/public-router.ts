@@ -125,7 +125,8 @@ export async function listingResponse(
   };
 }
 
-async function summaries(
+/** Product summaries for listings and content product rows (Phase 10). */
+export async function summaries(
   deps: AuthDeps,
   storage: MediaStorage,
   items: {

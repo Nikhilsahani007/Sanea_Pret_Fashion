@@ -1,9 +1,11 @@
-// The description block editor: plain text areas, one per block, with
-// move up, move down and remove buttons (no dragging), and a preview built
-// from React elements through an allow-list (never HTML strings).
+// The block editor for product descriptions and pages: plain text areas, one
+// per block, with move up, move down and remove buttons (no dragging), and a
+// preview built from React elements through an allow-list (never HTML
+// strings). With `media`, pages also get image blocks (Q10-6).
 import { Fragment, type ReactNode } from "react";
 
-import { Button, SelectField, TextArea } from "../ui/controls.tsx";
+import type { MediaAsset } from "../api/types.ts";
+import { Button, SelectField, TextArea, TextField } from "../ui/controls.tsx";
 import { Cluster, Stack, ui } from "../ui/feedback.tsx";
 import {
   BLOCK_LABELS,
@@ -15,20 +17,32 @@ import {
 } from "./rich-text-blocks.ts";
 import s from "./catalogue.module.css";
 
+type Schema = Parameters<typeof blockProblems>[1];
+
 type Props = {
   blocks: Block[];
   onChange: (blocks: Block[]) => void;
   disabled?: boolean;
   serverError?: string | undefined;
+  /** Pages: the images that image blocks may use. Omitted for descriptions. */
+  media?: MediaAsset[];
+  schema?: Schema;
 };
+
+/** A small WebP thumbnail of an uploaded image, if one exists. */
+export const thumbOf = (asset: MediaAsset | undefined) =>
+  asset?.derivatives.find((d) => d.format === "webp" && d.width >= 300) ??
+  asset?.derivatives.find((d) => d.format === "webp");
 
 export function RichTextEditor({
   blocks,
   onChange,
   disabled,
   serverError,
+  media,
+  schema,
 }: Props) {
-  const problems = blockProblems(blocks);
+  const problems = blockProblems(blocks, schema);
   const update = (i: number, patch: Partial<Block>) =>
     onChange(blocks.map((b, j) => (j === i ? { ...b, ...patch } : b)));
   const move = (i: number, by: -1 | 1) => {
@@ -51,7 +65,7 @@ export function RichTextEditor({
       {serverError ? <p className={ui.error}>{serverError}</p> : null}
       {problems.get(-1) ? <p className={ui.error}>{problems.get(-1)}</p> : null}
       {blocks.length === 0 ? (
-        <p className={ui.muted}>No description yet. Add a block to start.</p>
+        <p className={ui.muted}>Nothing written yet. Add a block to start.</p>
       ) : null}
       <ol className={s.blocks}>
         {blocks.map((b, i) => (
@@ -70,17 +84,29 @@ export function RichTextEditor({
                     {label}
                   </option>
                 ))}
+                {media ? <option value="image">Image</option> : null}
               </SelectField>
-              <TextArea
-                label={`Block ${i + 1} text`}
-                value={b.text}
-                disabled={disabled}
-                rows={b.kind === "h2" || b.kind === "h3" ? 1 : 4}
-                onChange={(e) => update(i, { text: e.target.value })}
-                error={problems.get(i)}
-                optional
-                aria-describedby="rte-help"
-              />
+              {b.kind === "image" ? (
+                <ImageFields
+                  block={b}
+                  index={i}
+                  media={media ?? []}
+                  disabled={disabled}
+                  error={problems.get(i)}
+                  onChange={(patch) => update(i, patch)}
+                />
+              ) : (
+                <TextArea
+                  label={`Block ${i + 1} text`}
+                  value={b.text}
+                  disabled={disabled}
+                  rows={b.kind === "h2" || b.kind === "h3" ? 1 : 4}
+                  onChange={(e) => update(i, { text: e.target.value })}
+                  error={problems.get(i)}
+                  optional
+                  aria-describedby="rte-help"
+                />
+              )}
               {disabled ? null : (
                 <Cluster gap="2">
                   <Button
@@ -134,12 +160,85 @@ export function RichTextEditor({
           >
             Add list
           </Button>
+          {media ? (
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => add("image")}
+            >
+              Add image
+            </Button>
+          ) : null}
         </Cluster>
       )}
       <details className={s.preview}>
         <summary>Preview</summary>
-        <RichTextPreview blocks={blocks} />
+        <RichTextPreview blocks={blocks} media={media} />
       </details>
+    </Stack>
+  );
+}
+
+function ImageFields({
+  block,
+  index,
+  media,
+  disabled,
+  error,
+  onChange,
+}: {
+  block: Block;
+  index: number;
+  media: MediaAsset[];
+  disabled: boolean | undefined;
+  error: string | undefined;
+  onChange: (patch: Partial<Block>) => void;
+}) {
+  const thumb = thumbOf(media.find((m) => m.id === block.mediaAssetId));
+  return (
+    <Stack gap="3">
+      <SelectField
+        label={`Block ${index + 1} image`}
+        hint="From the media library. Upload new images on a product's Images section."
+        value={block.mediaAssetId ?? ""}
+        disabled={disabled}
+        onChange={(e) =>
+          onChange({ mediaAssetId: e.target.value || undefined })
+        }
+      >
+        <option value="">Choose an image</option>
+        {media.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.width} × {m.height} px, uploaded{" "}
+            {new Date(m.createdAt).toLocaleDateString("en-IN")}
+          </option>
+        ))}
+      </SelectField>
+      {thumb ? (
+        <img
+          className={s.thumb}
+          src={thumb.url}
+          alt=""
+          width={96}
+          height={120}
+        />
+      ) : null}
+      <TextField
+        label={`Block ${index + 1} alt text`}
+        value={block.alt ?? ""}
+        maxLength={200}
+        disabled={disabled}
+        onChange={(e) => onChange({ alt: e.target.value })}
+        error={error}
+      />
+      <TextField
+        label={`Block ${index + 1} caption`}
+        optional
+        value={block.caption ?? ""}
+        maxLength={200}
+        disabled={disabled}
+        onChange={(e) => onChange({ caption: e.target.value })}
+      />
     </Stack>
   );
 }
@@ -175,13 +274,32 @@ function renderInline(content: readonly Inline[]): ReactNode[] {
   );
 }
 
-export function RichTextPreview({ blocks }: { blocks: Block[] }) {
+export function RichTextPreview({
+  blocks,
+  media,
+}: {
+  blocks: Block[];
+  media?: MediaAsset[] | undefined;
+}) {
   const doc = blocksToDoc(blocks);
   if (doc.content.length === 0)
     return <p className={ui.muted}>Nothing to preview.</p>;
   return (
     <div className={s.previewBody}>
       {doc.content.map((b, i) => {
+        if (b.type === "image") {
+          const thumb = thumbOf(media?.find((m) => m.id === b.mediaAssetId));
+          return (
+            <figure key={i}>
+              {thumb ? (
+                <img className={s.thumb} src={thumb.url} alt={b.alt} />
+              ) : (
+                <p className={ui.muted}>Image: {b.alt}</p>
+              )}
+              {b.caption ? <figcaption>{b.caption}</figcaption> : null}
+            </figure>
+          );
+        }
         if (b.type === "paragraph")
           return <p key={i}>{renderInline(b.content)}</p>;
         if (b.type === "heading")

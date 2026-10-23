@@ -1,6 +1,6 @@
 # Phase 10 Plan — Content Management
 
-Status: **Proposed, for your review. Planning only: no code, no schema change, no migration, nothing installed.** · Date: 2026-10-23 · Base: `phase-10-content` from `phase-9-inventory` at `688dbf3` (Phase 9 gate passed, D-092; draft PRs #6 and #7 open and unmerged)
+Status: **Approved by you on 2026-10-23 (D-093), with Q10-1 to Q10-9 as recommended, including the Rehma placeholder wording. The Rehma data migration stops for your review before commit; the draft PR needs your authorisation.** · Date: 2026-10-23 · Base: `phase-10-content` from `phase-9-inventory` at `688dbf3` (Phase 9 gate passed, D-092; draft PRs #6 and #7 open and unmerged)
 
 This plan covers Phase 10 of `MASTER-IMPLEMENTATION-INDEX.md`. Every step in §11 needs your approval of this plan first. Questions Q10-1 to Q10-9 (§9) need your decision.
 
@@ -291,7 +291,7 @@ This avoids two editors for the same links.
 
 **None new.** Everything uses the existing React, React Router, Zod, Prisma and test tooling.
 
-## 9. Questions for you
+## 9. Questions for you (approved 2026-10-23 as recommended, D-093)
 
 | # | Question | Recommendation |
 |---|----------|----------------|
@@ -324,9 +324,9 @@ This avoids two editors for the same links.
 
 | Step | Work | Needs your approval |
 |------|------|---------------------|
-| 1 | Approve this plan and Q10-1 to Q10-9 | **Yes (next)** |
+| 1 | Approve this plan and Q10-1 to Q10-9 | **Done** 2026-10-23 (D-093) |
 | 2 | Shared content schemas (and the page image node, if Q10-6 is approved), with unit tests | Covered by step 1 |
-| 3 | The Rehma data migration, validated on disposable databases | Covered by Q10-9, then **a review stop before commit** |
+| 3 | The Rehma data migration, validated on disposable databases | Covered by Q10-9, then **a review stop before commit** (validated, §13.1; **approved, D-094**) |
 | 4 | The `content` module: admin and public routes, gate tests | Covered by step 1 |
 | 5 | Admin editors; component and end-to-end tests; screenshots | Covered by step 1 |
 | 6 | Specification amendments; commit and normal push; CI on a draft PR | **The draft PR needs your authorisation** |
@@ -341,3 +341,49 @@ This avoids two editors for the same links.
 | Stale public content after unpublish | 404 responses are `no-store`; hits cache for 60 s at most (Q8-5). Accepted: content is not price or stock |
 | Content linking to removed products | Product rows and navigation are resolved at read time, and invisible targets are dropped; publish refuses missing targets |
 | Placeholder or test content reaches production | No content seeding beyond the Rehma draft placeholder; end-to-end text exists only in disposable databases |
+
+## 13. Evidence (2026-10-23, local; migration approved, D-094; gate awaiting your review)
+
+Run on Windows 11, Node 24.11.0, against a disposable PostgreSQL 18.6 container (`postgres:18.6-alpine`, synthetic data only, no production data or secrets).
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Unit and component | `npm test` | 688 passed (37 files) |
+| Integration | `npm run test:integration` | 381 passed (17 files), including 17 content tests |
+| End to end (Edge) | `npm run test:e2e` | 11 passed; axe clean at 390, 768 and 1440 px |
+| Lint and design tokens | `npm run lint` | clean |
+| Format | `npm run format:check` | clean |
+| Typecheck | `npm run typecheck` | clean |
+| Admin build | `npm run build -w @sanea/admin` | passed; JS 148.11 kB gzipped, CSS 3.88 kB |
+| Dependencies | `npm run audit` | 0 vulnerabilities; nothing installed or changed |
+
+### 13.1 Migration `20261023120000_rehma_foundation_page` (validated, not committed)
+
+- `prisma migrate deploy` on an empty database applies 5 migrations; `migrate status` is up to date; `migrate diff` against the schema exits 0 (no drift).
+- The row is `rehma-foundation`, "Rehma Foundation", the approved placeholder, `DRAFT`, `requires_verification` true, no published body, no verifier.
+- Re-running the insert is a no-op; an existing row with that slug is left unchanged (`ON CONFLICT DO NOTHING`).
+- Both page CHECKs refuse a direct publish without verification and clearing the flag.
+- Deleting the row leaves the schema without drift (data only).
+- Re-checked before commit on the final files, on a fresh database: the same results (row with the exact placeholder text; re-run leaves 1 row; a staff-edited row keeps its title and body; the direct publish fails `page_verification_required_check` and clearing the flag fails `page_rehma_requires_verification_check`). The migration has no DDL and `schema.prisma` is unchanged.
+
+### 13.2 Gate output (`[P10-GATE]` lines from `npm run test:integration`)
+
+```
+T-GATE-1/2 marker planted in 4 drafts (page, announcement, product row, Rehma): absent from 9 public routes, before and after publishing; published versions served
+T-GATE-3 unpublished page: 200 then 404 (no-store) immediately; unpublished announcement: absent from /content/home
+T-GATE-4 rehma-foundation (migration row: DRAFT, requires verification, unverified): 404 identical to an unknown slug in status, code, message and headers
+T-GATE-5 Rehma publish by Manager, catalogue editor and fulfilment: 403; catalogue editor edit: 403; public still 404
+T-GATE-6 Owner without verified:true: 400; verified:false: 400; stale draft version: 409 DRAFT_CHANGED; public still 404
+T-GATE-7 direct SQL publish without verification and clearing the flag: rejected by CHECKs; API slug or flag change: 400
+T-GATE-8 Owner verify-and-publish with the reviewed version: 200; verified_by and verified_at set; audit has the body hash, no text; public 200; Manager unpublish 403; Owner unpublish then 404
+T-GATE-9 menu of 5: draft category, draft page and unpublished Rehma page hidden publicly (marked hidden in admin); 2 public links served
+T-GATE-10 manual row of 4 (visible, draft, archived, no active variant): only the visible product served
+```
+
+### 13.3 Screenshots
+
+`docs/reviews/admin/2026-10-23/`: `content`, `content-block-editor` and `content-rehma-owner`, each at 390, 768 and 1440 px. The earlier catalogue and inventory screenshots in that folder were regenerated by the same run (the navigation now includes Content).
+
+### 13.4 Changes to earlier-phase tests
+
+The migration adds one `page` row, so tests that assumed an empty `page` table now assert the exact approved state instead: `schema.test.ts` (two data inserts, and the Rehma insert is an unpublished draft with `ON CONFLICT`), `catalog.db-test.ts` (the single Rehma draft; 20 other tables empty), `seed.db-test.ts` (page count excludes the Rehma draft).

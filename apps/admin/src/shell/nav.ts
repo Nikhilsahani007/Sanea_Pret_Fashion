@@ -25,6 +25,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: "Stock movements",
     permission: "inventory.adjust",
   },
+  { to: "/content", label: "Content", permission: "content.edit" },
   {
     to: "/categories",
     label: "Categories",

@@ -212,6 +212,7 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
     "Products",
     "Inventory",
     "Stock movements",
+    "Content",
     "Categories",
     "Collections",
     "Colours",
@@ -238,8 +239,8 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
 });
 
 for (const [role, email, name, nav] of [
-  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 8],
-  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 7],
+  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 9],
+  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 8],
   ["FULFILMENT", "fulfilment@e2e.example.test", "Farid Fulfilment", 3],
 ] as const) {
   test(`${role}: invite set-up and sign-in through the shell`, async ({
@@ -671,6 +672,123 @@ test("Inventory: fulfilment receives and adjusts stock; the public product follo
   );
   expect(refused.status()).toBe(403);
   await editor.context.close();
+});
+
+test("Content: drafts stay private; the Rehma page is 404 until the Owner verifies and publishes it", async ({
+  browser,
+}) => {
+  const api = process.env.E2E_API_URL!;
+  const anon = (await browser.newContext()).request;
+  const publicJson = async (path: string) => {
+    const r = await anon.get(`${api}/api/v1/content${path}`);
+    return {
+      status: r.status(),
+      body: r.status() === 200 ? await r.json() : null,
+    };
+  };
+  const SYNTHETIC = "TEST synthetic text for the end-to-end test only.";
+
+  // A catalogue editor drafts and publishes the announcement and the header menu.
+  const editor = await as(browser, "CATALOGUE_EDITOR");
+  await editor.page.goto("/content");
+  await review(editor.page, "content");
+  await editor.page.getByRole("link", { name: "Announcement bar" }).click();
+  await editor.page
+    .getByLabel("Text", { exact: true })
+    .fill("TEST e2e announcement draft");
+  await editor.page.getByRole("button", { name: "Save draft" }).click();
+  await expect(
+    editor.page.getByRole("status").filter({ hasText: "Draft saved" }),
+  ).toBeVisible();
+  expect((await publicJson("/home")).body.announcement).toBeNull();
+  await editor.page.getByRole("button", { name: "Publish" }).click();
+  await expect(
+    editor.page.getByRole("status").filter({ hasText: "Published." }),
+  ).toBeVisible();
+  expect((await publicJson("/home")).body.announcement).toMatchObject({
+    text: "TEST e2e announcement draft",
+  });
+  await review(editor.page, "content-block-editor");
+
+  await editor.page.goto("/content/navigation/HEADER");
+  for (const [label, kind, option] of [
+    ["Kurtas", "CATEGORY", "Kurtas"],
+    ["Rehma Foundation", "PAGE", "Rehma Foundation (not published)"],
+  ] as const) {
+    await editor.page.getByRole("button", { name: "Add link" }).click();
+    const n = await editor.page
+      .getByRole("list", { name: "Links in menu order" })
+      .getByRole("listitem")
+      .count();
+    await editor.page.getByLabel(`Link ${n} label`).fill(label);
+    const target = editor.page.getByRole("group", { name: `Link ${n} target` });
+    await target.getByLabel("Links to").selectOption(kind);
+    await target
+      .getByLabel(kind === "PAGE" ? "Page" : "Category", { exact: true })
+      .selectOption({ label: option });
+  }
+  await editor.page.getByRole("button", { name: "Save menu" }).click();
+  await expect(
+    editor.page.getByRole("status").filter({ hasText: "Menu saved" }),
+  ).toBeVisible();
+  const nav = (await publicJson("/navigation")).body as {
+    menus: Record<string, { label: string }[]>;
+  };
+  expect(nav.menus.HEADER?.map((i) => i.label)).toEqual(["Kurtas"]);
+
+  // The catalogue editor cannot edit the Rehma page.
+  await editor.page.goto("/content/pages/rehma-foundation");
+  await expect(
+    editor.page.getByText("Only the Owner or a Manager can edit this page."),
+  ).toBeVisible();
+  await editor.context.close();
+
+  // A Manager edits the Rehma draft; it stays private.
+  const manager = await as(browser, "MANAGER");
+  await manager.page.goto("/content/pages/rehma-foundation");
+  await manager.page.getByLabel("Block 1 text").fill(SYNTHETIC);
+  await manager.page.getByRole("button", { name: "Save draft" }).click();
+  await expect(
+    manager.page.getByRole("status").filter({ hasText: "Draft saved" }),
+  ).toBeVisible();
+  await expect(
+    manager.page.getByRole("region", { name: "Verify and publish" }),
+  ).toHaveCount(0);
+  expect((await publicJson("/pages/rehma-foundation")).status).toBe(404);
+  await manager.context.close();
+
+  // The Owner reviews exactly that draft, verifies and publishes; then unpublishes.
+  const owner = await as(browser, "OWNER");
+  await owner.page.goto("/content/pages/rehma-foundation");
+  const verify = owner.page.getByRole("region", { name: "Verify and publish" });
+  await expect(verify.getByText(SYNTHETIC)).toBeVisible();
+  await expect(
+    verify.getByRole("button", { name: "Verify and publish" }),
+  ).toBeDisabled();
+  await review(owner.page, "content-rehma-owner");
+  await verify.getByLabel(/I have verified that every statement/).check();
+  await verify.getByRole("button", { name: "Verify and publish" }).click();
+  await expect(
+    owner.page
+      .getByRole("status")
+      .filter({ hasText: "Verified and published" }),
+  ).toBeVisible();
+  const live = await publicJson("/pages/rehma-foundation");
+  expect(live.status).toBe(200);
+  expect(JSON.stringify(live.body)).toContain(SYNTHETIC);
+  expect(
+    (
+      (await publicJson("/navigation")).body as {
+        menus: Record<string, { label: string }[]>;
+      }
+    ).menus.HEADER?.map((i) => i.label),
+  ).toEqual(["Kurtas", "Rehma Foundation"]);
+  await owner.page.getByRole("button", { name: "Unpublish" }).click();
+  await expect(
+    owner.page.getByRole("status").filter({ hasText: "Unpublished" }),
+  ).toBeVisible();
+  expect((await publicJson("/pages/rehma-foundation")).status).toBe(404);
+  await owner.context.close();
 });
 
 test("sign-out ends the session; the shell then asks for sign-in", async ({

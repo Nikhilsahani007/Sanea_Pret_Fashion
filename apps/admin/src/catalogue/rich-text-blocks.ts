@@ -2,14 +2,26 @@
 // list of blocks edited as plain text, converted to and from the structured
 // rich-text JSON (Q8-10, R2: words under `text`). No HTML is produced or read.
 // Inline syntax: **bold**, _italic_, [link text](/products/slug).
-import { richTextSchema, toFieldErrors, type RichText } from "@sanea/shared";
+import {
+  richTextSchema,
+  toFieldErrors,
+  type PageRichText,
+} from "@sanea/shared";
 
 export type BlockKind =
-  "paragraph" | "h2" | "h3" | "bulletList" | "orderedList";
+  "paragraph" | "h2" | "h3" | "bulletList" | "orderedList" | "image";
 
-export type Block = { id: string; kind: BlockKind; text: string };
+/** Text blocks use `text`; image blocks (pages only, Q10-6) use the image fields. */
+export type Block = {
+  id: string;
+  kind: BlockKind;
+  text: string;
+  mediaAssetId?: string;
+  alt?: string;
+  caption?: string;
+};
 
-export const BLOCK_LABELS: Record<BlockKind, string> = {
+export const BLOCK_LABELS: Record<Exclude<BlockKind, "image">, string> = {
   paragraph: "Paragraph",
   h2: "Heading",
   h3: "Subheading",
@@ -17,9 +29,17 @@ export const BLOCK_LABELS: Record<BlockKind, string> = {
   orderedList: "Numbered list",
 };
 
-type Doc = RichText;
+/** The page document: rich text plus image blocks. Descriptions never contain images. */
+type Doc = PageRichText;
 type DocBlock = Doc["content"][number];
 type Paragraph = Extract<DocBlock, { type: "paragraph" }>;
+type Schema = {
+  safeParse: (v: unknown) => {
+    success: boolean;
+    data?: unknown;
+    error?: unknown;
+  };
+};
 type Inline = Paragraph["content"][number];
 type TextNode = Extract<Inline, { type: "text" }>;
 type Mark = "bold" | "italic";
@@ -85,7 +105,15 @@ const oneLine = (text: string) => text.replace(/\s*\n+\s*/g, " ").trim();
 export function blocksToDoc(blocks: readonly Block[]): Doc {
   const content: DocBlock[] = [];
   for (const b of blocks) {
-    if (b.kind === "paragraph") {
+    if (b.kind === "image") {
+      if (b.mediaAssetId)
+        content.push({
+          type: "image",
+          mediaAssetId: b.mediaAssetId,
+          alt: (b.alt ?? "").trim(),
+          ...(b.caption?.trim() ? { caption: b.caption.trim() } : {}),
+        });
+    } else if (b.kind === "paragraph") {
       const text = oneLine(b.text);
       if (text) content.push({ type: "paragraph", content: parseInline(text) });
     } else if (b.kind === "h2" || b.kind === "h3") {
@@ -112,7 +140,16 @@ export function blocksToDoc(blocks: readonly Block[]): Doc {
 }
 
 export function docToBlocks(doc: Doc): Block[] {
-  return doc.content.map((b) => {
+  return doc.content.map((b): Block => {
+    if (b.type === "image")
+      return {
+        id: newBlockId(),
+        kind: "image",
+        text: "",
+        mediaAssetId: b.mediaAssetId,
+        alt: b.alt,
+        caption: b.caption ?? "",
+      };
     if (b.type === "paragraph")
       return {
         id: newBlockId(),
@@ -139,10 +176,11 @@ export function docToBlocks(doc: Doc): Block[] {
  */
 export function readStored(
   value: unknown,
+  schema: Schema = richTextSchema,
 ): { ok: true; blocks: Block[] } | { ok: false } {
-  const parsed = richTextSchema.safeParse(value);
+  const parsed = schema.safeParse(value);
   return parsed.success
-    ? { ok: true, blocks: docToBlocks(parsed.data) }
+    ? { ok: true, blocks: docToBlocks(parsed.data as Doc) }
     : { ok: false };
 }
 
@@ -152,19 +190,24 @@ const PROBLEMS: Record<string, string> = {
   TEXT_INVALID_CHARACTERS: "Remove control characters.",
   TOO_LONG: "This block is too long.",
   INVALID: "Remove anything that looks like HTML, such as <b>.",
+  REQUIRED: "Describe the image for people who cannot see it.",
 };
 
 /** Problems per block index, using the same schema the API applies. */
-export function blockProblems(blocks: readonly Block[]): Map<number, string> {
+export function blockProblems(
+  blocks: readonly Block[],
+  schema: Schema = richTextSchema,
+): Map<number, string> {
   const problems = new Map<number, string>();
   // Map each non-empty block to its position in the document.
   const docIndex: number[] = [];
   blocks.forEach((b, i) => {
-    if (b.text.trim()) docIndex.push(i);
+    if (b.kind === "image" ? Boolean(b.mediaAssetId) : b.text.trim())
+      docIndex.push(i);
   });
-  const result = richTextSchema.safeParse(blocksToDoc(blocks));
+  const result = schema.safeParse(blocksToDoc(blocks));
   if (result.success) return problems;
-  for (const error of toFieldErrors(result.error)) {
+  for (const error of toFieldErrors(result.error as never)) {
     const m = /^content\.(\d+)/.exec(error.path);
     const blockIndex = m ? docIndex[Number(m[1])] : undefined;
     const key = blockIndex ?? -1;

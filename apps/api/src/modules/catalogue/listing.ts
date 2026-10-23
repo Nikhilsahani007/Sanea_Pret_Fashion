@@ -40,7 +40,8 @@ export const PRICE_BANDS: readonly { min: number; max: number | null }[] = [
   { min: 500_000, max: null },
 ];
 
-function baseConditions(
+/** Visible to shoppers (also used by content product rows, Phase 10). */
+export function baseConditions(
   f: ListingFilters,
   now: Date,
   withCategory = true,
@@ -88,6 +89,9 @@ function variantCondition(f: ListingFilters): Prisma.Sql | null {
 }
 
 const FROM = sql`FROM "product" p JOIN "category" c ON c."id" = p."category_id"`;
+
+/** The product table joined to its category, for `baseConditions`. */
+export const PRODUCT_FROM = FROM;
 
 export type ListedProduct = {
   id: string;

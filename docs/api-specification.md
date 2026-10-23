@@ -69,9 +69,9 @@ Public catalogue and search responses carry `Cache-Control: public, max-age=60` 
 ### Content
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/content/home` | Published homepage blocks: announcement, hero slides, category pills, product rows, tabbed grid. Product rows are resolved to product summaries. |
-| GET | `/content/navigation` | Header, pills and footer menus. |
-| GET | `/content/pages/:slug` | Published page. `rehma-foundation` returns 404 until verified and published. |
+| GET | `/content/home` | **Published** blocks only (D-093):<br>• `announcement` (`{ text, href }`, inside its active window, or null);<br>• `hero.slides` (derivative images; a slide whose target is not public is omitted);<br>• `newIns`, `row2` (`{ title, items }`, items as catalogue summaries of **visible** products only);<br>• `tabbedGrid.tabs`.<br>Dates use the database clock. The editorial band is not served until OD-23. Category pills are a navigation menu. `public, max-age=60` |
+| GET | `/content/navigation` | `{ menus: { HEADER, CATEGORY_PILLS, FOOTER_SHOP, FOOTER_HELP, FOOTER_ABOUT: [{ label, href }] }, footer: { contact, social } | null }`. A link appears only while its target is public: a published category, a scheduled published collection, a visible product, or a published (and, if required, verified) page. `public, max-age=60` |
+| GET | `/content/pages/:slug` | `{ slug, title, seoTitle, seoDescription, body }` for a `PUBLISHED` page; a page that requires verification must also be verified. Image nodes become `{ type: "image", image: { url, width, height, alt, sources }, caption }`. Otherwise **404, identical to an unknown slug, with `no-store`**; this includes `rehma-foundation` until the Owner verifies and publishes it. `public, max-age=60` |
 | GET | `/content/settings/public` | WhatsApp number, contact details, COD availability flag. |
 
 ### Cart
@@ -145,11 +145,13 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | POST | `/admin/orders/:orderNumber/refunds` | O M |
 | GET/PATCH | `/admin/enquiries[/:id]` | O M |
 | GET | `/admin/enquiries/whatsapp-clicks` | O M |
-| GET/PUT | `/admin/content/blocks/:key` (draft) | O M C |
-| POST | `/admin/content/blocks/:key/publish` | O M C |
-| GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
-| POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
-| GET/PUT | `/admin/content/navigation/:menu` | O M C |
+| GET | `/admin/content/blocks`: every registry key (`site.announcement`, `home.hero`, `home.newIns`, `home.row2`, `home.tabbedGrid`, `home.editorial`, `site.footer`; Q10-1) with `draft`, `published`, `publishedAt`, `unpublishedChanges` | O M C |
+| GET/PUT | `/admin/content/blocks/:key` (draft). The payload is validated by the shared schema for the key (`@sanea/shared` `CONTENT_BLOCKS`); referenced media and targets must exist (`400 TARGET_NOT_FOUND` at the field). An unknown key returns 404 | O M C |
+| POST | `/admin/content/blocks/:key/publish`, `/unpublish`, `/discard` (Q10-5).<br>• Publish validates the draft again: `409` with `TARGET_NOT_FOUND`, or `NOTHING_TO_PUBLISH`.<br>• Discard copies `published` to `draft` (`409 NOTHING_PUBLISHED` without one) | O M C |
+| GET/POST | `/admin/content/pages`: create `{ slug, title, seoTitle?, seoDescription? }`; the slug is **fixed** after creation | O M C |
+| GET/PATCH | `/admin/content/pages/:slug` `{ title?, draftBody? (page rich text with image nodes, Q10-6), seoTitle?, seoDescription? }`. The slug and `requiresVerification` are not editable (400). The response has `draftVersion` | O M C (pages requiring verification: O M) |
+| POST | `/admin/content/pages/:slug/publish` (`409 PAGE_EMPTY` for an empty body), `/unpublish` (status `ARCHIVED`), `/discard`. For a page requiring verification, publish needs `{ verified: true, draftVersion }`:<br>• a different version gives `409 DRAFT_CHANGED` (Q10-8);<br>• verifier and time are recorded;<br>• audited as `content.page_verified_published`, with the body hash | O M C (pages requiring verification: publish and unpublish O only) |
+| GET/PUT | `/admin/content/navigation/:menu`: an allow-listed menu, replaced whole. `items: [{ label, target }]`, where the target is an entity or an internal `URL` path. GET adds `href` and `hidden` (target not public) | O M C |
 | POST | `/admin/media`: the raw image bytes as the request body, not multipart (D-079). `Content-Type` must be `image/jpeg`, `image/png` or `image/webp`; at most 15 MB; the file's own bytes must match (D-078). Processed before the response: re-encoded without metadata, AVIF and WebP at 480, 960, 1440 and 2048 px (D-077, Q8-11). Optional header `X-Upload-Filename`: a display name, sanitised and stored; never logged and never used in paths. Returns the media asset with its derivative URLs. One upload is processed at a time per API process, and up to `MEDIA_UPLOAD_QUEUE_WAITING` (default 2) wait. Outcomes: `429 UPLOAD_QUEUE_FULL` when the queue is full; `503 UPLOAD_QUEUE_TIMEOUT` after 30 s of waiting; `503 UPLOAD_PROCESSING_TIMEOUT` when 60 s from admission pass, with nothing saved; `413 PAYLOAD_TOO_LARGE` for a declared or streamed body over 15 MB, including chunked bodies; `415 UNSUPPORTED_MEDIA_TYPE` with an image-specific message. Node's 300 s server request timeout is separate and unchanged. Phase 8 queue policy (D-088; values approved 2026-10-21; `MEDIA_UPLOAD_QUEUE_WAITING` 0 to 4, per process; `phase-8-plan.md` §5.7). · GET `/admin/media` | O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
