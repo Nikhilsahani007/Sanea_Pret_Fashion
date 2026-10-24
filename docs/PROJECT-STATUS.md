@@ -4,9 +4,15 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 7 — Admin authentication, roles and audit (API only): gate passed (D-076).** Commit `75f499c` on `phase-7-admin-auth`, in draft PR #5 into `main`, open and unmerged. Decisions D-062 to D-075. CI run 39165512527: unit suite 22 files, 429 tests; database and API suite 11 files, 267 tests; Gitleaks no leaks (`phase-7-plan.md`). **Phase 8 not started**; its planning needs your go-ahead.
+**Last updated 2026-10-24.** Work continues on `claude/amazing-faraday-21s6uc` (from `main` at `6593082`, the merge of PR #5) under the master completion request: TD-001 and TD-002 decided (D-077, D-078), later phases may proceed while gates wait for you (D-079), planned packages and per-batch commits authorised (D-080).
 
-**`main`:** PRs #1 to #4 merged (D-134); `main` at `cb72b6b`, CI run 39162324224 succeeded.
+| Phase | State | Evidence |
+|-------|-------|----------|
+| 7 | Gate passed (D-076); PR #5 merged into `main` | `6593082` |
+| 8 Catalogue, media, catalogue API, admin shell | **Evidence ready, awaiting your approval** | `phase-8-plan.md`; commit `7c2fe4b` (API) and the UI commit that follows; 473 unit, 302 database and 10 end-to-end tests passed locally |
+| 9 onward | Not started | — |
+
+**Needs you:** review Phase 8 evidence and screenshots; approve migration `20261024090000_catalogue_search` before any kept database; confirm or change the proposed choices D-135 to D-144.
 
 Phase 6 — Core database schema: gate passed (D-061). Commit `56ef435`, merged into `main` with PR #4. The results below are the Phase 6 record.
 

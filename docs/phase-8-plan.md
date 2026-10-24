@@ -42,3 +42,30 @@ Every admin write runs in one transaction with its audit entry (before and after
 ## Environment notes
 - This session ran on Node 24.11.0 (downloaded to `/opt/node24`, the container default was Node 22) and PostgreSQL 18.4 binaries from the `@embedded-postgres/linux-x64` npm package, outside the repository. Docker was not available.
 - `prisma migrate diff --from-schema … --to-schema …` needs `DATABASE_URL` set even though it reads no database (Prisma 7.10.1).
+
+## UI implementation (2026-10-24)
+| Area | Files |
+|------|-------|
+| Tokens (TD-002, D-078) | `packages/shared/src/tokens/{brand,storefront,admin,fonts}.css`, `fonts/` (Archivo, OFL, D-141); subpath exports in `packages/shared/package.json` |
+| Token check | `scripts/check-design-tokens.ts` with fixture tests; `npm run check:tokens`; register `docs/design-token-exceptions.md` (DTX-001) |
+| Admin app | `apps/admin`: Vite and React; `api.ts` (same-origin client, session-bound CSRF), `auth.tsx` (two-step sign-in, role-aware `can()` from `@sanea/shared`), `ui/` (button, labelled fields with linked hints and errors, focused error summary), pages: sign-in, invite and reset acceptance, shell, overview, products, product editor (details, variants with prices, images), categories, collections (schedule and membership), colours, media upload |
+| End-to-end | `playwright.config.ts`, `e2e/support/*` (disposable stack), `e2e/admin-catalogue.spec.ts`; CI job `e2e` (D-144) |
+
+Accessibility applied (`ui-ux-pro-max`): visible labels; hints and errors linked by `aria-describedby`; a focused `role="alert"` summary after failed submits; password-manager-friendly sign-in (`autocomplete="username"`, `current-password`, `one-time-code`); skip link; focus moved to `main` on navigation; `aria-current` on the active link; 44 px controls; tabular figures in tables; confirmation before archive and delete; reduced-motion and forced-colours rules.
+
+## Verification (UI)
+| Check | Command | Result |
+|-------|---------|--------|
+| Token check | `npm run check:tokens` | Pass; one registered exception in use (DTX-001) |
+| Build | `npm run build` | Admin: 448.7 kB JS (137.6 kB gzip), 8.9 kB CSS, two font files |
+| Unit tests | `npm test` | 25 files, 473 tests passed (includes 9 token-check fixtures) |
+| End-to-end | `TEST_DATABASE_URL=… PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium npx playwright test` | 10 passed: generic sign-in error with focused alert; sign-in through the shell for all four roles with role-based navigation; Manager creates category, colour, media, product, two variants, image with alt text, is told why publishing fails, publishes, and the product is found by the public filter and search APIs; Catalogue editor sees prices read-only; Fulfilment cannot edit; no horizontal scroll at 390 px; skip link and focus after navigation; sign-out revokes the server session |
+
+Defects found by the end-to-end run and fixed: two React copies in the tree (D-143); horizontal overflow of 217 px at 390 px (grid column `minmax(0, 1fr)`); focus jumped to `main` on first load under React StrictMode.
+
+Screenshots: `docs/reviews/admin/2026-10-24/` (`sign-in-1440.png`, `overview-1440.png`, `media-1440.png`, `product-editor-1440.png`, `products-390.png`). The image in them is a generated grey "TEST PLACEHOLDER", not product photography.
+
+## Gate (index Phase 8): evidence ready, awaiting your approval (D-079)
+Index verification: a product with colour × size variants and images can be published and found by filter and search (API test and end-to-end); admin sign-in works through the shell for every role (end-to-end); token checks from TD-002 pass. Still needed from you: review of this evidence and the screenshots, approval of migration `20261024090000_catalogue_search` before it touches any kept database, and the proposed choices D-135 to D-144 and D-081 palette confirmation in practice.
+
+Not done in this phase: CI has not run on these commits, because the workflow runs only for pull requests and `main`, and no pull request was requested.

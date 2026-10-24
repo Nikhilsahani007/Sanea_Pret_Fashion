@@ -3,12 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./tokens/brand.css": "./src/tokens/brand.css",
+    "./tokens/storefront.css": "./src/tokens/storefront.css",
+    "./tokens/admin.css": "./src/tokens/admin.css",
+    "./tokens/fonts.css": "./src/tokens/fonts.css",
     "./package.json": "./package.json"
   },
   "dependencies": {

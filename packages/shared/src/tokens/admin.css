@@ -1,0 +1,20 @@
+/* Admin semantic tokens (TD-002): same names, ink, accent and focus as the
+   storefront; quieter grounds for dense data (design-system.md §5). */
+:root {
+  --sp-ground: var(--sp-porcelain);
+  --sp-surface: var(--sp-linen);
+  --sp-ink: var(--sp-soft-black);
+  --sp-muted: var(--sp-stone);
+  --sp-border: var(--sp-line);
+  --sp-divider: var(--sp-hairline);
+  --sp-accent: var(--sp-soft-black);
+  --sp-accent-ink: var(--sp-ivory);
+  --sp-inverse: var(--sp-soft-black);
+  --sp-inverse-ink: var(--sp-ivory);
+  --sp-field: var(--sp-white);
+  --sp-danger: var(--sp-red);
+  --sp-success: var(--sp-green);
+  --sp-focus: var(--sp-soft-black);
+  --sp-focus-halo: var(--sp-white);
+  color-scheme: light;
+}

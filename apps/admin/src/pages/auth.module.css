@@ -1,0 +1,31 @@
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--sp-gutter);
+}
+.card {
+  display: grid;
+  gap: var(--sp-space-5);
+  width: min(100%, 26rem);
+  padding: var(--sp-space-6);
+  background: var(--sp-field);
+  border: 1px solid var(--sp-divider);
+}
+.wordmark {
+  font-weight: 800;
+  font-stretch: var(--sp-display-stretch);
+  letter-spacing: -0.02em;
+  font-size: 1.5rem;
+}
+.secret {
+  overflow-wrap: anywhere;
+  font-family: var(--sp-face-mono);
+  padding: var(--sp-space-3);
+  background: var(--sp-surface);
+}
+.codes {
+  columns: 2;
+  font-family: var(--sp-face-mono);
+  padding-left: var(--sp-space-5);
+}

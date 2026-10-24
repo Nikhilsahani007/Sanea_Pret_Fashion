@@ -1,0 +1,66 @@
+/*
+ * Sanéa Pret brand primitives (TD-002, D-078). The only place brand values
+ * are written. Components never read these directly: they use the semantic
+ * names in storefront.css or admin.css.
+ *
+ * Palette: ivory and soft black (D-081, the 2026-10-24 brief), provisional
+ * until official brand colours are supplied (OD-02). Contrast (WCAG 2.x):
+ * soft black on ivory 15.42, stone on ivory 6.04, stone on ivory-deep 5.38,
+ * danger on ivory 7.24, success on ivory 5.79, line on ivory 3.28 (control
+ * boundaries only).
+ */
+:root {
+  --sp-ivory: #f6f1e7;
+  --sp-ivory-deep: #ece4d4;
+  --sp-soft-black: #1c1a17;
+  --sp-stone: #615a50;
+  --sp-line: #8c8478;
+  --sp-hairline: #ddd5c6;
+  --sp-white: #ffffff;
+  --sp-red: #9b1c1c;
+  --sp-green: #1f6b3a;
+  --sp-porcelain: #faf8f4;
+  --sp-linen: #f0ece4;
+
+  /* Type: Archivo (OFL) stands in for Panchang and Switzer until their files
+     can be self-hosted (D-082, OD-15). Display uses the expanded width. */
+  --sp-face: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --sp-face-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --sp-display-stretch: 125%;
+  --sp-step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --sp-step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --sp-step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --sp-step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --sp-step-monument: clamp(3.5rem, 12.6vw, 13.75rem);
+
+  /* Space (4 px base) */
+  --sp-space-1: 0.25rem;
+  --sp-space-2: 0.5rem;
+  --sp-space-3: 0.75rem;
+  --sp-space-4: 1rem;
+  --sp-space-5: 1.5rem;
+  --sp-space-6: 2rem;
+  --sp-space-7: 3rem;
+  --sp-space-8: 4rem;
+  --sp-space-9: 6rem;
+  --sp-space-10: 8rem;
+
+  /* Shape: square corners; pills fully rounded (design-system.md §6) */
+  --sp-radius-none: 0;
+  --sp-radius-pill: 999px;
+
+  /* Motion (design-system.md §8) */
+  --sp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --sp-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --sp-duration-press: 100ms;
+  --sp-duration-quick: 150ms;
+  --sp-duration-hover: 250ms;
+  --sp-duration-drawer: 280ms;
+  --sp-duration-enter: 400ms;
+  --sp-duration-slide: 600ms;
+
+  /* Layout */
+  --sp-gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
+  --sp-measure: 68ch;
+  --sp-tap: 2.75rem;
+}

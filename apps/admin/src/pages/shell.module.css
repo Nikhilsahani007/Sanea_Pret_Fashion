@@ -1,0 +1,121 @@
+.skip {
+  position: absolute;
+  left: var(--sp-space-3);
+  top: -4rem;
+  padding: var(--sp-space-3) var(--sp-space-4);
+  background: var(--sp-inverse);
+  color: var(--sp-inverse-ink);
+  z-index: 100;
+}
+.skip:focus {
+  top: var(--sp-space-3);
+}
+.layout {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  min-height: 100dvh;
+}
+.nav {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-5);
+  min-height: 100dvh;
+  padding: var(--sp-space-5);
+  background: var(--sp-inverse);
+  color: var(--sp-inverse-ink);
+}
+.brand {
+  font-weight: 800;
+  font-stretch: var(--sp-display-stretch);
+  letter-spacing: -0.02em;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+.brand span {
+  display: block;
+  font-weight: 400;
+  font-stretch: 100%;
+  letter-spacing: 0;
+  font-size: var(--sp-step-small);
+  opacity: 0.8;
+}
+.links {
+  display: grid;
+  gap: var(--sp-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.links a {
+  display: flex;
+  align-items: center;
+  min-height: var(--sp-tap);
+  padding: 0 var(--sp-space-3);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.links a[aria-current="page"] {
+  border-left-color: var(--sp-inverse-ink);
+  font-weight: 650;
+  background: color-mix(in srgb, var(--sp-inverse-ink) 10%, transparent);
+}
+.links a:focus-visible,
+.account button:focus-visible {
+  outline-color: var(--sp-inverse-ink);
+  box-shadow: none;
+}
+.account {
+  margin-top: auto;
+  display: grid;
+  gap: var(--sp-space-2);
+  font-size: var(--sp-step-small);
+}
+.account button {
+  justify-self: start;
+  min-height: var(--sp-tap);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.main {
+  min-width: 0;
+  padding: var(--sp-space-6) var(--sp-gutter);
+  max-width: 80rem;
+  width: 100%;
+}
+.main:focus {
+  outline: none;
+}
+@media (max-width: 52rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nav {
+    position: static;
+    min-height: auto;
+    min-width: 0;
+  }
+  .links {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+  }
+  .links a {
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+  .links a[aria-current="page"] {
+    border-bottom-color: var(--sp-inverse-ink);
+  }
+  .account {
+    grid-auto-flow: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

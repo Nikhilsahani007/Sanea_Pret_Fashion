@@ -1,28 +1,9 @@
 // The authorisation matrix from security-design.md §4 as data (D-075). A test
 // parses that table and compares it with this one, so the two cannot drift.
-import { AdminRole } from "@sanea/shared";
+import { PERMISSIONS, can, type Permission } from "@sanea/shared";
 
-const { OWNER: O, MANAGER: M, CATALOGUE_EDITOR: C, FULFILMENT: F } = AdminRole;
-
-export const PERMISSIONS = {
-  "products.view": [O, M, C, F],
-  "products.editContent": [O, M, C],
-  "products.editPrices": [O, M],
-  "products.publish": [O, M, C],
-  "inventory.adjust": [O, M, F],
-  "orders.view": [O, M, F],
-  "orders.fulfil": [O, M, F],
-  "orders.cancelRefund": [O, M],
-  "content.edit": [O, M, C],
-  "content.publishRehma": [O],
-  "enquiries.manage": [O, M],
-  "settings.store": [O, M],
-  "settings.payments": [O],
-  "staff.manage": [O],
-  "audit.view": [O],
-} as const satisfies Record<string, readonly AdminRole[]>;
-
-export type Permission = keyof typeof PERMISSIONS;
+export { PERMISSIONS, can };
+export type { Permission };
 
 /** The row label in security-design.md §4 for each permission. */
 export const PERMISSION_LABELS: Record<Permission, string> = {
@@ -42,7 +23,3 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "staff.manage": "Staff management",
   "audit.view": "Audit log",
 };
-
-export function can(role: AdminRole, permission: Permission): boolean {
-  return (PERMISSIONS[permission] as readonly AdminRole[]).includes(role);
-}

@@ -1,0 +1,19 @@
+/* Storefront semantic tokens (TD-002). Components use only these names. */
+:root {
+  --sp-ground: var(--sp-ivory);
+  --sp-surface: var(--sp-ivory-deep);
+  --sp-ink: var(--sp-soft-black);
+  --sp-muted: var(--sp-stone);
+  --sp-border: var(--sp-line);
+  --sp-divider: var(--sp-hairline);
+  --sp-accent: var(--sp-soft-black);
+  --sp-accent-ink: var(--sp-ivory);
+  --sp-inverse: var(--sp-soft-black);
+  --sp-inverse-ink: var(--sp-ivory);
+  --sp-field: var(--sp-white);
+  --sp-danger: var(--sp-red);
+  --sp-success: var(--sp-green);
+  --sp-focus: var(--sp-soft-black);
+  --sp-focus-halo: var(--sp-ivory);
+  color-scheme: light;
+}

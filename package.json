@@ -22,12 +22,17 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:seed": "prisma db seed",
-    "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts"
+    "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",
+    "check:tokens": "node scripts/check-design-tokens.ts",
+    "build": "npm run build -w @sanea/admin -w @sanea/storefront --if-present"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.10",
@@ -36,5 +41,9 @@
     "typescript-eslint": "8.71.2",
     "vite": "8.3.4",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }

@@ -197,7 +197,13 @@ Argon2id (`crypto.argon2`), TOTP (HMAC-SHA-1), AES-256-GCM and HMAC all use Node
 |---------|---------|-------|--------|
 | sharp | 0.35.5 | `@sanea/api` | Image validation, EXIF-free re-encoding to AVIF and WebP (system-design.md §10). Uses prebuilt libvips binaries (platform packages in the lock file); verified on linux-x64 only |
 
-The UI packages for Phase 8 are listed with the admin app below, when installed.
+| react, react-dom | 19.3.0 | `@sanea/admin`, `@sanea/storefront` | UI (D-080). `overrides` keep one copy in the tree (D-143) |
+| react-router | 8.4.0 | admin, storefront | Routing |
+| @tanstack/react-query | 5.104.1 | admin, storefront | Server-state caching and mutations |
+| @vitejs/plugin-react | 6.1.2 | root, dev | React transform for Vite |
+| @types/react, @types/react-dom | 19.3.0 | root, dev | Types for React |
+
+Not installed: `@testing-library/react` (component behaviour is covered by Playwright against the real app instead, so no DOM-emulation package is needed). Self-hosted font files (Archivo, OFL) are assets, not packages (D-141).
 
 ### Planned for later phases
 
@@ -205,8 +211,6 @@ Not installed yet. Planned dependencies and the reason for each:
 
 | Package | Where | Why |
 |---------|-------|-----|
-| react, react-dom, react-router | storefront, admin | UI and routing. |
-| @tanstack/react-query | storefront, admin | Server-state caching, retries, optimistic cart updates. |
 | zod | shared, api, apps | Single validation contract. |
 | express, helmet, cors, cookie-parser | api | HTTP server and security headers. |
 | express-rate-limit | api | Rate limiting on auth, enquiries, checkout. |

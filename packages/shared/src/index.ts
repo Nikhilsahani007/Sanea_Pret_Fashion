@@ -47,6 +47,10 @@ export { OrderStatus, orderStatusSchema } from "./enums/order-status.ts";
 export { PaymentMethod, paymentMethodSchema } from "./enums/payment-method.ts";
 export { AdminRole, adminRoleSchema } from "./enums/admin-role.ts";
 
+// Admin permissions (security-design.md §4)
+export { PERMISSIONS, can } from "./auth/permissions.ts";
+export type { Permission } from "./auth/permissions.ts";
+
 // Catalogue
 export { SLUG_PATTERN, slugSchema, slugify } from "./catalogue/slug.ts";
 export { Availability, availabilityOf } from "./catalogue/availability.ts";

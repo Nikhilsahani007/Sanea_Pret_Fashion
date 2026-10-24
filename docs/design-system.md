@@ -118,6 +118,8 @@ Prices use tabular figures. Indian formatting via `Intl.NumberFormat('en-IN')`.
 
 ## 5. Colour
 
+> **Superseded for the palette by D-081 (2026-10-24):** the brief now asks for ivory and soft black. Current values and contrast ratios are in `packages/shared/src/tokens/brand.css` (soft black `#1C1A17` on ivory `#F6F1E7` 15.42:1; stone `#615A50` on ivory 6.04:1). The table below is the earlier dealt palette, kept for history. Type: Archivo stands in for Panchang and Switzer (D-141).
+
 Dealt palette "Blush and aubergine", kept because it suits women's eastern wear without falling into the gold-on-black luxury cliché. It is provisional until brand colours are supplied (OD-02).
 
 | Token | Value | Use |

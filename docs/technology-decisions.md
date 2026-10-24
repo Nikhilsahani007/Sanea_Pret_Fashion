@@ -5,8 +5,8 @@ Date: 2026-10-18
 | Item | Status |
 |------|--------|
 | Technology-flexible policy (§1) | **Confirmed by you** (D-020 to D-022) |
-| TD-001 Styling approach | **Unresolved.** Provisional recommendation only |
-| TD-002 Design token sharing | **Proposed**, not approved |
+| TD-001 Styling approach | **Decided (D-077):** CSS Modules with token custom properties, both apps; no Tailwind |
+| TD-002 Design token sharing | **Decided (D-078):** option B, tokens in `packages/shared` |
 | ST-01 Styling evaluation task | **Planned**, not approved; nothing installed |
 
 ## 1. Policy: technology-flexible engineering
@@ -118,7 +118,7 @@ Reasons: it adds no dependency; it keeps bespoke editorial layouts in plain CSS,
 - **Approval:** `tailwindcss` and `@tailwindcss/vite` stay uninstalled until you explicitly approve ST-01. They are installed only on the throwaway branch, which is not merged. Results are added to this record before a decision is proposed.
 
 ### Decision
-Not yet made.
+**Option B, CSS Modules with tokens as custom properties, for both apps (D-077, 2026-10-24).** Decided by you without running ST-01, which is cancelled; no Tailwind package is installed.
 
 ---
 
@@ -294,4 +294,4 @@ A small Node script in `scripts/` with no new dependency, run in CI and locally.
   - changing one primitive token changes both apps.
 
 ### Decision
-Not yet made.
+**Option B (D-078, 2026-10-24).** Implemented in Phase 8: `packages/shared/src/tokens/` (`brand.css`, `storefront.css`, `admin.css`, `fonts.css`), the check `scripts/check-design-tokens.ts` (`npm run check:tokens`, in CI) and the register `docs/design-token-exceptions.md`.
