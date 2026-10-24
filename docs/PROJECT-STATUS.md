@@ -10,7 +10,8 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 |-------|-------|----------|
 | 7 | Gate passed (D-076); PR #5 merged into `main` | `6593082` |
 | 8 Catalogue, media, catalogue API, admin shell | **Evidence ready, awaiting your approval** | `phase-8-plan.md`; commit `7c2fe4b` (API) and the UI commit that follows; 473 unit, 302 database and 10 end-to-end tests passed locally |
-| 9 onward | Not started | — |
+| 9 Inventory and stock reservation | **Evidence ready, awaiting your approval** | `phase-9-plan.md`; concurrency tests 18 passed (three runs) |
+| 10 onward | Not started | — |
 
 **Needs you:** review Phase 8 evidence and screenshots; approve migration `20261024090000_catalogue_search` before any kept database; confirm or change the proposed choices D-135 to D-144.
 

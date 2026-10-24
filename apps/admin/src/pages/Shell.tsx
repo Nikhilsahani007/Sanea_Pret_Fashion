@@ -16,6 +16,7 @@ const NAV: {
   { to: "/categories", label: "Categories", permission: "products.view" },
   { to: "/collections", label: "Collections", permission: "products.view" },
   { to: "/colours", label: "Colours", permission: "products.view" },
+  { to: "/inventory", label: "Inventory", permission: "products.view" },
   { to: "/media", label: "Media", permission: "products.editContent" },
 ];
 

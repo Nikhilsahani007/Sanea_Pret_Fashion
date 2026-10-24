@@ -6,6 +6,7 @@ import { Categories } from "./pages/Categories.tsx";
 import { Collections } from "./pages/Collections.tsx";
 import { Colours } from "./pages/Colours.tsx";
 import { Home } from "./pages/Home.tsx";
+import { Inventory } from "./pages/Inventory.tsx";
 import { Media } from "./pages/Media.tsx";
 import { ProductEditor } from "./pages/ProductEditor.tsx";
 import { Products } from "./pages/Products.tsx";
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       { path: "collections", element: <Collections /> },
       { path: "colours", element: <Colours /> },
       { path: "media", element: <Media /> },
+      { path: "inventory", element: <Inventory /> },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },

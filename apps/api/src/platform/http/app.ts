@@ -19,6 +19,8 @@ import { adminTaxonomyRouter } from "../../modules/catalogue/admin-taxonomy.ts";
 import { publicCatalogueRouter } from "../../modules/catalogue/public-router.ts";
 import type { ModuleDeps } from "../../modules/deps.ts";
 import { healthRouter } from "../../modules/health/router.ts";
+import { startReservationExpiry } from "../../modules/inventory/jobs.ts";
+import { inventoryRouter } from "../../modules/inventory/router.ts";
 import { mediaRouter } from "../../modules/media/router.ts";
 import {
   localMediaStorage,
@@ -48,6 +50,8 @@ export type AppOptions = {
   readonly authLimits?: AuthLimits;
   /** Media storage; defaults to the local folder MEDIA_DIR. */
   readonly media?: MediaStorage;
+  /** Start background jobs (reservation expiry). Only main.ts sets this. */
+  readonly jobs?: boolean;
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -60,6 +64,7 @@ export function createApp({
   argon2 = DEFAULT_ARGON2,
   authLimits = DEFAULT_AUTH_LIMITS,
   media,
+  jobs = false,
 }: AppOptions): Express {
   const deps: ModuleDeps | undefined = db
     ? {
@@ -116,6 +121,8 @@ export function createApp({
     app.use(adminProductsRouter(deps));
     app.use(adminTaxonomyRouter(deps));
     app.use(publicCatalogueRouter(deps));
+    app.use(inventoryRouter(deps));
+    if (jobs) startReservationExpiry(deps);
   }
   for (const router of routers) app.use(router);
 

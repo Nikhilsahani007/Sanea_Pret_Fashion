@@ -25,7 +25,7 @@ try {
 `);
   process.exit(1);
 }
-const app = createApp({ config, logger, db });
+const app = createApp({ config, logger, db, jobs: true });
 const server = app.listen(config.port, config.host, () => {
   logger.info({ host: config.host, port: config.port }, "api listening");
 });

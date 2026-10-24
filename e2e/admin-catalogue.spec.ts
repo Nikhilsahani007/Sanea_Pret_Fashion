@@ -198,6 +198,41 @@ test("catalogue editor sees prices read-only; fulfilment cannot edit", async ({
   ).toBeDisabled();
 });
 
+test("fulfilment receives stock and the storefront availability follows", async ({
+  browser,
+  request,
+}) => {
+  const page = await pageAs(browser, "FULFILMENT");
+  const sold = await (
+    await request.get("/api/v1/catalogue/products/test-sample-kurta")
+  ).json();
+  expect(
+    sold.product.variants.every(
+      (v: { availability: string }) => v.availability === "SOLD_OUT",
+    ),
+  ).toBe(true);
+  await page.getByRole("link", { name: "Inventory", exact: true }).click();
+  await page.getByRole("button", { name: "Adjust TEST-SK-IV-M" }).click();
+  await page.getByLabel("Units").fill("2");
+  await page.getByLabel("Reason").fill("TEST delivery");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(
+    page.getByText("Saved. On hand is now 2, free 2."),
+  ).toBeVisible();
+  await expect(page.getByRole("cell", { name: "TEST delivery" })).toBeVisible();
+  await page.screenshot({
+    path: join(shots, "inventory-1440.png"),
+    fullPage: true,
+  });
+  const after = await (
+    await request.get("/api/v1/catalogue/products/test-sample-kurta")
+  ).json();
+  const m = after.product.variants.find(
+    (v: { sku: string }) => v.sku === "TEST-SK-IV-M",
+  );
+  expect(m).toMatchObject({ availability: "LOW_STOCK", remaining: 2 });
+});
+
 test("mobile layout of the shell and product list", async ({ browser }) => {
   const page = await pageAs(browser, "OWNER", { width: 390, height: 844 });
   await page.getByRole("link", { name: "Products", exact: true }).click();

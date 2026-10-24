@@ -128,7 +128,8 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
 | GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
-| POST | `/admin/inventory/:variantId/adjustments` `{ delta, reason }` | O M F |
+| POST | `/admin/inventory/:variantId/adjustments` `{ delta, type?: RECEIVED \| ADJUSTMENT \| CORRECTION, reason }` → `409 CONFLICT { reason: BELOW_RESERVED \| NEGATIVE_ON_HAND }` when it would take stock below reserved or zero | O M F |
+| PATCH | `/admin/inventory/:variantId` `{ lowStockThreshold }` (Phase 9, additive) | O M F |
 | GET | `/admin/inventory/movements` | O M F |
 | GET | `/admin/orders` (filters: status, method, date, needsAttention) | O M F |
 | GET | `/admin/orders/:orderNumber` | O M F |
