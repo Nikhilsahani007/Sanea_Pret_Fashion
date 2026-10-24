@@ -29,6 +29,9 @@ const listQuery = z
   })
   .strict();
 
+// eslint-disable-next-line no-control-regex -- rejects control characters
+const NO_CONTROL = /^[^\u0000-\u001f\u007f]*$/;
+
 const variantParams = z.object({ variantId: z.uuid() });
 
 const adjustmentBody = z
@@ -42,13 +45,7 @@ const adjustmentBody = z
     type: z
       .enum(["RECEIVED", "ADJUSTMENT", "CORRECTION"])
       .default("ADJUSTMENT"),
-    // eslint-disable-next-line no-control-regex -- rejects control characters
-    reason: z
-      .string()
-      .trim()
-      .min(3)
-      .max(300)
-      .regex(/^[^\u0000-\u001f\u007f]*$/),
+    reason: z.string().trim().min(3).max(300).regex(NO_CONTROL),
   })
   .refine((b) => b.type !== "RECEIVED" || b.delta > 0, {
     error: "A delivery adds stock",
