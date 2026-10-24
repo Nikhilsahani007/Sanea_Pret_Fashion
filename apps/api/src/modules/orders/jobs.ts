@@ -4,6 +4,7 @@
 // CREATED are reconciled with the provider (system-design.md §6.3).
 import { readSettings } from "../checkout/settings.ts";
 import type { ModuleDeps } from "../deps.ts";
+import { notify } from "../notifications/service.ts";
 import { reconcile } from "../payments/service.ts";
 import { lockOrder, transition } from "./service.ts";
 
@@ -43,7 +44,10 @@ export async function expireUnpaidOrders(deps: ModuleDeps): Promise<number> {
       );
       return true;
     });
-    if (done) n++;
+    if (done) {
+      n++;
+      await notify(deps, id, "order.cancelled");
+    }
   }
   return n;
 }
@@ -75,7 +79,10 @@ export async function expireUnconfirmedCod(deps: ModuleDeps): Promise<number> {
       );
       return true;
     });
-    if (done) n++;
+    if (done) {
+      n++;
+      await notify(deps, id, "order.cancelled");
+    }
   }
   return n;
 }
@@ -83,10 +90,20 @@ export async function expireUnconfirmedCod(deps: ModuleDeps): Promise<number> {
 export async function runOrderJobs(deps: ModuleDeps) {
   const unpaid = await expireUnpaidOrders(deps);
   const cod = await expireUnconfirmedCod(deps);
-  const reconciled = deps.payments
+  const changed = deps.payments
     ? await reconcile(deps.db, deps.payments, deps.now())
-    : 0;
-  return { unpaid, cod, reconciled };
+    : [];
+  for (const c of changed)
+    await notify(
+      deps,
+      c.orderId,
+      c.outcome === "CONFIRMED"
+        ? "order.confirmed"
+        : c.outcome === "PAID_NO_STOCK"
+          ? "order.cancelled"
+          : null,
+    );
+  return { unpaid, cod, reconciled: changed.length };
 }
 
 export function startOrderJobs(deps: ModuleDeps, everyMs = 60_000): () => void {

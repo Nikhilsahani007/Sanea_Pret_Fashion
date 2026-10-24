@@ -12,6 +12,8 @@ const NAV: {
   end?: boolean;
 }[] = [
   { to: "/", label: "Overview", permission: "products.view", end: true },
+  { to: "/orders", label: "Orders", permission: "orders.view" },
+  { to: "/enquiries", label: "Enquiries", permission: "enquiries.manage" },
   { to: "/products", label: "Products", permission: "products.view" },
   { to: "/categories", label: "Categories", permission: "products.view" },
   { to: "/collections", label: "Collections", permission: "products.view" },

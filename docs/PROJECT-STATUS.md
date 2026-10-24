@@ -17,9 +17,11 @@ Last updated: 2026-10-24 · Repository: https://github.com/Nikhilsahani007/Sanea
 | 13 Browsing, product detail and enquiries | **Evidence ready, awaiting your approval** | `phase-13-plan.md`; migration `20261024150000_enquiries` needs your approval; enquiry tests 9 passed; end-to-end 5 passed |
 | 14 Customer accounts | Deferred (D-034) | — |
 | 15 Checkout, orders, COD and mock payments | **Evidence ready, awaiting your approval** | `phase-15-plan.md`; migration `20261024180000_orders_payments` needs your approval; checkout tests 34 passed; end-to-end 39 passed (E2E-1, E2E-3, E2E-2 storefront part); B-07 defaults are proposals (D-150) |
-| 16 onward | In progress | — |
+| 16 Admin operations and notifications | **Evidence ready, awaiting your approval** | `phase-16-plan.md`; migration `20261024200000_admin_operations` needs your approval; admin order tests 11 passed; E2E-2, E2E-5, E2E-6 passed; D-160 needs your decision |
+| 17 Hardening and legal content | **Partly done**: SEO, accessibility smoke test, security review, bundle budget; Lighthouse/axe need package approval (D-165); legal text needs OD-12 | `phase-17-plan.md`, `security-review.md`; end-to-end 62 passed |
+| 18 onward | Not started | — |
 
-**Needs you:** review the evidence of Phases 8 to 15; approve the migrations `20261024090000_catalogue_search`, `20261024120000_guest_cart`, `20261024150000_enquiries` and `20261024180000_orders_payments` before any kept database; confirm or change the proposed choices D-135 to D-159; answer B-07 (shipping, COD, returns text, launch offer).
+**Needs you:** review the evidence of Phases 8 to 15; approve the migrations `20261024090000_catalogue_search`, `20261024120000_guest_cart`, `20261024150000_enquiries` and `20261024180000_orders_payments` before any kept database; confirm or change the proposed choices D-135 to D-165 (D-160 settles a document conflict); approve `20261024200000_admin_operations`; answer B-07 (shipping, COD, returns text, launch offer).
 
 Phase 6 — Core database schema: gate passed (D-061). Commit `56ef435`, merged into `main` with PR #4. The results below are the Phase 6 record.
 

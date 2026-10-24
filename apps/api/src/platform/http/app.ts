@@ -22,9 +22,13 @@ import { checkoutRouter } from "../../modules/checkout/router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
 import type { ModuleDeps } from "../../modules/deps.ts";
+import { enquiriesAdminRouter } from "../../modules/enquiries/admin-router.ts";
 import { enquiriesPublicRouter } from "../../modules/enquiries/public-router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { startReservationExpiry } from "../../modules/inventory/jobs.ts";
+import { logEmailProvider } from "../../modules/notifications/provider.ts";
+import { ordersAdminRouter } from "../../modules/orders/admin-router.ts";
+import { dashboardRouter } from "../../modules/orders/dashboard.ts";
 import { startOrderJobs } from "../../modules/orders/jobs.ts";
 import { createMockProvider } from "../../modules/payments/mock.ts";
 import type { PaymentProvider } from "../../modules/payments/provider.ts";
@@ -35,6 +39,7 @@ import {
   localMediaStorage,
   type MediaStorage,
 } from "../../modules/media/storage.ts";
+import { seoRouter } from "../../modules/seo/router.ts";
 import { staffRouter } from "../../modules/staff/router.ts";
 import type { Config } from "../config.ts";
 import type { Db } from "../db.ts";
@@ -95,6 +100,7 @@ export function createApp({
                   secret: config.mockPaymentSecret,
                 })
               : null,
+        email: logEmailProvider(logger),
       }
     : undefined;
   const app = express();
@@ -149,6 +155,10 @@ export function createApp({
     app.use(enquiriesPublicRouter(deps));
     app.use(checkoutRouter(deps));
     app.use(webhooksRouter(deps));
+    app.use(ordersAdminRouter(deps));
+    app.use(enquiriesAdminRouter(deps));
+    app.use(dashboardRouter(deps));
+    app.use(seoRouter(deps));
     if (jobs) {
       startReservationExpiry(deps);
       startOrderJobs(deps);

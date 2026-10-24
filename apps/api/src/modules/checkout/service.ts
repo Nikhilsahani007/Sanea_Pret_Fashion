@@ -11,6 +11,7 @@ import { sha256 } from "../auth/secrets.ts";
 import { cartView } from "../cart/service.ts";
 import type { ModuleDeps } from "../deps.ts";
 import { OutOfStock, convert, reserve } from "../inventory/service.ts";
+import { notify } from "../notifications/service.ts";
 import { HOLD_MS } from "../payments/service.ts";
 import { orderNumber, priceOrder, type PricedLine } from "./pricing.ts";
 import { readSettings } from "./settings.ts";
@@ -232,6 +233,7 @@ export async function placeOrder(
   }
   if (body.paymentMethod === "PREPAID")
     await startPayment(deps, created.paymentId, created.orderNumber);
+  else await notify(deps, created.id, "order.placed_cod");
   return describePlacement(deps, created.id, 201);
 }
 

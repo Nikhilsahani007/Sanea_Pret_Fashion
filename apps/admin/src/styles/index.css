@@ -75,3 +75,16 @@ table {
     outline-color: Highlight;
   }
 }
+
+/* Packing slip: print the slip only, on white. */
+@media print {
+  body:has([data-print="slip"]) header,
+  body:has([data-print="slip"]) nav,
+  [data-print="hide"] {
+    display: none !important;
+  }
+  body:has([data-print="slip"]) {
+    background: var(--sp-white);
+    color: var(--sp-soft-black);
+  }
+}

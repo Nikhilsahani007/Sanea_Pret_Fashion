@@ -177,6 +177,23 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | D-158 | `order_status_event` is append-only (the D-057 triggers). Dispatch closes the order's allocations (reservation status `RELEASED` with a `SHIPPED` movement), so a later cancel cannot release them twice. A COD payment becomes `COLLECTED` on delivery and `NOT_COLLECTED` on refusal or cancellation. | system-design.md §5; SR-7, SR-11. | Proposed |
 | D-159 | New error codes: `CART_NOT_READY` (409, empty bag or lines changed), `PAYMENT_METHOD_UNAVAILABLE` (422) and `WEBHOOK_INVALID` (400), beside the documented `PRICE_CHANGED`, `INVALID_TRANSITION`, `IDEMPOTENCY_CONFLICT` and `COD_NOT_AVAILABLE`. `PIN_CODE_NOT_SERVICEABLE` is not used while every valid PIN code is served (OD-07). Placement, payment restarts and the mock endpoint are limited to 20 per minute per IP; quotes (no side effects, refreshed as the shopper types) and status reads to 120. | api-specification.md §2. | Proposed |
 
+## Phase 16 — implementation choices (awaiting your review at the Phase 16 gate)
+
+| ID | Choice | Reason | Status |
+|----|--------|--------|--------|
+| D-160 | Fulfilment may confirm **or cancel** a COD order that is still waiting for confirmation (a refused confirmation call); cancelling after confirmation stays Owner and Manager. This follows the `system-design.md` §5 table; the `security-design.md` §4 row "Cancel orders, issue refunds: O M" is read as covering confirmed orders. Restocking: Fulfilment for return-to-origin parcels, Owner and Manager for customer returns after inspection (same table). | The two documents differ on this one case. | Proposed; please confirm |
+| D-161 | Refunds are **recorded** in the admin and **paid out manually** in release one (UF-7). Cancelling an order with a captured online payment creates a pending refund; staff mark each refund refunded (with a bank or gateway reference) or failed. The payment shows `REFUND_PENDING` while any is pending, then `REFUNDED` when the refunds cover the amount. A refund can never exceed what was paid. Gateway refunds arrive in Phase 18. | No live gateway (D-107). | Proposed |
+| D-162 | Order emails: COD order placed, order confirmed, shipped (with courier and tracking), cancelled; plain text from the order. A log provider writes only the subject and a masked address to the server log and sends nothing; each attempt is recorded in `notification` (template, recipient, provider, status), without the body. A failed send never undoes the order change. A real provider waits for OD-19 (B-08). | system-design.md §11. | Proposed |
+| D-163 | Migration `20261024200000_admin_operations`: `order_note` (internal, append-only by the D-057 triggers, 1–2000 characters) and `notification` (template list and error-when-failed CHECKs), all foreign keys `RESTRICT`. | Notes and email history need storage. | Proposed; needs your approval before any kept database |
+| D-164 | Dashboard figures come only from rows: orders today (India time) and their value excluding cancelled, COD to confirm, to pack or ship, needing attention, low-stock variants, open enquiries. Each role gets only the figures it may act on. No targets, trends or invented numbers. | project-requirements.md §3.2. | Proposed |
+
+## Phase 17 — proposals
+
+| ID | Choice | Reason | Status |
+|----|--------|--------|--------|
+| D-165 | Add `@axe-core/playwright` (dev dependency, exact pin) for automated accessibility checks in the end-to-end suite, and run Lighthouse in CI against a production build with the bundled Chromium, to meet the Phase 17 verification (performance ≥ 85, accessibility ≥ 95). Not installed: outside the D-080 package list. | The index requires these numbers; nothing installed can produce them. | **Needs your approval** |
+| D-166 | SEO follows the OD-14 default: the SPA sets meta on the client; the API serves escaped preview HTML, `sitemap.xml` and `robots.txt`; hosting routes crawler user agents to the preview endpoint. Full SSR is not adopted. | Link previews and indexing without a second rendering stack. | Proposed |
+
 ## Observed (needs confirmation)
 
 | ID | Observation | Evidence | Question |
@@ -213,3 +230,5 @@ The Status column shows which proposals D-028 approved as part of the baseline a
 | 2026-10-19 | Phase 7 gate passed (D-076). Phase 8 planning needs your go-ahead. |
 | 2026-10-24 | Master completion request: TD-001 and TD-002 decided (D-077, D-078); gate sequencing changed (D-079); package and Git authorisation (D-080). Phase 8 started. |
 | 2026-10-24 | Phase 15 implemented: D-150 to D-159 proposed; B-07 defaults applied as proposals, not decisions. Gate pending. |
+| 2026-10-24 | Phase 16 implemented: D-160 to D-164 proposed (D-160 asks you to settle a document conflict). Gate pending. |
+| 2026-10-24 | Phase 17 partly implemented: security review fixes; D-165 (needs approval), D-166 proposed. |

@@ -104,3 +104,25 @@ describe("real Phase 7 routes", () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe("real Phase 15 and 16 routes", () => {
+  it.each(ROLES)(
+    "%s: orders, enquiries and settings by the matrix",
+    async (role) => {
+      const session = sessions.get(role)!;
+      const status = (p: Permission) => (can(role, p) ? 200 : 403);
+      expect((await h.get("/api/v1/admin/orders", session)).status).toBe(
+        status("orders.view"),
+      );
+      expect((await h.get("/api/v1/admin/enquiries", session)).status).toBe(
+        status("enquiries.manage"),
+      );
+      expect((await h.get("/api/v1/admin/settings/cod", session)).status).toBe(
+        status("settings.store"),
+      );
+      expect((await h.get("/api/v1/admin/dashboard", session)).status).toBe(
+        200,
+      );
+    },
+  );
+});

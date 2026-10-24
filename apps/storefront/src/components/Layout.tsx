@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 
 import { useCart, useHome, useMenus, useSettings } from "../lib/hooks.ts";
+import { usePageMeta } from "../lib/meta.ts";
 import { CartDrawer } from "./CartDrawer.tsx";
 import { BagIcon, CloseIcon, MenuIcon, SearchIcon } from "./Icons.tsx";
 import { SearchBox } from "./SearchBox.tsx";
@@ -34,6 +35,7 @@ export function SmartLink({
 }
 
 export function Layout() {
+  usePageMeta();
   const home = useHome();
   const menus = useMenus();
   const cart = useCart();

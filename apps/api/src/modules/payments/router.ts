@@ -9,7 +9,29 @@ import { AppError } from "../../platform/http/errors.ts";
 import { handle } from "../../platform/http/handle.ts";
 import type { ModuleDeps } from "../deps.ts";
 import { InvalidWebhook, type PaymentProvider } from "./provider.ts";
-import { processEvent, storeEvent } from "./service.ts";
+import { notify } from "../notifications/service.ts";
+import { processEvent, storeEvent, type Outcome } from "./service.ts";
+
+/** Confirmation or cancellation email after a payment event changed the order. */
+export async function emailFor(
+  deps: ModuleDeps,
+  providerPaymentId: string,
+  provider: string,
+  outcome: Outcome,
+) {
+  const template =
+    outcome === "CONFIRMED"
+      ? "order.confirmed"
+      : outcome === "PAID_NO_STOCK"
+        ? "order.cancelled"
+        : null;
+  if (!template) return;
+  const p = await deps.db.payment.findUnique({
+    where: { provider_providerPaymentId: { provider, providerPaymentId } },
+    select: { orderId: true },
+  });
+  if (p) await notify(deps, p.orderId, template);
+}
 
 export async function ingest(
   deps: ModuleDeps,
@@ -29,10 +51,9 @@ export async function ingest(
   const rowId = await storeEvent(deps.db, provider.name, event, now);
   if (!rowId) return { duplicate: true as const };
   try {
-    return {
-      duplicate: false as const,
-      outcome: await processEvent(deps.db, provider, rowId, event, now),
-    };
+    const outcome = await processEvent(deps.db, provider, rowId, event, now);
+    await emailFor(deps, event.providerPaymentId, provider.name, outcome);
+    return { duplicate: false as const, outcome };
   } catch (err) {
     // Stored but not applied: reconciliation and staff pick it up.
     deps.logger.error({ err, eventId: rowId }, "payment event not applied");

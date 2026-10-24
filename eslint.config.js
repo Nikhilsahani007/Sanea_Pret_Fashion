@@ -37,6 +37,20 @@ export default defineConfig(
     ],
     rules: {
       "no-restricted-imports": ["error", prismaBan],
+      // security-design.md §3: content is structured JSON, never raw HTML.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            "dangerouslySetInnerHTML is banned (security-design.md §3). Render structured content instead.",
+        },
+        {
+          selector:
+            "AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]",
+          message: "Writing HTML strings is banned (security-design.md §3).",
+        },
+      ],
     },
   },
   prettier,

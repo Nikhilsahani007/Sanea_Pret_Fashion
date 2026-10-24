@@ -133,13 +133,17 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | POST | `/admin/inventory/:variantId/adjustments` `{ delta, type?: RECEIVED \| ADJUSTMENT \| CORRECTION, reason }` → `409 CONFLICT { reason: BELOW_RESERVED \| NEGATIVE_ON_HAND }` when it would take stock below reserved or zero | O M F |
 | PATCH | `/admin/inventory/:variantId` `{ lowStockThreshold }` (Phase 9, additive) | O M F |
 | GET | `/admin/inventory/movements` | O M F |
-| GET | `/admin/orders` (filters: status, method, date, needsAttention) | O M F |
-| GET | `/admin/orders/:orderNumber` | O M F |
-| POST | `/admin/orders/:orderNumber/transitions` `{ toStatus, note?, shipment? }` | O M F (cancel: O M) |
-| POST | `/admin/orders/:orderNumber/notes` | O M F |
-| POST | `/admin/orders/:orderNumber/refunds` | O M |
-| GET/PATCH | `/admin/enquiries[/:id]` | O M |
-| GET | `/admin/enquiries/whatsapp-clicks` | O M |
+| GET | `/admin/dashboard` → counts from real rows, only the ones the role may use: `orders { today, todayValuePaise, pendingCodConfirmation, needsAttention, toDispatch }` (O M F), `lowStockVariants` (all), `openEnquiries` (O M) (Phase 16) | all |
+| GET | `/admin/orders` (filters: `status`, `method`, `needsAttention=true`, `q` (order number, email or phone), `from`, `to` (dates, India time), `before`, `limit`) | O M F |
+| GET | `/admin/orders/:orderNumber` → `{ order (items, events with actor names, payments with refunds, shipments, notes), nextStatuses }`; `nextStatuses` is what this role may do | O M F |
+| POST | `/admin/orders/:orderNumber/transitions` `{ toStatus, note?, shipment?: { courierName, trackingNumber, trackingUrl? (https) } }`; SHIPPED needs `shipment`; cancelling a captured online payment records a pending refund; the order email follows | O M F (by the transitions table: cancel after confirmation O M) |
+| POST | `/admin/orders/:orderNumber/notes` `{ body }` (internal, append-only) | O M F |
+| POST | `/admin/orders/:orderNumber/refunds` `{ amountPaise, reason }` → `409 CONFLICT { reason: NOTHING_PAID \| OVER_REFUND, refundablePaise }`; refunds are paid out manually in release one | O M |
+| POST | `/admin/orders/:orderNumber/refunds/:refundId/complete` `{ outcome: REFUNDED \| FAILED, reference? }` (Phase 16, additive) | O M |
+| POST | `/admin/orders/:orderNumber/restock` `{ lines: [{ itemId, quantity }] }`, only for RETURNED or RETURN_TO_ORIGIN, at most what was sent (SR-13; Phase 16, additive) | O M |
+| GET | `/admin/orders/:orderNumber/packing-slip` (address, items without prices, COD amount to collect) | O M F |
+| GET/PATCH | `/admin/enquiries[/:id]` (PATCH `{ status?, assignedAdminId? }`, assignee an active Owner or Manager) | O M |
+| GET | `/admin/enquiries/whatsapp-clicks?days=30` (anonymous counts per product) | O M |
 | GET/PUT | `/admin/content/blocks/:key` (draft) | O M C |
 | POST | `/admin/content/blocks/:key/publish` · `/unpublish` (keys: D-145; PUT body `{ draft }`) | O M C |
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |

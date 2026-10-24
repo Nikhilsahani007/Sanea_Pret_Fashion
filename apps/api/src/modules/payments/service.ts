@@ -218,7 +218,7 @@ export async function reconcile(
   db: Db,
   provider: PaymentProvider,
   now: Date,
-): Promise<number> {
+): Promise<{ orderId: string; outcome: Outcome }[]> {
   const stuck = await db.payment.findMany({
     where: {
       provider: provider.name,
@@ -228,7 +228,7 @@ export async function reconcile(
     },
     take: 100,
   });
-  let changed = 0;
+  const changed: { orderId: string; outcome: Outcome }[] = [];
   for (const p of stuck) {
     const status = await provider.fetchStatus(p.providerPaymentId!);
     if (status !== "CAPTURED" && status !== "FAILED") continue;
@@ -245,7 +245,8 @@ export async function reconcile(
         now,
       ),
     );
-    if (outcome !== "ALREADY_APPLIED") changed++;
+    if (outcome !== "ALREADY_APPLIED")
+      changed.push({ orderId: p.orderId, outcome });
   }
   return changed;
 }

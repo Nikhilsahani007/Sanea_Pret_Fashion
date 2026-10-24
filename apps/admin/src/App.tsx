@@ -41,6 +41,18 @@ const Products = lazy(() =>
 const Settings = lazy(() =>
   import("./pages/Settings.tsx").then((m) => ({ default: m.Settings })),
 );
+const Orders = lazy(() =>
+  import("./pages/Orders.tsx").then((m) => ({ default: m.Orders })),
+);
+const OrderDetail = lazy(() =>
+  import("./pages/OrderDetail.tsx").then((m) => ({ default: m.OrderDetail })),
+);
+const PackingSlip = lazy(() =>
+  import("./pages/PackingSlip.tsx").then((m) => ({ default: m.PackingSlip })),
+);
+const Enquiries = lazy(() =>
+  import("./pages/Enquiries.tsx").then((m) => ({ default: m.Enquiries })),
+);
 const AcceptInvite = lazy(() =>
   import("./pages/AcceptInvite.tsx").then((m) => ({ default: m.AcceptInvite })),
 );
@@ -80,6 +92,13 @@ const router = createBrowserRouter([
       { path: "content/home", element: page(<ContentHome />) },
       { path: "content/pages", element: page(<Pages />) },
       { path: "content/navigation", element: page(<Navigation />) },
+      { path: "orders", element: page(<Orders />) },
+      { path: "orders/:orderNumber", element: page(<OrderDetail />) },
+      {
+        path: "orders/:orderNumber/packing-slip",
+        element: page(<PackingSlip />),
+      },
+      { path: "enquiries", element: page(<Enquiries />) },
       { path: "settings", element: page(<Settings />) },
       { path: "*", element: <Navigate to="/" replace /> },
     ],

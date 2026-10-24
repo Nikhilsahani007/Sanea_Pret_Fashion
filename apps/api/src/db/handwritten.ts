@@ -27,6 +27,8 @@ export const APPEND_ONLY_TABLES = [
   "audit_log",
   // Phase 15: order status history.
   "order_status_event",
+  // Phase 16: internal order notes.
+  "order_note",
 ] as const;
 
 export const HANDWRITTEN_TRIGGERS = APPEND_ONLY_TABLES.flatMap((table) => [
@@ -103,6 +105,10 @@ export const HANDWRITTEN_CHECKS = [
   { table: "gst_rule", name: "gst_rule_rates_check" },
   { table: "gst_rule", name: "gst_rule_effective_check" },
   { table: "gst_rule", name: "gst_rule_hsn_prefix_check" },
+  // Phase 16 (admin operations)
+  { table: "order_note", name: "order_note_body_check" },
+  { table: "notification", name: "notification_template_check" },
+  { table: "notification", name: "notification_error_check" },
 ] as const;
 
 /** Reference rows inserted by the migration (D-029, D-058), in order. */

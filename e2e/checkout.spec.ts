@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 import { browseToProduct } from "./support/browse.ts";
+import { fillDetails } from "./support/checkout.ts";
 
 const shots = join(
   import.meta.dirname,
@@ -33,18 +34,6 @@ async function addKurtaA(page: Page) {
   await expect(
     page.getByRole("heading", { name: "Checkout", level: 1 }),
   ).toBeVisible();
-}
-
-async function fillDetails(page: Page) {
-  await page.getByLabel("Email").fill("shopper@example.test");
-  await page.getByLabel("Mobile number").fill("98765 43210");
-  await page.getByLabel("Full name").fill("TEST Shopper");
-  await page.getByLabel("Address", { exact: true }).fill("TEST 1 Example Road");
-  await page.getByLabel("Town or city").fill("Lucknow");
-  await page
-    .getByLabel("State or union territory")
-    .selectOption({ label: "Uttar Pradesh" });
-  await page.getByLabel("PIN code").fill("226001");
 }
 
 for (const [name, viewport] of [
@@ -136,6 +125,7 @@ test("checkout: field errors are shown and focused; nothing is placed", async ({
   await page.goto("/products/test-demo-dupatta-a");
   await page.getByRole("button", { name: "Free Size" }).click();
   await page.getByRole("button", { name: "Add to bag" }).click();
+  await expect(page.getByRole("dialog", { name: /^Bag/ })).toBeVisible();
   await page.goto("/checkout");
   await page.getByLabel("Email").fill("not-an-email");
   await page.getByRole("button", { name: /^Place order/ }).click();

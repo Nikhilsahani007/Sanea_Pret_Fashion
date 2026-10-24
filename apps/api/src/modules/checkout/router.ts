@@ -2,9 +2,10 @@
 // Writes pass the storefront CSRF check; placement needs an Idempotency-Key.
 import { checkoutQuoteSchema, placeOrderSchema } from "@sanea/shared";
 import { Router, type Request } from "express";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { z } from "zod";
 
-import { AppError } from "../../platform/http/errors.ts";
+import { AppError, errorBody } from "../../platform/http/errors.ts";
 import { handle, input } from "../../platform/http/handle.ts";
 import { createRateLimiter } from "../../platform/http/rate-limit.ts";
 import { validate } from "../../platform/http/validate.ts";
@@ -33,6 +34,23 @@ export function checkoutRouter(deps: ModuleDeps): Router {
   const router = Router();
   const writes = createRateLimiter({ windowMs: 60_000, limit: 20 });
   const reads = createRateLimiter({ windowMs: 60_000, limit: 120 });
+  // security-design.md §3: order creation 10 per hour per cart (by its
+  // cookie's hash; without a cart, by IP).
+  const perCart = rateLimit({
+    windowMs: 3_600_000,
+    limit: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      const token = req.cookies?.[CART_COOKIE] as string | undefined;
+      return token
+        ? `cart:${Buffer.from(sha256(token)).toString("base64url")}`
+        : `ip:${ipKeyGenerator(req.ip ?? "")}`;
+    },
+    handler: (req, res) => {
+      res.status(429).json(errorBody("RATE_LIMITED", String(req.id ?? "")));
+    },
+  });
   router.use(BASE, (_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
     next();
@@ -106,6 +124,7 @@ export function checkoutRouter(deps: ModuleDeps): Router {
   router.post(
     `${BASE}/orders`,
     writes,
+    perCart,
     validate({ body: placeOrderSchema }),
     handle(async (req, res) => {
       const idem = idempotencyKey(req);

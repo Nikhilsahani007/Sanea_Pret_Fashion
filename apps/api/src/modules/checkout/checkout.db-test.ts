@@ -20,6 +20,7 @@ import { CART_COOKIE } from "../cart/router.ts";
 import type { ModuleDeps } from "../deps.ts";
 import { releaseExpired } from "../inventory/service.ts";
 import { expireUnconfirmedCod, expireUnpaidOrders } from "../orders/jobs.ts";
+import { logEmailProvider } from "../notifications/provider.ts";
 import { transition } from "../orders/service.ts";
 import {
   MOCK_SIGNATURE_HEADER,
@@ -191,6 +192,7 @@ beforeAll(async () => {
     argon2: FAST_ARGON2,
     media: undefined as never,
     payments: mock,
+    email: logEmailProvider(pino({ level: "silent" })),
   } as ModuleDeps;
   owner = await h.signIn(await h.createAdmin("OWNER"));
 });
@@ -640,16 +642,16 @@ describe("reconciliation", () => {
     const { no } = await placed("PREPAID");
     const pay = (await order(no)).payments[0]!;
     mock.simulate(pay.providerPaymentId!, "success"); // the webhook is lost
-    expect(await reconcile(h.db, mock, h.clock.now())).toBe(0); // not stuck long enough
+    expect(await reconcile(h.db, mock, h.clock.now())).toEqual([]); // not stuck long enough
     // Keep the hold alive past 30 minutes so this tests reconciliation alone.
     await h.db.stockReservation.updateMany({
       where: { orderId: (await order(no)).id },
       data: { expiresAt: new Date(h.clock.now().getTime() + 3_600_000) },
     });
     h.clock.advance(31 * 60_000);
-    expect(await reconcile(h.db, mock, h.clock.now())).toBeGreaterThanOrEqual(
-      1,
-    );
+    expect(
+      (await reconcile(h.db, mock, h.clock.now())).map((c) => c.outcome),
+    ).toContain("CONFIRMED");
     expect((await order(no)).status).toBe("CONFIRMED");
   });
 });

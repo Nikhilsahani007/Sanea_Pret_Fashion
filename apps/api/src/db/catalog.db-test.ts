@@ -94,8 +94,10 @@ describe("tables and scope", () => {
       "inventory_level",
       "media_asset",
       "navigation_item",
+      "notification",
       "order",
       "order_item",
+      "order_note",
       "order_status_event",
       "page",
       "payment",
@@ -122,9 +124,11 @@ describe("tables and scope", () => {
        ORDER BY 1`,
     );
     expect(rows.map((r) => r.c)).toEqual([
+      "notification.order_id",
       "order.tax_paise",
       "order_item.gst_rate_bps",
       "order_item.order_id",
+      "order_note.order_id",
       "order_status_event.order_id",
       "payment.order_id",
       "product.search_vector",
@@ -145,7 +149,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(33); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables
+    expect(counts).toHaveLength(35); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables + two Phase 16
   });
 });
 
@@ -231,7 +235,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(42); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13) + ten Phase 15 keys
+    expect(expected).toHaveLength(45); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13) + ten Phase 15 keys + three Phase 16
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -266,7 +270,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(30); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables
+    expect(rows).toHaveLength(32); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables + two Phase 16
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

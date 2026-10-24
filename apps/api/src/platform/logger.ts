@@ -5,6 +5,9 @@ export const REDACT_PATHS = [
   "req.headers.authorization",
   "req.headers.cookie",
   'req.headers["x-csrf-token"]',
+  // Phase 15: the guest order access token and webhook signatures.
+  'req.headers["x-order-token"]',
+  'req.headers["x-mock-signature"]',
   'res.headers["set-cookie"]',
   "*.password",
   "*.token",

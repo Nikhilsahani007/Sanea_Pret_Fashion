@@ -156,3 +156,55 @@ textarea.input {
 .muted {
   color: var(--sp-muted);
 }
+
+/* Phase 16 order screens */
+.check {
+  display: flex;
+  gap: var(--sp-space-2);
+  align-items: center;
+  min-height: var(--sp-tap);
+}
+.flag {
+  color: var(--sp-danger);
+  font-weight: 600;
+}
+.status[data-status="CANCELLED"],
+.status[data-status="PENDING_CONFIRMATION"],
+.status[data-status="PENDING_PAYMENT"] {
+  border-style: dashed;
+}
+.status[data-status="DELIVERED"],
+.status[data-status="CONFIRMED"] {
+  background: var(--sp-inverse);
+  color: var(--sp-inverse-ink);
+  border-color: var(--sp-inverse);
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  gap: var(--sp-space-5);
+  align-items: start;
+}
+.timeline {
+  display: grid;
+  gap: var(--sp-space-2);
+  margin: 0;
+  padding-left: var(--sp-space-5);
+}
+.dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--sp-space-1) var(--sp-space-4);
+  margin: 0;
+}
+.dl dt {
+  color: var(--sp-muted);
+}
+.dl dd {
+  margin: 0;
+}
+@media (max-width: 56rem) {
+  .grid2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
