@@ -1,0 +1,73 @@
+.form {
+  display: grid;
+  gap: var(--sp-space-4);
+  max-width: 36rem;
+}
+.field {
+  display: grid;
+  gap: var(--sp-space-1);
+}
+.field > label {
+  font-weight: 600;
+  font-size: var(--sp-step-small);
+}
+.field input:not([type="checkbox"]),
+.field textarea {
+  min-height: var(--sp-tap);
+  padding: var(--sp-space-2) var(--sp-space-3);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-field);
+  font-size: 1rem;
+}
+.field [aria-invalid="true"] {
+  border-color: var(--sp-danger);
+  border-width: 2px;
+}
+.hint {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+.error {
+  color: var(--sp-danger);
+  font-size: var(--sp-step-small);
+  font-weight: 600;
+}
+.consent {
+  display: flex;
+  gap: var(--sp-space-3);
+  align-items: flex-start;
+  font-weight: 400 !important;
+  font-size: var(--sp-step-body) !important;
+}
+.consent input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.2em;
+  flex: none;
+  accent-color: var(--sp-accent);
+}
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.button {
+  justify-self: start;
+  min-height: 3rem;
+  padding: 0 var(--sp-space-6);
+  border: 0;
+  background: var(--sp-accent);
+  color: var(--sp-accent-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.button:disabled {
+  opacity: 0.6;
+}
+.sent {
+  display: grid;
+  gap: var(--sp-space-4);
+}

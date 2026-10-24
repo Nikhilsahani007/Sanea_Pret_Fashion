@@ -89,8 +89,8 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 ### Enquiries and events
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/enquiries` | `{ productId?, variantId?, name, email?, phone?, message, consentToContact: true }`. Rate-limited. Honeypot field. |
-| POST | `/events/whatsapp-click` | `{ productId?, variantId?, pagePath }`. Fire-and-forget, rate-limited. |
+| POST | `/enquiries` | `{ productId?, variantId?, name, email?, phone?, message, consentToContact: true, sourcePath, website?, elapsedMs? }` → `201 { received: true }`. Email or phone required. 5 per hour per IP, 3 per hour per email or phone. `website` is a honeypot; a filled honeypot or `elapsedMs` under 2000 gets the same answer but nothing is stored. |
+| POST | `/events/whatsapp-click` | `{ productId?, variantId?, pagePath, sessionId }` (random per browser session, no personal data) → `204`. 60 per minute per IP. |
 
 ### Customer auth and account
 

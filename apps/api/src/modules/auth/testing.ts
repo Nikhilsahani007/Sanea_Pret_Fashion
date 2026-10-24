@@ -7,7 +7,13 @@ import request from "supertest";
 
 import { createTestDatabase } from "../../db/testing/database.ts";
 import { sessionCsrfToken } from "../../platform/http/csrf.ts";
-import { ADMIN, SECRET, cookiePair, testApp } from "../../platform/testing.ts";
+import {
+  ADMIN,
+  SECRET,
+  cookiePair,
+  testApp,
+  testConfig,
+} from "../../platform/testing.ts";
 import { CSRF_COOKIE } from "../../platform/http/csrf.ts";
 import { hashPassword, type Argon2Params } from "./password.ts";
 import type { AuthLimits } from "./router.ts";
@@ -38,7 +44,12 @@ export type Session = { cookie: string; csrfToken: string; token: string };
 let counter = 0;
 
 export async function adminHarness(
-  options: { authLimits?: AuthLimits; routers?: Router[] } = {},
+  options: {
+    authLimits?: AuthLimits;
+    routers?: Router[];
+    /** Extra environment values, for example TRUST_PROXY for per-IP limits. */
+    env?: Record<string, string>;
+  } = {},
 ) {
   const { db, drop } = await createTestDatabase();
   let current = new Date("2026-10-19T10:00:00.000Z");
@@ -49,6 +60,7 @@ export async function adminHarness(
     },
   };
   const { app, lines, config } = testApp({
+    ...(options.env ? { config: testConfig(options.env) } : {}),
     db,
     now: clock.now,
     argon2: FAST_ARGON2,

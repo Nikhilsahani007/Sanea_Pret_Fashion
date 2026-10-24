@@ -88,6 +88,7 @@ describe("tables and scope", () => {
       "collection_product",
       "colour",
       "content_block",
+      "enquiry",
       "inventory_level",
       "media_asset",
       "navigation_item",
@@ -100,6 +101,7 @@ describe("tables and scope", () => {
       "stock_movement",
       "stock_reservation",
       "store_setting",
+      "whatsapp_click",
     ]);
   });
 
@@ -124,7 +126,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(23); // 21 + cart, cart_item (Phase 11)
+    expect(counts).toHaveLength(25); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13)
   });
 });
 
@@ -202,7 +204,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(27); // 25 + two cart_item keys (Phase 11)
+    expect(expected).toHaveLength(32); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13)
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -237,7 +239,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(20); // 19 + cart (Phase 11)
+    expect(rows).toHaveLength(22); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13)
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

@@ -69,6 +69,12 @@ export const HANDWRITTEN_CHECKS = [
   { table: "cart", name: "cart_token_hash_check" },
   { table: "cart", name: "cart_expiry_check" },
   { table: "cart_item", name: "cart_item_quantity_check" },
+  // Phase 13 (enquiries)
+  { table: "enquiry", name: "enquiry_consent_check" },
+  { table: "enquiry", name: "enquiry_contact_check" },
+  { table: "enquiry", name: "enquiry_phone_check" },
+  { table: "enquiry", name: "enquiry_text_check" },
+  { table: "enquiry", name: "enquiry_source_check" },
 ] as const;
 
 /** Reference rows inserted by the migration (D-029, D-058), in order. */

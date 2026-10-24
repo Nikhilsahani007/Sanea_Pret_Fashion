@@ -71,6 +71,18 @@ mkdirSync(mediaDir, { recursive: true });
 // Demo catalogue and published content with placeholder images (TEST only).
 const { seedDemo } = await import("../../apps/api/src/db/demo-seed.ts");
 await seedDemo(db, mediaDir);
+// Test-only store settings so the WhatsApp journey can run (E2E-4); not a real number.
+await db.storeSetting.create({
+  data: {
+    key: "store",
+    value: {
+      whatsappNumber: "+919000000000",
+      contactEmail: "care@example.test",
+      contactPhone: null,
+      businessAddress: null,
+    },
+  },
+});
 await db.$disconnect();
 
 const children: ChildProcess[] = [];
