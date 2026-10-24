@@ -252,8 +252,13 @@
   text-underline-offset: 0.2em;
 }
 
-.arrows button:active {
+.arrows button:active:not(:disabled) {
   transform: scale(0.94);
+}
+
+.arrows button:disabled {
+  color: var(--sp-muted);
+  cursor: default;
 }
 
 @media (min-width: 64rem) {
@@ -275,6 +280,11 @@
     (100% - (var(--peek) - 0.6) * var(--gap)) / var(--peek)
   );
   gap: var(--gap);
+  /* Run past the right gutter to the screen edge (at the page's maximum
+     width, to the column's edge): the partly shown card reads as more to
+     come, not as a clipped box. */
+  margin-inline-end: calc(var(--gutter) * -1);
+  padding-inline-end: var(--gutter);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;

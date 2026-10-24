@@ -163,51 +163,69 @@ export function Layout() {
       >
         <Outlet />
       </main>
+      {/* The footer (phase-12-plan.md §13): the logo with its tagline on the
+          left, then the published menus, contact and social links as quiet
+          columns. Only what is published is drawn. */}
       <footer className={s.footer}>
         <div className={s.footerInner}>
-          <Lockup />
-          {groups.length ? (
-            <div className={s.groups}>
-              {groups.map(([title, links]) => (
-                <div key={title}>
-                  <h2 className={s.groupTitle}>{title}</h2>
-                  <Links links={links!} label={`${title} links`} />
-                </div>
-              ))}
-            </div>
-          ) : null}
-          {footer?.contact ? (
-            <address className={s.contact}>
-              {footer.contact.addressLines?.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-              {footer.contact.hours ? (
-                <span>{footer.contact.hours}</span>
-              ) : null}
-              {footer.contact.phone ? (
-                <a href={`tel:${footer.contact.phone.replace(/[^+\d]/g, "")}`}>
-                  {footer.contact.phone}
-                </a>
-              ) : null}
-              {footer.contact.email ? (
-                <a href={`mailto:${footer.contact.email}`}>
-                  {footer.contact.email}
-                </a>
-              ) : null}
-            </address>
-          ) : null}
-          {footer?.social?.length ? (
-            <ul className={s.social} aria-label="Sanéa Pret elsewhere">
-              {footer.social.map((link) => (
-                <li key={link.url}>
-                  <a href={link.url} rel="noopener noreferrer" target="_blank">
-                    {NETWORK_NAMES[link.network] ?? link.network}
-                    <span className="visually-hidden"> (opens a new tab)</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <div className={s.footerBrand}>
+            <Lockup />
+          </div>
+          <div className={s.footerCols}>
+            {groups.map(([title, links]) => (
+              <div key={title}>
+                <h2 className={s.groupTitle}>{title}</h2>
+                <Links links={links!} label={`${title} links`} />
+              </div>
+            ))}
+            {footer?.contact ? (
+              <div>
+                <h2 className={s.groupTitle}>Contact</h2>
+                <address className={s.contact}>
+                  {footer.contact.addressLines?.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  {footer.contact.hours ? (
+                    <span>{footer.contact.hours}</span>
+                  ) : null}
+                  {footer.contact.phone ? (
+                    <a
+                      href={`tel:${footer.contact.phone.replace(/[^+\d]/g, "")}`}
+                    >
+                      {footer.contact.phone}
+                    </a>
+                  ) : null}
+                  {footer.contact.email ? (
+                    <a href={`mailto:${footer.contact.email}`}>
+                      {footer.contact.email}
+                    </a>
+                  ) : null}
+                </address>
+              </div>
+            ) : null}
+            {footer?.social?.length ? (
+              <div>
+                <h2 className={s.groupTitle}>Follow</h2>
+                <ul className={s.social} aria-label="Sanéa Pret elsewhere">
+                  {footer.social.map((link) => (
+                    <li key={link.url}>
+                      <a
+                        href={link.url}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {NETWORK_NAMES[link.network] ?? link.network}
+                        <span className="visually-hidden">
+                          {" "}
+                          (opens a new tab)
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </div>
       </footer>
       <CartDrawer />

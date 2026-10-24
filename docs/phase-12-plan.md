@@ -252,3 +252,45 @@ The palette is unchanged (D-096); `admin.css` is unchanged.
 - **The live-reference comparison** (gate 3) and **the motion audit** (gate 4): not performed.
 - **Real assets:** B-04 (vector logo), B-06 (at least eight real product photographs and campaign photographs) and B-03 (the reference recording). Every image here is a labelled placeholder.
 - **Your visual review of the redesign.** Phase 12 is not passed.
+
+## 13. Refinements after the second review (2026-10-24)
+
+### 13.1 What changed
+
+- **Carousel edges:** the product rows run past the right-hand gutter to the edge of the screen (at the page's maximum width, to the column's edge), so the partly shown card reads as more to come rather than a clipped box. The arrow buttons are disabled at each end.
+- **Responsive card text:** each card is a size container. On narrow cards (phones, the 2-column grid) the name sits above the price; on wider cards they share a line. Names scale gently and wrap rather than overflow.
+- **Footer hierarchy:**
+  - the logo and tagline in their own column (12rem on a phone, 15rem on desktop, below the raster's native width);
+  - the published menus as quiet columns beside it, each with a small title;
+  - contact and social links in titled columns of their own, shown only when published.
+- **`TEST` labels:** kept. They come from the synthetic seed data (`e2e/support/seed-*.ts`), not from the code; **no approved real content exists to replace them** (B-06). The same names are used by the tests.
+
+Kept as approved: the ivory and aubergine direction, the smaller centred masthead, the campaign-first hero, the larger cards (P12-9) and the subtle motion.
+
+### 13.2 Evidence
+
+| Check | Result |
+|-------|--------|
+| Unit and component | 718 passed (40 files) |
+| Lint, design tokens, format, typecheck | clean |
+| Taste lint | 0 FAIL, 0 WARN |
+| Storefront build | JS 92.99 kB gzipped, CSS 5.56 kB |
+| Checks against the running preview (`localhost:5173`, synthetic data; the preview stays up at your request) | At 1440, 1024, 768, 390 and 360: the hero fills the first screen; the masthead fits (336, 246, 184, 144 and 144 px wide); no horizontal scroll; order hero > New Ins > second row > tabs; **axe: no violations**, including the size picker at 390 |
+| **Not run this round** | The Playwright end-to-end suite and Lighthouse: both need ports 4100, 4101 and 5173, which the preview holds, and you asked for the preview to stay up. Last results, at `f252387`: 20 end-to-end tests passed; Lighthouse accessibility 100, performance 91 |
+
+**Screenshots** in `docs/reviews/landing/2026-10-24/`, regenerated from the preview (synthetic data, with the header menus, pills and footer seeded); earlier versions are in `f252387` and `2c25dbb`:
+- first screen and full page at 1440, 1024, 768, 390 and 360;
+- hero slide 2 at 390; the size picker from New Ins at 390.
+
+`landing-empty-1440.png` is unchanged from `f252387`.
+
+### 13.3 Assets (checked 2026-10-24)
+
+| Asset | Found | Blocker |
+|-------|-------|---------|
+| Vector logo, or transparent PNG ≥ 3000 px | No. Only the raster crops in `docs/brand/` | **B-04 open** |
+| ≥ 8 genuine product photographs | No | **B-06 open** |
+| Campaign photography | No | **B-06 open** |
+| Nishorama screen recording | No (`docs/reference/` does not exist) | **B-03 open** |
+
+The live-reference comparison and the motion audit are **not performed**: they wait for the reference evidence (B-03). Phase 12 is **not passed**.

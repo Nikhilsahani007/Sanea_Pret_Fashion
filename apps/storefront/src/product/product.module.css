@@ -21,11 +21,13 @@
   }
 }
 
-/* The picture leads; the words are quiet and close to it. */
+/* The picture leads; the words are quiet and close to it. The card is a
+   size container, so its text follows the card's width, not the page's. */
 .card {
   display: grid;
   gap: var(--sp-space-3);
   align-content: start;
+  container-type: inline-size;
 }
 
 .well {
@@ -60,16 +62,25 @@
   font-size: var(--sp-step-small);
 }
 
+/* Narrow cards (phones, the 2-column grid): name, then price below.
+   Wider cards: name and price share one line. */
 .meta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--sp-space-1) var(--sp-space-4);
+  display: grid;
+  gap: var(--sp-space-1);
+}
+
+@container (min-width: 17rem) {
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-space-4);
+  }
 }
 
 .cardName {
-  font-size: var(--sp-step-body);
+  font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.0625rem);
+  overflow-wrap: anywhere;
   font-weight: var(--sp-weight-regular);
   line-height: var(--sp-leading-tight);
 }
