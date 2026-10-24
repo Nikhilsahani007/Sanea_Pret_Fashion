@@ -38,3 +38,6 @@ Thumbs.db
 
 # Lint cache
 .eslintcache
+
+# Local media uploads (MEDIA_DIR, Phase 8)
+var/

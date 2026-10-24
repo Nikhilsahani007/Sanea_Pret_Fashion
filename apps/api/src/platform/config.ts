@@ -40,6 +40,16 @@ const schema = z
     IP_HASH_KEY: z
       .string({ error: "IP_HASH_KEY is required" })
       .min(32, { error: "IP_HASH_KEY must be at least 32 characters" }),
+    // Phase 8 media (system-design.md §10). Local folder for originals and
+    // derivatives; public URL prefix for derivatives (a CDN in production).
+    MEDIA_DIR: z.string().min(1).default("var/media"),
+    MEDIA_PUBLIC_BASE_URL: z
+      .string()
+      .regex(/^(\/[A-Za-z0-9_-]+|https:\/\/[^\s?#]+)$/, {
+        error:
+          "MEDIA_PUBLIC_BASE_URL must be a path such as /media or an https URL without a trailing slash",
+      })
+      .default("/media"),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -51,6 +61,14 @@ const schema = z
           message: `${key} must use https in production`,
         });
       }
+    }
+    // The API never serves media in production (security-design.md §6).
+    if (!env.MEDIA_PUBLIC_BASE_URL.startsWith("https://")) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["MEDIA_PUBLIC_BASE_URL"],
+        message: "MEDIA_PUBLIC_BASE_URL must be an https URL in production",
+      });
     }
   });
 
@@ -67,6 +85,8 @@ export type Config = {
   readonly mfaEncryptionKey: Buffer;
   readonly mfaKeyVersion: number;
   readonly ipHashKey: string;
+  readonly mediaDir: string;
+  readonly mediaPublicBaseUrl: string;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -110,5 +130,7 @@ export function loadConfig(
     mfaEncryptionKey: Buffer.from(e.MFA_ENCRYPTION_KEY, "base64"),
     mfaKeyVersion: e.MFA_ENCRYPTION_KEY_VERSION,
     ipHashKey: e.IP_HASH_KEY,
+    mediaDir: e.MEDIA_DIR,
+    mediaPublicBaseUrl: e.MEDIA_PUBLIC_BASE_URL,
   };
 }

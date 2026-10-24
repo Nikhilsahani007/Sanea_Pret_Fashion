@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_INDEXES,
   HANDWRITTEN_TRIGGERS,
 } from "./handwritten.ts";
 import { createTestDatabase } from "./testing/database.ts";
@@ -98,13 +99,13 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("has no GST, order-link or search column", async () => {
+  it("has no GST or order-link column, and only the Phase 8 search column", async () => {
     const rows = await q<{ c: string }>(
       `SELECT table_name || '.' || column_name AS c FROM information_schema.columns
        WHERE table_schema = 'public'
          AND (column_name ~ '(gst|tax|order_id|customer|search)' OR data_type = 'tsvector')`,
     );
-    expect(rows).toEqual([]);
+    expect(rows).toEqual([{ c: "product.search_vector" }]);
   });
 
   it("inserts exactly the six approved sizes and no other rows", async () => {
@@ -137,6 +138,17 @@ describe("handwritten objects exist in the live catalogue", () => {
       ),
     ).toHaveLength(1);
   });
+
+  it.each(HANDWRITTEN_INDEXES)(
+    "index $name on $table",
+    async ({ table, name }) => {
+      expect(
+        await q(
+          `SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND tablename = '${table}' AND indexname = '${name}'`,
+        ),
+      ).toHaveLength(1);
+    },
+  );
 
   it("every CHECK constraint, validated, and no unlisted ones", async () => {
     const rows = await q<{ t: string; name: string; valid: boolean }>(

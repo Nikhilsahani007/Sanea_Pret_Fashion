@@ -191,6 +191,14 @@ No `dotenv`: `prisma.config.ts` uses Node's `process.loadEnvFile`.
 
 Argon2id (`crypto.argon2`), TOTP (HMAC-SHA-1), AES-256-GCM and HMAC all use Node 24's built-in `crypto` (D-062, D-064, D-065). The common-password list is a data file from SecLists (MIT), not a package (D-063).
 
+### Installed in Phase 8 (pinned exactly, D-080)
+
+| Package | Version | Where | Reason |
+|---------|---------|-------|--------|
+| sharp | 0.35.5 | `@sanea/api` | Image validation, EXIF-free re-encoding to AVIF and WebP (system-design.md §10). Uses prebuilt libvips binaries (platform packages in the lock file); verified on linux-x64 only |
+
+The UI packages for Phase 8 are listed with the admin app below, when installed.
+
 ### Planned for later phases
 
 Not installed yet. Planned dependencies and the reason for each:
@@ -203,7 +211,6 @@ Not installed yet. Planned dependencies and the reason for each:
 | express, helmet, cors, cookie-parser | api | HTTP server and security headers. |
 | express-rate-limit | api | Rate limiting on auth, enquiries, checkout. |
 | pino, pino-http | api | Structured logging. |
-| sharp | api | Image resizing and format conversion. |
 | vitest, supertest, @testing-library/react, playwright | dev | Tests. |
 | typescript, eslint, prettier | dev | Tooling. |
 

@@ -58,6 +58,21 @@ Shared contracts for Sanéa Pret: money in paise, INR formatting, Indian mobile 
 
 Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 
+### Catalogue (Phase 8)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `SLUG_PATTERN`, `slugSchema` | constant, schema | Lowercase ASCII words joined by single hyphens, at most 120 characters |
+| `slugify(name)` | function | Slug from a name: accents removed, lowercase, other characters collapsed to hyphens; `""` if nothing remains |
+| `Availability`, `availabilityOf(stock)`, `VariantAvailability` | constant, function, type | `onHand − reserved` against the low-stock threshold: `SOLD_OUT`, `LOW_STOCK` with the real `remaining` count, or `IN_STOCK` with no count |
+
+### Content (Phase 8)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `richTextSchema`, `richTextBlockSchema`, `RichText`, `RichTextBlock` | schemas, types | `{ blocks }` of `paragraph`, `heading` (level 2 or 3), `list`, `link` and `image`; strict objects; no HTML field exists; control characters rejected |
+| `safeHrefSchema` | schema | Site-relative paths, `https:` URLs, `mailto:` and `tel:` only; rejects `javascript:`, `data:`, protocol-relative and `http:` |
+
 ### Validation
 
 | Export | Kind | Description |

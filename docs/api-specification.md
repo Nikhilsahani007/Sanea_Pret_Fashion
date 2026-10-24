@@ -57,10 +57,10 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | GET | `/catalogue/categories` | Published category tree. |
 | GET | `/catalogue/collections` | Published collections. |
 | GET | `/catalogue/collections/:slug` | Collection detail. |
-| GET | `/catalogue/products` | Listing. Query: `category`, `collection`, `size[]`, `colour[]`, `priceMin`, `priceMax`, `inStock`, `sort` (`newest`, `price_asc`, `price_desc`), `limit`, `cursor`. Returns items and facets. |
+| GET | `/catalogue/products` | Listing. Query: `category` (slug, includes child categories), `collection` (slug), `size` (label, repeatable), `colour` (slug, repeatable), `priceMin`, `priceMax` (paise), `inStock=true`, `sort` (`newest`, `price_asc`, `price_desc`, `relevance` with `q`), `limit` (≤ 48, default 24), `cursor`. Unknown parameters → 400. Returns `{ items, nextCursor, total, facets: { sizes, colours, categories, priceBands } }`; each facet counts products matching every other filter. |
 | GET | `/catalogue/products/:slug` | Product detail with variants, per-variant `available` (capped display, see §6), images by colour. |
-| GET | `/search` | `q`, plus the same filters. |
-| GET | `/search/suggest` | `q` (≥ 2 chars). Up to 6 product and category suggestions. |
+| GET | `/search` | `q`, plus the same filters. Full-text match (prefix on the last word) or a trigram name match for typos. 60 requests per minute per IP. |
+| GET | `/search/suggest` | `q` (≥ 2 chars). Up to 6 suggestions: `{ products: [{ slug, name }], categories: [{ slug, name }] }`. 60 per minute per IP. |
 
 ### Content
 | Method | Path | Description |
@@ -122,8 +122,9 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET | `/admin/dashboard` | O M C F (content tailored to role) |
 | GET/POST | `/admin/products` | GET: O M C F · POST: O M C |
 | GET/PATCH | `/admin/products/:id` | GET: all · PATCH: O M C (price fields: O M only) |
-| POST | `/admin/products/:id/publish` · `/archive` | O M C |
-| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | O M C (price: O M) |
+| POST | `/admin/products/:id/publish` · `/archive` | O M C. Publish returns `409 CONFLICT` with `details.reasons` (`CATEGORY_NOT_PUBLISHED`, `NO_ACTIVE_VARIANT`, `NO_PRIMARY_IMAGE`) until the product is ready |
+| GET/POST/PATCH | `/admin/products/:id/variants[/:variantId]` | O M C (price: O M). Creating a variant sets its price, so POST needs O M |
+| PUT | `/admin/products/:id/images` `{ images: [{ mediaAssetId, colourId?, alt, role }] }` (replaces the ordered list; one PRIMARY and one HOVER per colour) | O M C |
 | GET/POST/PATCH/DELETE | `/admin/categories[/:id]` · `/admin/collections[/:id]` | O M C |
 | PUT | `/admin/collections/:id/products` | O M C |
 | GET | `/admin/inventory` (filters: lowStock, sku, product) | all |
@@ -141,7 +142,8 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
 | POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
-| POST | `/admin/media` (multipart) · GET `/admin/media` | O M C |
+| POST | `/admin/media` (raw image body, `Content-Type: image/jpeg`, `image/png` or `image/webp`, at most 15 MB; optional `X-Filename` header, URL-encoded) → `201 { asset }` · GET `/admin/media` | O M C |
+| GET/POST/PATCH | `/admin/colours[/:id]` · GET `/admin/sizes` (reference data) · GET/POST/PATCH `/admin/size-charts[/:id]` (Phase 8, additive) | GET: all · writes: O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |
@@ -168,7 +170,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
       "pricePaise": 349900, "compareAtPricePaise": null,
       "availability": "IN_STOCK" }
   ],
-  "images": [{ "colourId": "…", "url": "…", "width": 1440, "height": 1800, "alt": "…", "role": "PRIMARY" }],
+  "images": [{ "colourId": "…", "url": "…", "avifSrcset": "… 480w, … 960w", "webpSrcset": "…", "width": 1440, "height": 1800, "alt": "…", "role": "PRIMARY" }],
   "labels": ["NEW"]
 }
 ```

@@ -72,6 +72,7 @@ describe("security headers", () => {
       NODE_ENV: "production",
       STOREFRONT_ORIGIN: "https://shop.example",
       ADMIN_ORIGIN: "https://admin.example",
+      MEDIA_PUBLIC_BASE_URL: "https://media.example",
     });
     const res = await request(testApp({ config }).app).get("/api/v1/health");
     expect(res.headers["strict-transport-security"]).toBe(

@@ -4,7 +4,6 @@ import { pinoHttp } from "pino-http";
 import type { Logger } from "pino";
 
 import { auditRouter } from "../../modules/audit/router.ts";
-import type { AuthDeps } from "../../modules/auth/deps.ts";
 import { adminSession } from "../../modules/auth/middleware.ts";
 import {
   DEFAULT_ARGON2,
@@ -15,7 +14,16 @@ import {
   authRouter,
   type AuthLimits,
 } from "../../modules/auth/router.ts";
+import { adminProductsRouter } from "../../modules/catalogue/admin-products.ts";
+import { adminTaxonomyRouter } from "../../modules/catalogue/admin-taxonomy.ts";
+import { publicCatalogueRouter } from "../../modules/catalogue/public-router.ts";
+import type { ModuleDeps } from "../../modules/deps.ts";
 import { healthRouter } from "../../modules/health/router.ts";
+import { mediaRouter } from "../../modules/media/router.ts";
+import {
+  localMediaStorage,
+  type MediaStorage,
+} from "../../modules/media/storage.ts";
 import { staffRouter } from "../../modules/staff/router.ts";
 import type { Config } from "../config.ts";
 import type { Db } from "../db.ts";
@@ -38,6 +46,8 @@ export type AppOptions = {
   readonly now?: () => Date;
   readonly argon2?: Argon2Params;
   readonly authLimits?: AuthLimits;
+  /** Media storage; defaults to the local folder MEDIA_DIR. */
+  readonly media?: MediaStorage;
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -49,9 +59,17 @@ export function createApp({
   now = () => new Date(),
   argon2 = DEFAULT_ARGON2,
   authLimits = DEFAULT_AUTH_LIMITS,
+  media,
 }: AppOptions): Express {
-  const deps: AuthDeps | undefined = db
-    ? { db, config, logger, now, argon2 }
+  const deps: ModuleDeps | undefined = db
+    ? {
+        db,
+        config,
+        logger,
+        now,
+        argon2,
+        media: media ?? localMediaStorage(config.mediaDir),
+      }
     : undefined;
   const app = express();
   app.set("trust proxy", config.trustProxy);
@@ -68,12 +86,36 @@ export function createApp({
   app.use(requireJson); // 8. 415 for non-JSON bodies
   app.use(jsonBody); // 9. 100 KB JSON
 
+  // Development only: serve local media derivatives. In production a CDN
+  // serves them and the API never does (security-design.md §6).
+  const mediaDir = deps?.media.localPublicDir;
+  if (
+    deps &&
+    mediaDir &&
+    config.nodeEnv !== "production" &&
+    config.mediaPublicBaseUrl.startsWith("/")
+  ) {
+    app.use(
+      config.mediaPublicBaseUrl,
+      express.static(mediaDir, {
+        immutable: true,
+        maxAge: "365d",
+        index: false,
+        dotfiles: "deny",
+      }),
+    );
+  }
+
   app.use(healthRouter());
   app.use(csrfRouter(config));
   if (deps) {
     app.use(authRouter(deps, authLimits));
     app.use(staffRouter(deps));
     app.use(auditRouter(deps));
+    app.use(mediaRouter(deps));
+    app.use(adminProductsRouter(deps));
+    app.use(adminTaxonomyRouter(deps));
+    app.use(publicCatalogueRouter(deps));
   }
   for (const router of routers) app.use(router);
 

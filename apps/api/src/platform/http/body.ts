@@ -15,9 +15,28 @@ function hasBody(headers: {
   );
 }
 
-/** Rejects request bodies that are not `application/json` with 415 (D-046). */
+/** The one route that takes a raw image body instead of JSON (Phase 8). */
+export const IMAGE_UPLOAD_PATH = "/api/v1/admin/media";
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function isImageUpload(req: Parameters<RequestHandler>[0]): boolean {
+  return (
+    req.method === "POST" &&
+    req.path.toLowerCase() === IMAGE_UPLOAD_PATH &&
+    typeof req.is(IMAGE_TYPES) === "string"
+  );
+}
+
+/**
+ * Rejects request bodies that are not `application/json` with 415 (D-046),
+ * except an image body on the admin media upload route.
+ */
 export const requireJson: RequestHandler = (req, _res, next) => {
-  if (hasBody(req.headers) && !req.is("application/json")) {
+  if (
+    hasBody(req.headers) &&
+    !req.is("application/json") &&
+    !isImageUpload(req)
+  ) {
     return next(new AppError("UNSUPPORTED_MEDIA_TYPE"));
   }
   next();

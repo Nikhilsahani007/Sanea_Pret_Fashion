@@ -1,4 +1,6 @@
 // Test helpers for the API platform. Not used by production code.
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Writable } from "node:stream";
 
 import type { Router } from "express";
@@ -26,6 +28,8 @@ export function testConfig(overrides: Record<string, string> = {}): Config {
     DATABASE_URL: "postgresql://unused@127.0.0.1:1/unused",
     MFA_ENCRYPTION_KEY: MFA_KEY,
     IP_HASH_KEY: IP_KEY,
+    // Uploads in tests go to a throwaway folder, never the repository.
+    MEDIA_DIR: join(tmpdir(), `sanea-test-media-${process.pid}`),
     ...overrides,
   });
 }

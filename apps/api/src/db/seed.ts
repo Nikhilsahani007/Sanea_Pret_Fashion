@@ -166,6 +166,8 @@ export async function seedDevelopment(db: PrismaClient): Promise<SeedResult> {
         }
       }
     }
+    // Phase 8: build the search documents for the sample products.
+    await tx.$executeRaw`SELECT refresh_product_search(id) FROM "product"`;
     return { created: true, products: SAMPLE_PRODUCTS.length, variants };
   });
 }

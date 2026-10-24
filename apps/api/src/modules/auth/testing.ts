@@ -93,6 +93,40 @@ export async function adminHarness(
       .send(body);
   }
 
+  function put(path: string, body: object, session: Session) {
+    return request(app)
+      .put(path)
+      .set("Origin", ADMIN)
+      .set("Cookie", session.cookie)
+      .set("X-CSRF-Token", session.csrfToken)
+      .send(body);
+  }
+
+  function del(path: string, session: Session) {
+    return request(app)
+      .delete(path)
+      .set("Origin", ADMIN)
+      .set("Cookie", session.cookie)
+      .set("X-CSRF-Token", session.csrfToken);
+  }
+
+  /** A raw image upload to the admin media route. */
+  function upload(
+    data: Buffer,
+    type: string,
+    session: Session,
+    filename?: string,
+  ) {
+    const req = request(app)
+      .post("/api/v1/admin/media")
+      .set("Origin", ADMIN)
+      .set("Cookie", session.cookie)
+      .set("X-CSRF-Token", session.csrfToken)
+      .set("Content-Type", type);
+    if (filename) req.set("X-Filename", encodeURIComponent(filename));
+    return req.send(data);
+  }
+
   function get(path: string, session?: Session) {
     const req = request(app).get(path).set("Origin", ADMIN);
     return session ? req.set("Cookie", session.cookie) : req;
@@ -160,6 +194,9 @@ export async function adminHarness(
     csrf,
     post,
     patch,
+    put,
+    del,
+    upload,
     get,
     createAdmin,
     signIn,

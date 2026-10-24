@@ -5,9 +5,18 @@
  * the migration SQL and, once a database exists, against the live catalogue.
  */
 
-export const HANDWRITTEN_EXTENSIONS = ["citext"] as const;
+export const HANDWRITTEN_EXTENSIONS = ["citext", "pg_trgm"] as const;
 
-export const HANDWRITTEN_FUNCTIONS = ["reject_append_only_change"] as const;
+export const HANDWRITTEN_FUNCTIONS = [
+  "reject_append_only_change",
+  // Phase 8: rebuilds a product's full-text search document.
+  "refresh_product_search",
+] as const;
+
+/** Expression indexes Prisma cannot model (Phase 8 search). */
+export const HANDWRITTEN_INDEXES = [
+  { table: "product", name: "product_name_trgm_idx" },
+] as const;
 
 /** Append-only tables (D-057): UPDATE/DELETE row trigger plus TRUNCATE trigger. */
 export const APPEND_ONLY_TABLES = ["stock_movement", "audit_log"] as const;

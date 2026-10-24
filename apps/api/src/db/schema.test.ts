@@ -12,6 +12,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_INDEXES,
   HANDWRITTEN_TRIGGERS,
 } from "./handwritten.ts";
 
@@ -46,7 +47,11 @@ describe("migration SQL contains every handwritten object", () => {
   });
 
   it.each(HANDWRITTEN_FUNCTIONS)("function %s", (name) => {
-    expect(sql).toContain(`CREATE FUNCTION "${name}"()`);
+    expect(sql).toContain(`CREATE FUNCTION "${name}"(`);
+  });
+
+  it.each(HANDWRITTEN_INDEXES)("index $name on $table", ({ table, name }) => {
+    expect(sql).toContain(`CREATE INDEX "${name}" ON "${table}"`);
   });
 
   it.each(HANDWRITTEN_CHECKS)("CHECK $name on $table", ({ table, name }) => {
@@ -129,7 +134,15 @@ describe("Phase 6 scope and conventions", () => {
   });
 
   it("stores no GST rate, order link or search field (D-033, D-054)", () => {
-    expect(sql).not.toMatch(/gst|order_id|search_vector|tsvector|pg_trgm/i);
+    // Phase 6 and 7 migrations only; search arrives in Phase 8.
+    const early = dirs
+      .filter((d) => d < "20261024")
+      .map((d) =>
+        readFileSync(new URL(`${d}/migration.sql`, migrations), "utf8"),
+      )
+      .join("\n");
+    expect(early).not.toMatch(/gst|order_id|search_vector|tsvector|pg_trgm/i);
+    expect(sql).not.toMatch(/gst|order_id/i);
   });
 
   it("uses snake_case for every table and column (D-056)", () => {

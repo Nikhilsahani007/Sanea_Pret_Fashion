@@ -6,6 +6,14 @@ import * as shared from "@sanea/shared";
 // checked by the type checker, not here.
 const PUBLIC_RUNTIME_EXPORTS = [
   "AdminRole",
+  "Availability",
+  "SLUG_PATTERN",
+  "availabilityOf",
+  "richTextBlockSchema",
+  "richTextSchema",
+  "safeHrefSchema",
+  "slugSchema",
+  "slugify",
   "INDIAN_STATE_KEYS",
   "INDIAN_STATE_NAMES",
   "MAX_AMOUNT_PAISE",

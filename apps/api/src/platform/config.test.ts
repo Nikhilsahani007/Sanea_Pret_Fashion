@@ -37,6 +37,8 @@ describe("loadConfig()", () => {
       mfaEncryptionKey: Buffer.alloc(32, 7),
       mfaKeyVersion: 1,
       ipHashKey: "i".repeat(32),
+      mediaDir: "var/media",
+      mediaPublicBaseUrl: "/media",
     });
   });
 
@@ -93,6 +95,7 @@ describe("loadConfig()", () => {
     expect(problems({ ...valid, NODE_ENV: "production" })).toEqual([
       "STOREFRONT_ORIGIN must use https in production",
       "ADMIN_ORIGIN must use https in production",
+      "MEDIA_PUBLIC_BASE_URL must be an https URL in production",
     ]);
     expect(
       problems({
@@ -100,8 +103,18 @@ describe("loadConfig()", () => {
         NODE_ENV: "production",
         STOREFRONT_ORIGIN: "https://saneapret.example",
         ADMIN_ORIGIN: "https://admin.saneapret.example",
+        MEDIA_PUBLIC_BASE_URL: "https://media.saneapret.example",
       }),
     ).toEqual([]);
+  });
+
+  it("validates the media URL prefix", () => {
+    expect(
+      problems({ ...valid, MEDIA_PUBLIC_BASE_URL: "/media/" }),
+    ).toHaveLength(1);
+    expect(
+      problems({ ...valid, MEDIA_PUBLIC_BASE_URL: "javascript:x" }),
+    ).toHaveLength(1);
   });
 
   it("never includes secret values in the error message", () => {
