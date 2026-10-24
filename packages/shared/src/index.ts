@@ -63,6 +63,22 @@ export {
   safeHrefSchema,
 } from "./content/rich-text.ts";
 export type { RichText, RichTextBlock } from "./content/rich-text.ts";
+export {
+  CONTENT_BLOCKS,
+  CONTENT_BLOCK_KEYS,
+  NAVIGATION_MENUS,
+  linkTargetSchema,
+  navigationItemsSchema,
+  productSourceSchema,
+  storeSettingsSchema,
+  targetHref,
+} from "./content/blocks.ts";
+export type {
+  ContentBlockKey,
+  LinkTarget,
+  ProductSource,
+  StoreSettings,
+} from "./content/blocks.ts";
 
 // Validation
 export {

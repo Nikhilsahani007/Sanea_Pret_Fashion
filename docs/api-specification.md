@@ -139,9 +139,9 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/PATCH | `/admin/enquiries[/:id]` | O M |
 | GET | `/admin/enquiries/whatsapp-clicks` | O M |
 | GET/PUT | `/admin/content/blocks/:key` (draft) | O M C |
-| POST | `/admin/content/blocks/:key/publish` | O M C |
+| POST | `/admin/content/blocks/:key/publish` · `/unpublish` (keys: D-145; PUT body `{ draft }`) | O M C |
 | GET/POST/PATCH | `/admin/content/pages[/:slug]` | O M C (rehma-foundation: O M) |
-| POST | `/admin/content/pages/:slug/publish` | O M C (rehma-foundation: O only, with `verified: true`) |
+| POST | `/admin/content/pages/:slug/publish` · `/unpublish` | O M C (rehma-foundation: O only, with `verified: true`; otherwise `409 VERIFICATION_REQUIRED`) |
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
 | POST | `/admin/media` (raw image body, `Content-Type: image/jpeg`, `image/png` or `image/webp`, at most 15 MB; optional `X-Filename` header, URL-encoded) → `201 { asset }` · GET `/admin/media` | O M C |
 | GET/POST/PATCH | `/admin/colours[/:id]` · GET `/admin/sizes` (reference data) · GET/POST/PATCH `/admin/size-charts[/:id]` (Phase 8, additive) | GET: all · writes: O M C |

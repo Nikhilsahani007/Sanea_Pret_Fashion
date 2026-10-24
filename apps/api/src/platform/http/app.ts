@@ -17,6 +17,8 @@ import {
 import { adminProductsRouter } from "../../modules/catalogue/admin-products.ts";
 import { adminTaxonomyRouter } from "../../modules/catalogue/admin-taxonomy.ts";
 import { publicCatalogueRouter } from "../../modules/catalogue/public-router.ts";
+import { contentAdminRouter } from "../../modules/content/admin-router.ts";
+import { contentPublicRouter } from "../../modules/content/public-router.ts";
 import type { ModuleDeps } from "../../modules/deps.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { startReservationExpiry } from "../../modules/inventory/jobs.ts";
@@ -122,6 +124,8 @@ export function createApp({
     app.use(adminTaxonomyRouter(deps));
     app.use(publicCatalogueRouter(deps));
     app.use(inventoryRouter(deps));
+    app.use(contentAdminRouter(deps));
+    app.use(contentPublicRouter(deps));
     if (jobs) startReservationExpiry(deps);
   }
   for (const router of routers) app.use(router);

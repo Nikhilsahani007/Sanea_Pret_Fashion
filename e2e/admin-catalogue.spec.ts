@@ -63,6 +63,9 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
   await page.screenshot({ path: join(shots, "overview-1440.png") });
 
   await page.getByRole("link", { name: "Categories", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Categories", level: 1 }),
+  ).toBeVisible();
   await page.getByLabel("Name").fill("TEST Kurtas");
   await page.getByRole("button", { name: "Create" }).click();
   const row = page.getByRole("row", { name: /TEST Kurtas/ });
@@ -71,11 +74,17 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
   await expect(row.locator('[data-status="PUBLISHED"]')).toBeVisible();
 
   await page.getByRole("link", { name: "Colours", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Colours", level: 1 }),
+  ).toBeVisible();
   await page.getByLabel("Name").fill("TEST Ivory");
   await page.getByRole("button", { name: "Add colour" }).click();
   await expect(page.getByText("TEST Ivory")).toBeVisible();
 
   await page.getByRole("link", { name: "Media", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Media", level: 1 }),
+  ).toBeVisible();
   const png = await sharp({
     create: {
       width: 1440,
@@ -106,6 +115,9 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
   await page.screenshot({ path: join(shots, "media-1440.png") });
 
   await page.getByRole("link", { name: "Products", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Products", level: 1 }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "New product" }).click();
   await page
     .getByRole("textbox", { name: "Name", exact: true })
@@ -180,6 +192,9 @@ test("catalogue editor sees prices read-only; fulfilment cannot edit", async ({
 }) => {
   let page = await pageAs(browser, "CATALOGUE_EDITOR");
   await page.getByRole("link", { name: "Products", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Products", level: 1 }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "TEST Sample Kurta" }).click();
   await expect(page.getByText("₹3,499", { exact: true }).first()).toBeVisible();
   await expect(page.getByLabel("Price (₹)")).toHaveCount(0);
@@ -189,6 +204,9 @@ test("catalogue editor sees prices read-only; fulfilment cannot edit", async ({
 
   page = await pageAs(browser, "FULFILMENT");
   await page.getByRole("link", { name: "Products", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Products", level: 1 }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "New product" })).toHaveCount(
     0,
   );
@@ -212,6 +230,9 @@ test("fulfilment receives stock and the storefront availability follows", async 
     ),
   ).toBe(true);
   await page.getByRole("link", { name: "Inventory", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Inventory", level: 1 }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Adjust TEST-SK-IV-M" }).click();
   await page.getByLabel("Units").fill("2");
   await page.getByLabel("Reason").fill("TEST delivery");
@@ -233,9 +254,73 @@ test("fulfilment receives stock and the storefront availability follows", async 
   expect(m).toMatchObject({ availability: "LOW_STOCK", remaining: 2 });
 });
 
+test("manager publishes an announcement; the Rehma page needs the Owner's verification", async ({
+  browser,
+  request,
+}) => {
+  const page = await pageAs(browser, "MANAGER");
+  await page.getByRole("link", { name: "Homepage", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Homepage", level: 1 }),
+  ).toBeVisible();
+  const bar = page.locator("section", {
+    has: page.getByRole("heading", { name: "Announcement bar" }),
+  });
+  await bar.getByLabel("Text").fill("TEST announcement");
+  await bar.getByRole("button", { name: "Save draft" }).click();
+  await expect(bar.getByText("Draft saved.")).toBeVisible();
+  expect(
+    (await (await request.get("/api/v1/content/home")).json()).announcement,
+  ).toBeNull();
+  await bar.getByRole("button", { name: "Publish" }).click();
+  await expect(
+    bar.getByText("Published. The storefront shows it within a minute."),
+  ).toBeVisible();
+  const home = await (await request.get("/api/v1/content/home")).json();
+  expect(home.announcement).toEqual({ text: "TEST announcement", href: null });
+  await page.screenshot({ path: join(shots, "content-home-1440.png") });
+
+  await page.getByRole("link", { name: "Pages", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Pages", level: 1 }),
+  ).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "Title", exact: true })
+    .fill("Rehma Foundation");
+  await page
+    .getByRole("textbox", { name: "Address", exact: true })
+    .fill("rehma-foundation");
+  await page.getByRole("button", { name: "Create" }).click();
+  await expect(
+    page.getByText("Only the Owner can publish this page."),
+  ).toBeVisible();
+  expect(
+    (await request.get("/api/v1/content/pages/rehma-foundation")).status(),
+  ).toBe(404);
+
+  const owner = await pageAs(browser, "OWNER");
+  await owner.getByRole("link", { name: "Pages", exact: true }).click();
+  await expect(
+    owner.getByRole("heading", { name: "Pages", level: 1 }),
+  ).toBeVisible();
+  await owner.getByRole("button", { name: "Rehma Foundation" }).click();
+  const publish = owner.getByRole("button", {
+    name: "Publish the saved draft",
+  });
+  await expect(publish).toBeDisabled();
+  await owner.screenshot({
+    path: join(shots, "rehma-verification-1440.png"),
+    fullPage: true,
+  });
+  // Not published here: the page has no verified content (OD-13).
+});
+
 test("mobile layout of the shell and product list", async ({ browser }) => {
   const page = await pageAs(browser, "OWNER", { width: 390, height: 844 });
   await page.getByRole("link", { name: "Products", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Products", level: 1 }),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "TEST Sample Kurta" }),
   ).toBeVisible();
@@ -256,6 +341,9 @@ test("keyboard: skip link and focus after navigation", async ({ browser }) => {
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
   await page.getByRole("link", { name: "Categories", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Categories", level: 1 }),
+  ).toBeVisible();
   await expect(page.locator("main#main")).toBeFocused();
 });
 

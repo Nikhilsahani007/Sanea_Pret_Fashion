@@ -18,6 +18,14 @@ const NAV: {
   { to: "/colours", label: "Colours", permission: "products.view" },
   { to: "/inventory", label: "Inventory", permission: "products.view" },
   { to: "/media", label: "Media", permission: "products.editContent" },
+  { to: "/content/home", label: "Homepage", permission: "content.edit" },
+  { to: "/content/pages", label: "Pages", permission: "content.edit" },
+  {
+    to: "/content/navigation",
+    label: "Navigation",
+    permission: "content.edit",
+  },
+  { to: "/settings", label: "Settings", permission: "settings.store" },
 ];
 
 export function Shell() {

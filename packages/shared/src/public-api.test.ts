@@ -6,6 +6,9 @@ import * as shared from "@sanea/shared";
 // checked by the type checker, not here.
 const PUBLIC_RUNTIME_EXPORTS = [
   "AdminRole",
+  "CONTENT_BLOCKS",
+  "CONTENT_BLOCK_KEYS",
+  "NAVIGATION_MENUS",
   "Availability",
   "SLUG_PATTERN",
   "availabilityOf",
@@ -32,6 +35,11 @@ const PUBLIC_RUNTIME_EXPORTS = [
   "indianMobileSchema",
   "indianStateSchema",
   "isPaise",
+  "linkTargetSchema",
+  "navigationItemsSchema",
+  "productSourceSchema",
+  "storeSettingsSchema",
+  "targetHref",
   "multiplyPaise",
   "normalizeIndianMobile",
   "normalizePinCode",
