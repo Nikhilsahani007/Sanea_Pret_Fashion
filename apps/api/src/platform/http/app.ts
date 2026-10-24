@@ -18,12 +18,17 @@ import { adminProductsRouter } from "../../modules/catalogue/admin-products.ts";
 import { adminTaxonomyRouter } from "../../modules/catalogue/admin-taxonomy.ts";
 import { publicCatalogueRouter } from "../../modules/catalogue/public-router.ts";
 import { cartRouter } from "../../modules/cart/router.ts";
+import { checkoutRouter } from "../../modules/checkout/router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
 import type { ModuleDeps } from "../../modules/deps.ts";
 import { enquiriesPublicRouter } from "../../modules/enquiries/public-router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { startReservationExpiry } from "../../modules/inventory/jobs.ts";
+import { startOrderJobs } from "../../modules/orders/jobs.ts";
+import { createMockProvider } from "../../modules/payments/mock.ts";
+import type { PaymentProvider } from "../../modules/payments/provider.ts";
+import { webhooksRouter } from "../../modules/payments/router.ts";
 import { inventoryRouter } from "../../modules/inventory/router.ts";
 import { mediaRouter } from "../../modules/media/router.ts";
 import {
@@ -56,6 +61,8 @@ export type AppOptions = {
   readonly media?: MediaStorage;
   /** Start background jobs (reservation expiry). Only main.ts sets this. */
   readonly jobs?: boolean;
+  /** Payment provider override (tests); otherwise from PAYMENT_PROVIDER. */
+  readonly payments?: PaymentProvider | null;
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -69,6 +76,7 @@ export function createApp({
   authLimits = DEFAULT_AUTH_LIMITS,
   media,
   jobs = false,
+  payments,
 }: AppOptions): Express {
   const deps: ModuleDeps | undefined = db
     ? {
@@ -78,6 +86,15 @@ export function createApp({
         now,
         argon2,
         media: media ?? localMediaStorage(config.mediaDir),
+        payments:
+          payments !== undefined
+            ? payments
+            : config.paymentProvider === "mock"
+              ? createMockProvider({
+                  nodeEnv: config.nodeEnv,
+                  secret: config.mockPaymentSecret,
+                })
+              : null,
       }
     : undefined;
   const app = express();
@@ -130,7 +147,12 @@ export function createApp({
     app.use(contentPublicRouter(deps));
     app.use(cartRouter(deps));
     app.use(enquiriesPublicRouter(deps));
-    if (jobs) startReservationExpiry(deps);
+    app.use(checkoutRouter(deps));
+    app.use(webhooksRouter(deps));
+    if (jobs) {
+      startReservationExpiry(deps);
+      startOrderJobs(deps);
+    }
   }
   for (const router of routers) app.use(router);
 

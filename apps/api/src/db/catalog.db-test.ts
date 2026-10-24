@@ -14,6 +14,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_INDEXES,
+  HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
 } from "./handwritten.ts";
 import { createTestDatabase } from "./testing/database.ts";
@@ -89,13 +90,21 @@ describe("tables and scope", () => {
       "colour",
       "content_block",
       "enquiry",
+      "gst_rule",
       "inventory_level",
       "media_asset",
       "navigation_item",
+      "order",
+      "order_item",
+      "order_status_event",
       "page",
+      "payment",
+      "payment_event",
       "product",
       "product_image",
       "product_variant",
+      "refund",
+      "shipment",
       "size",
       "size_chart",
       "stock_movement",
@@ -105,13 +114,23 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("has no GST or order-link column, and only the Phase 8 search column", async () => {
+  it("has GST and order-link columns only on Phase 15 tables, no customer column, and only the Phase 8 search column", async () => {
     const rows = await q<{ c: string }>(
       `SELECT table_name || '.' || column_name AS c FROM information_schema.columns
        WHERE table_schema = 'public'
-         AND (column_name ~ '(gst|tax|order_id|customer|search)' OR data_type = 'tsvector')`,
+         AND (column_name ~ '(gst|tax|order_id|customer|search)' OR data_type = 'tsvector')
+       ORDER BY 1`,
     );
-    expect(rows).toEqual([{ c: "product.search_vector" }]);
+    expect(rows.map((r) => r.c)).toEqual([
+      "order.tax_paise",
+      "order_item.gst_rate_bps",
+      "order_item.order_id",
+      "order_status_event.order_id",
+      "payment.order_id",
+      "product.search_vector",
+      "shipment.order_id",
+      "stock_reservation.order_id",
+    ]);
   });
 
   it("inserts exactly the six approved sizes and no other rows", async () => {
@@ -126,7 +145,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(25); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13)
+    expect(counts).toHaveLength(33); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables
   });
 });
 
@@ -141,6 +160,14 @@ describe("handwritten objects exist in the live catalogue", () => {
     expect(
       await q(
         `SELECT 1 FROM pg_proc WHERE proname = '${name}' AND pronamespace = 'public'::regnamespace`,
+      ),
+    ).toHaveLength(1);
+  });
+
+  it.each(HANDWRITTEN_SEQUENCES)("sequence %s", async (name) => {
+    expect(
+      await q(
+        `SELECT 1 FROM pg_class WHERE relkind = 'S' AND relname = '${name}' AND relnamespace = 'public'::regnamespace`,
       ),
     ).toHaveLength(1);
   });
@@ -204,7 +231,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(32); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13)
+    expect(expected).toHaveLength(42); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13) + ten Phase 15 keys
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -239,7 +266,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(22); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13)
+    expect(rows).toHaveLength(30); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 
@@ -271,7 +298,8 @@ describe("conventions", () => {
       `SELECT column_name AS c, data_type AS type FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name LIKE '%paise'`,
     );
-    expect(rows.map((r) => r.type)).toEqual(["integer", "integer"]);
+    expect(rows.length).toBeGreaterThan(10);
+    expect(rows.filter((r) => r.type !== "integer")).toEqual([]);
   });
 
   it("admin_role enum values match the shared role list", async () => {

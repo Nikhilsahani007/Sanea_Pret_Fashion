@@ -17,7 +17,12 @@ export function corsPolicy(config: Config): RequestHandler {
       origin: origin === allowed ? allowed : false,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      allowedHeaders: ["Content-Type", "X-CSRF-Token", "Idempotency-Key"],
+      allowedHeaders: [
+        "Content-Type",
+        "X-CSRF-Token",
+        "Idempotency-Key",
+        "X-Order-Token",
+      ],
       exposedHeaders: ["X-Request-Id"],
       maxAge: 600,
     });

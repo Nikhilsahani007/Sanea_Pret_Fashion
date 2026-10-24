@@ -40,7 +40,7 @@ export function testApp(
     config?: Config;
     routers?: Router[];
     db?: Db;
-  } & Pick<AppOptions, "now" | "argon2" | "authLimits"> = {},
+  } & Pick<AppOptions, "now" | "argon2" | "authLimits" | "payments"> = {},
 ) {
   const lines: string[] = [];
   const stream = new Writable({
@@ -59,6 +59,7 @@ export function testApp(
     ...(options.now ? { now: options.now } : {}),
     ...(options.argon2 ? { argon2: options.argon2 } : {}),
     ...(options.authLimits ? { authLimits: options.authLimits } : {}),
+    ...(options.payments !== undefined ? { payments: options.payments } : {}),
   });
   return { app, lines, config };
 }

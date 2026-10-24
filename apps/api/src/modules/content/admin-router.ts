@@ -10,7 +10,6 @@ import {
   navigationItemsSchema,
   richTextSchema,
   slugSchema,
-  storeSettingsSchema,
   toFieldErrors,
   type ContentBlockKey,
   type LinkTarget,
@@ -30,6 +29,11 @@ import {
 import { validate } from "../../platform/http/validate.ts";
 import { recordAudit } from "../audit/record.ts";
 import { requirePermission } from "../auth/middleware.ts";
+import {
+  SETTINGS_GROUPS,
+  readSettings,
+  type SettingsGroup,
+} from "../checkout/settings.ts";
 import type { ModuleDeps } from "../deps.ts";
 import { invalidateContent } from "./cache.ts";
 
@@ -43,7 +47,9 @@ const keyParams = z.object({
 });
 const slugParams = z.object({ slug: slugSchema });
 const menuParams = z.object({ menu: z.enum(NAVIGATION_MENUS) });
-const groupParams = z.object({ group: z.enum(["store"]) });
+const groupParams = z.object({
+  group: z.enum(Object.keys(SETTINGS_GROUPS) as [SettingsGroup]),
+});
 
 // eslint-disable-next-line no-control-regex -- rejects control characters
 const ONE_LINE = /^[^\u0000-\u001f\u007f]*$/;
@@ -477,38 +483,46 @@ export function contentAdminRouter(deps: ModuleDeps): Router {
   );
 
   // ── Settings ──────────────────────────────────────────────────────────────
+  // store, shipping and cod (Phase 15): Owner and Manager.
   router.get(
     `${S}/:group`,
     requirePermission("settings.store"),
     validate({ params: groupParams }),
     handle(async (_req, res) => {
-      const row = await deps.db.storeSetting.findUnique({
-        where: { key: "store" },
-      });
-      res.json({ settings: storeSettingsSchema.parse(row?.value ?? {}) });
+      const { params } = input<unknown, { group: SettingsGroup }>(res);
+      res.json({ settings: await readSettings(deps.db, params.group) });
     }),
   );
 
   router.put(
     `${S}/:group`,
     requirePermission("settings.store"),
-    validate({ params: groupParams, body: storeSettingsSchema }),
+    validate({ params: groupParams }),
     handle(async (req, res) => {
-      const { body } = input<z.infer<typeof storeSettingsSchema>>(res);
+      const { params } = input<unknown, { group: SettingsGroup }>(res);
+      const parsed = SETTINGS_GROUPS[params.group].safeParse(req.body);
+      if (!parsed.success)
+        throw new AppError(
+          "VALIDATION_FAILED",
+          toFieldErrors(parsed.error).map((e) => ({
+            ...e,
+            path: e.path ? `body.${e.path}` : "body",
+          })),
+        );
+      const body = parsed.data as Prisma.InputJsonObject;
+      const key = params.group;
       const admin = adminContext(res)!.admin;
       await deps.db.$transaction(async (tx) => {
-        const before = await tx.storeSetting.findUnique({
-          where: { key: "store" },
-        });
+        const before = await tx.storeSetting.findUnique({ where: { key } });
         await tx.storeSetting.upsert({
-          where: { key: "store" },
-          create: { key: "store", value: body, updatedByAdminId: admin.id },
+          where: { key },
+          create: { key, value: body, updatedByAdminId: admin.id },
           update: { value: body, updatedByAdminId: admin.id },
         });
         await audit(tx, req.ip, res, {
-          action: "settings.store_updated",
+          action: `settings.${key}_updated`,
           entityType: "store_setting",
-          entityId: "store",
+          entityId: key,
           before: (before?.value ?? null) as Prisma.InputJsonValue,
           after: body,
         });

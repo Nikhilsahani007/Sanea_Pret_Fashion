@@ -6,7 +6,8 @@
 // is listed in apps/api/src/db/handwritten.ts and checked by tests.
 //
 // Phase 6 tables, the Phase 7 admin-auth tables (database-design.md §6), the
-// Phase 8 search column, the Phase 11 guest cart and the Phase 13 enquiries.
+// Phase 8 search column, the Phase 11 guest cart, the Phase 13 enquiries and
+// the Phase 15 orders and payments.
 
 generator client {
   provider               = "prisma-client"
@@ -97,6 +98,63 @@ enum ContentBlockType {
   FOOTER
 
   @@map("content_block_type")
+}
+
+/// Same values as `OrderStatus` in @sanea/shared (parity test).
+enum OrderStatus {
+  PENDING_PAYMENT
+  PENDING_CONFIRMATION
+  CONFIRMED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURN_TO_ORIGIN
+  RETURN_REQUESTED
+  RETURNED
+
+  @@map("order_status")
+}
+
+enum PaymentMethod {
+  PREPAID
+  COD
+
+  @@map("payment_method")
+}
+
+/// system-design.md §6.2.
+enum PaymentStatus {
+  CREATED
+  AUTHORISED
+  CAPTURED
+  FAILED
+  EXPIRED
+  REFUND_PENDING
+  REFUNDED
+  REFUND_FAILED
+  PENDING
+  COLLECTED
+  NOT_COLLECTED
+
+  @@map("payment_status")
+}
+
+enum ActorType {
+  SYSTEM
+  ADMIN
+  CUSTOMER
+  PROVIDER
+
+  @@map("actor_type")
+}
+
+enum RefundStatus {
+  PENDING
+  REFUNDED
+  FAILED
+
+  @@map("refund_status")
 }
 
 enum EnquiryStatus {
@@ -275,6 +333,7 @@ model ProductVariant {
   movements    StockMovement[]
   reservations StockReservation[]
   cartItems    CartItem[]
+  orderItems   OrderItem[]
   enquiries    Enquiry[]
   waClicks     WhatsAppClick[]
 
@@ -375,10 +434,15 @@ model StockReservation {
   createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
+  /// Set when the hold belongs to an order (Phase 15, D-054).
+  orderId String? @map("order_id") @db.Uuid
+
   variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  order   Order?         @relation(fields: [orderId], references: [id], onDelete: Restrict)
 
   @@index([status, expiresAt])
   @@index([variantId])
+  @@index([orderId])
   @@map("stock_reservation")
 }
 
@@ -413,6 +477,197 @@ model CartItem {
   @@id([cartId, variantId])
   @@index([variantId])
   @@map("cart_item")
+}
+
+// ─── Orders and payments (Phase 15) ─────────────────────────────────────────
+
+/// A guest order (database-design.md §3.4). Contact and addresses are
+/// snapshots. Totals in paise; total = subtotal − discount + shipping + COD
+/// fee (CHECK). Prices include GST, so `taxPaise` is the GST contained in the
+/// total, computed from the effective GST rules (0 while none are entered).
+model Order {
+  id              String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  /// SP-YYMM-NNNNNN (D-115).
+  orderNumber     String        @unique @map("order_number")
+  email           String        @db.Citext
+  phone           String
+  shippingAddress Json          @map("shipping_address")
+  billingAddress  Json          @map("billing_address")
+  status          OrderStatus
+  needsAttention  Boolean       @default(false) @map("needs_attention")
+  attentionReason String?       @map("attention_reason")
+  paymentMethod   PaymentMethod @map("payment_method")
+  subtotalPaise   Int           @map("subtotal_paise")
+  discountPaise   Int           @default(0) @map("discount_paise")
+  shippingPaise   Int           @map("shipping_paise")
+  codFeePaise     Int           @default(0) @map("cod_fee_paise")
+  taxPaise        Int           @default(0) @map("tax_paise")
+  totalPaise      Int           @map("total_paise")
+  currency        String        @default("INR")
+  /// Client Idempotency-Key and a hash of the request it came with.
+  idempotencyKey  String        @unique @map("idempotency_key") @db.Uuid
+  requestHash     String        @map("request_hash")
+  /// SHA-256 of the guest's order access token (status page).
+  accessTokenHash Bytes         @unique @map("access_token_hash")
+  notes           String?
+  placedAt        DateTime      @default(now()) @map("placed_at") @db.Timestamptz(3)
+  confirmedAt     DateTime?     @map("confirmed_at") @db.Timestamptz(3)
+  cancelledAt     DateTime?     @map("cancelled_at") @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  items        OrderItem[]
+  events       OrderStatusEvent[]
+  payments     Payment[]
+  shipments    Shipment[]
+  reservations StockReservation[]
+
+  @@index([status, placedAt])
+  @@index([needsAttention])
+  @@index([placedAt])
+  @@map("order")
+}
+
+/// Snapshot of what was bought, so the order stays right if the product changes.
+model OrderItem {
+  id             String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId        String  @map("order_id") @db.Uuid
+  variantId      String  @map("variant_id") @db.Uuid
+  productName    String  @map("product_name")
+  variantLabel   String  @map("variant_label")
+  sku            String
+  unitPricePaise Int     @map("unit_price_paise")
+  quantity       Int
+  lineTotalPaise Int     @map("line_total_paise")
+  /// GST rate in basis points from the effective rule, if one exists (D-033).
+  gstRateBps     Int?    @map("gst_rate_bps")
+  hsnCode        String? @map("hsn_code")
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_item")
+}
+
+/// Every status change, with who made it (system-design.md §5).
+model OrderStatusEvent {
+  id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId    String       @map("order_id") @db.Uuid
+  fromStatus OrderStatus? @map("from_status")
+  toStatus   OrderStatus  @map("to_status")
+  actorType  ActorType    @map("actor_type")
+  actorId    String?      @map("actor_id")
+  note       String?
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+  @@map("order_status_event")
+}
+
+model Shipment {
+  id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId        String    @map("order_id") @db.Uuid
+  courierName    String    @map("courier_name")
+  trackingNumber String    @map("tracking_number")
+  trackingUrl    String?   @map("tracking_url")
+  shippedAt      DateTime  @default(now()) @map("shipped_at") @db.Timestamptz(3)
+  deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(3)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("shipment")
+}
+
+model Payment {
+  id                String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId           String        @map("order_id") @db.Uuid
+  method            PaymentMethod
+  /// `mock` until a live gateway is approved (D-107).
+  provider          String
+  providerPaymentId String?       @map("provider_payment_id")
+  status            PaymentStatus
+  amountPaise       Int           @map("amount_paise")
+  failureCode       String?       @map("failure_code")
+  failureMessage    String?       @map("failure_message")
+  /// What the storefront needs to open the provider's payment page; no secrets.
+  clientPayload     Json?         @map("client_payload")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  events  PaymentEvent[]
+  refunds Refund[]
+
+  @@unique([provider, providerPaymentId])
+  @@index([orderId])
+  @@index([status, createdAt])
+  @@map("payment")
+}
+
+/// Raw provider webhooks, stored before processing; one row per provider event.
+model PaymentEvent {
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  paymentId       String?   @map("payment_id") @db.Uuid
+  provider        String
+  providerEventId String    @map("provider_event_id")
+  type            String
+  rawPayload      Json      @map("raw_payload")
+  receivedAt      DateTime  @default(now()) @map("received_at") @db.Timestamptz(3)
+  processedAt     DateTime? @map("processed_at") @db.Timestamptz(3)
+  outcome         String?
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, providerEventId])
+  @@index([paymentId])
+  @@map("payment_event")
+}
+
+model Refund {
+  id               String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  paymentId        String       @map("payment_id") @db.Uuid
+  amountPaise      Int          @map("amount_paise")
+  reason           String
+  status           RefundStatus @default(PENDING)
+  providerRefundId String?      @map("provider_refund_id")
+  /// Null for refunds the system records itself (SR-10).
+  createdByAdminId String?      @map("created_by_admin_id") @db.Uuid
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  payment   Payment    @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  createdBy AdminUser? @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId])
+  @@index([createdByAdminId])
+  @@map("refund")
+}
+
+/// Effective-dated GST rules (D-030, D-033). No rates are entered by the
+/// system; the Owner enters them after accountant verification (B-14). A rule
+/// matches by HSN prefix (empty = any) and by unit price at or below / above
+/// a threshold.
+model GstRule {
+  id               String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  hsnPrefix        String    @default("") @map("hsn_prefix")
+  /// Unit price threshold in paise; null means one rate for all prices.
+  thresholdPaise   Int?      @map("threshold_paise")
+  rateBpsAtOrBelow Int       @map("rate_bps_at_or_below")
+  rateBpsAbove     Int?      @map("rate_bps_above")
+  effectiveFrom    DateTime  @map("effective_from") @db.Timestamptz(3)
+  effectiveTo      DateTime? @map("effective_to") @db.Timestamptz(3)
+  note             String?
+  createdByAdminId String    @map("created_by_admin_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  createdBy AdminUser @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  @@index([effectiveFrom])
+  @@index([createdByAdminId])
+  @@map("gst_rule")
 }
 
 // ─── Enquiries (Phase 13) ────────────────────────────────────────────────────
@@ -501,6 +756,8 @@ model AdminUser {
   recoveryCodes   AdminRecoveryCode[]
   invitesSent     AdminInvite[]       @relation("InviteSentBy")
   enquiries       Enquiry[]
+  refunds         Refund[]
+  gstRules        GstRule[]
   resetInvites    AdminInvite[]       @relation("InviteForAdmin")
 
   @@map("admin_user")

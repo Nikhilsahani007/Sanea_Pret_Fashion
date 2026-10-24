@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
   HANDWRITTEN_INDEXES,
+  HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
 } from "./handwritten.ts";
 
@@ -58,6 +59,10 @@ describe("migration SQL contains every handwritten object", () => {
     expect(sql).toMatch(
       new RegExp(`ALTER TABLE "${table}" ADD CONSTRAINT "${name}"\\s+CHECK`),
     );
+  });
+
+  it.each(HANDWRITTEN_SEQUENCES)("sequence %s", (name) => {
+    expect(sql).toContain(`CREATE SEQUENCE "${name}"`);
   });
 
   it.each(HANDWRITTEN_TRIGGERS)(
@@ -123,6 +128,14 @@ describe("Phase 6 scope and conventions", () => {
         "inventory_level",
         "media_asset",
         "navigation_item",
+        "gst_rule",
+        "order",
+        "order_item",
+        "order_status_event",
+        "payment",
+        "payment_event",
+        "refund",
+        "shipment",
         "page",
         "product",
         "product_image",
@@ -146,7 +159,15 @@ describe("Phase 6 scope and conventions", () => {
       )
       .join("\n");
     expect(early).not.toMatch(/gst|order_id|search_vector|tsvector|pg_trgm/i);
-    expect(sql).not.toMatch(/gst|order_id/i);
+    // Order links and the GST rules table arrive in Phase 15, with no rates (B-14).
+    const beforeOrders = dirs
+      .filter((d) => d < "20261024180000")
+      .map((d) =>
+        readFileSync(new URL(`${d}/migration.sql`, migrations), "utf8"),
+      )
+      .join("\n");
+    expect(beforeOrders).not.toMatch(/gst|order_id/i);
+    expect(sql).not.toMatch(/INSERT INTO "gst_rule"/);
   });
 
   it("uses snake_case for every table and column (D-056)", () => {
@@ -171,8 +192,19 @@ describe("Phase 6 scope and conventions", () => {
   it("stores money as 32-bit integer paise", () => {
     const money = [...sql.matchAll(/^\s+"([a-z_]*paise)" ([A-Z]+)/gm)];
     expect(money.map((m) => m[1]).sort()).toEqual([
+      "amount_paise", // payment
+      "amount_paise", // refund
+      "cod_fee_paise",
       "compare_at_price_paise",
+      "discount_paise",
+      "line_total_paise",
       "price_paise",
+      "shipping_paise",
+      "subtotal_paise",
+      "tax_paise",
+      "threshold_paise",
+      "total_paise",
+      "unit_price_paise",
     ]);
     for (const m of money) expect(m[2]).toBe("INTEGER");
   });

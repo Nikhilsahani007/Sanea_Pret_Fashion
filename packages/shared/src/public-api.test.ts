@@ -56,6 +56,17 @@ const PUBLIC_RUNTIME_EXPORTS = [
   "sumPaise",
   "toFieldErrors",
   "validationMessage",
+  "DeliveryMethod",
+  "checkoutContactSchema",
+  "checkoutQuoteSchema",
+  "codSettingsSchema",
+  "deliveryMethodSchema",
+  "placeOrderSchema",
+  "shippingSettingsSchema",
+  "ORDER_NUMBER_PATTERN",
+  "ORDER_TRANSITIONS",
+  "canTransition",
+  "nextStatuses",
 ];
 
 describe("@sanea/shared public API", () => {

@@ -55,7 +55,7 @@ export function normaliseLines(
 export async function reserve(
   tx: Tx,
   lines: readonly ReservationLine[],
-  options: { expiresAt: Date; now: Date },
+  options: { expiresAt: Date; now: Date; orderId?: string },
 ): Promise<{ reservationIds: string[] }> {
   const ordered = normaliseLines(lines);
   await releaseExpired(
@@ -99,6 +99,7 @@ export async function reserve(
         quantity: line.quantity,
         expiresAt: options.expiresAt,
         createdAt: options.now,
+        orderId: options.orderId ?? null,
       },
     });
     await tx.stockMovement.create({
@@ -116,17 +117,24 @@ export async function reserve(
   return { reservationIds };
 }
 
-/** Returns active reservations to available stock (SR-8, SR-9). */
+/**
+ * Returns held units to available stock (SR-8, SR-9): active holds, and with
+ * `includeConverted`, order allocations that have not shipped.
+ */
 async function endReservations(
   tx: Tx,
   where: Prisma.StockReservationWhereInput,
   status: "RELEASED" | "EXPIRED",
   actorAdminId?: string,
+  includeConverted = false,
 ) {
+  const statuses: ("ACTIVE" | "CONVERTED")[] = includeConverted
+    ? ["ACTIVE", "CONVERTED"]
+    : ["ACTIVE"];
   // Lock the rows so a concurrent release cannot count them twice.
   const ids = (
     await tx.stockReservation.findMany({
-      where: { ...where, status: "ACTIVE" },
+      where: { ...where, status: { in: statuses } },
       select: { id: true },
       orderBy: { variantId: "asc" },
     })
@@ -136,7 +144,7 @@ async function endReservations(
     { id: string; variant_id: string; quantity: number }[]
   >`
     SELECT id::text, variant_id::text, quantity FROM "stock_reservation"
-    WHERE id = ANY(${ids}::uuid[]) AND status = 'ACTIVE' ORDER BY variant_id FOR UPDATE`;
+    WHERE id = ANY(${ids}::uuid[]) AND status::text = ANY(${statuses}::text[]) ORDER BY variant_id FOR UPDATE`;
   for (const r of locked) {
     await tx.$executeRaw`UPDATE "inventory_level" SET "reserved" = "reserved" - ${r.quantity}, "version" = "version" + 1 WHERE "variant_id" = ${r.variant_id}::uuid`;
     await tx.stockReservation.update({
@@ -171,6 +179,56 @@ export function release(
     "RELEASED",
     actorAdminId,
   );
+}
+
+/** Order holds become allocations (SR-5, SR-6): `reserved` stays until dispatch. */
+export async function convert(tx: Tx, orderId: string) {
+  const { count } = await tx.stockReservation.updateMany({
+    where: { orderId, status: "ACTIVE" },
+    data: { status: "CONVERTED", expiresAt: null },
+  });
+  return count;
+}
+
+/** Cancellation before dispatch (SR-8): every hold and allocation of the order is released. */
+export function releaseOrder(tx: Tx, orderId: string, actorAdminId?: string) {
+  return endReservations(tx, { orderId }, "RELEASED", actorAdminId, true);
+}
+
+/**
+ * Dispatch (SR-7): `onHand` and `reserved` both fall by each allocation. The
+ * allocation is then closed (RELEASED) so a later cancel cannot release it
+ * again; the SHIPPED movement records why.
+ */
+export async function shipOrder(
+  tx: Tx,
+  orderId: string,
+  actorAdminId?: string,
+) {
+  const locked = await tx.$queryRaw<
+    { id: string; variant_id: string; quantity: number }[]
+  >`
+    SELECT id::text, variant_id::text, quantity FROM "stock_reservation"
+    WHERE order_id = ${orderId}::uuid AND status = 'CONVERTED' ORDER BY variant_id FOR UPDATE`;
+  for (const r of locked) {
+    await tx.$executeRaw`UPDATE "inventory_level" SET "on_hand" = "on_hand" - ${r.quantity}, "reserved" = "reserved" - ${r.quantity}, "version" = "version" + 1 WHERE "variant_id" = ${r.variant_id}::uuid`;
+    await tx.stockReservation.update({
+      where: { id: r.id },
+      data: { status: "RELEASED" },
+    });
+    await tx.stockMovement.create({
+      data: {
+        variantId: r.variant_id,
+        type: "SHIPPED",
+        onHandDelta: -r.quantity,
+        reservedDelta: -r.quantity,
+        referenceType: "ORDER",
+        referenceId: orderId,
+        actorAdminId: actorAdminId ?? null,
+      },
+    });
+  }
+  return locked.length;
 }
 
 /** Expired holds go back to stock; with `variantIds`, only those variants (lazy release on read). */

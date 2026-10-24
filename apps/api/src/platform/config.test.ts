@@ -39,6 +39,8 @@ describe("loadConfig()", () => {
       ipHashKey: "i".repeat(32),
       mediaDir: "var/media",
       mediaPublicBaseUrl: "/media",
+      paymentProvider: "mock",
+      mockPaymentSecret: null,
     });
   });
 
@@ -106,6 +108,26 @@ describe("loadConfig()", () => {
         MEDIA_PUBLIC_BASE_URL: "https://media.saneapret.example",
       }),
     ).toEqual([]);
+  });
+
+  it("refuses the mock payment provider in production and defaults to none there", () => {
+    const prod = {
+      ...valid,
+      NODE_ENV: "production",
+      STOREFRONT_ORIGIN: "https://saneapret.example",
+      ADMIN_ORIGIN: "https://admin.saneapret.example",
+      MEDIA_PUBLIC_BASE_URL: "https://media.saneapret.example",
+    };
+    expect(problems({ ...prod, PAYMENT_PROVIDER: "mock" })).toEqual([
+      "PAYMENT_PROVIDER mock is not allowed in production",
+    ]);
+    expect(loadConfig(prod).paymentProvider).toBe("none");
+    expect(problems({ ...valid, PAYMENT_PROVIDER: "razorpay" })).toHaveLength(
+      1,
+    );
+    expect(problems({ ...valid, MOCK_PAYMENT_SECRET: "short" })).toHaveLength(
+      1,
+    );
   });
 
   it("validates the media URL prefix", () => {

@@ -15,6 +15,7 @@ import {
   testConfig,
 } from "../../platform/testing.ts";
 import { CSRF_COOKIE } from "../../platform/http/csrf.ts";
+import type { PaymentProvider } from "../payments/provider.ts";
 import { hashPassword, type Argon2Params } from "./password.ts";
 import type { AuthLimits } from "./router.ts";
 import { encryptSecret, sha256 } from "./secrets.ts";
@@ -49,6 +50,8 @@ export async function adminHarness(
     routers?: Router[];
     /** Extra environment values, for example TRUST_PROXY for per-IP limits. */
     env?: Record<string, string>;
+    /** Payment provider (Phase 15 tests pass their own mock to drive it). */
+    payments?: PaymentProvider | null;
   } = {},
 ) {
   const { db, drop } = await createTestDatabase();
@@ -66,6 +69,7 @@ export async function adminHarness(
     argon2: FAST_ARGON2,
     authLimits: options.authLimits ?? HIGH_LIMITS,
     ...(options.routers ? { routers: options.routers } : {}),
+    ...(options.payments !== undefined ? { payments: options.payments } : {}),
   });
 
   /** A double-submit CSRF pair for requests without a session. */

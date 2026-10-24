@@ -79,6 +79,23 @@ Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 | `richTextSchema`, `richTextBlockSchema`, `RichText`, `RichTextBlock` | schemas, types | `{ blocks }` of `paragraph`, `heading` (level 2 or 3), `list`, `link` and `image`; strict objects; no HTML field exists; control characters rejected |
 | `safeHrefSchema` | schema | Site-relative paths, `https:` URLs, `mailto:` and `tel:` only; rejects `javascript:`, `data:`, protocol-relative and `http:` |
 
+### Checkout (Phase 15)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `shippingSettingsSchema`, `ShippingSettings` | schema, type | Admin settings group `shipping` (OD-08): flat fee, optional free-shipping threshold, delivery estimate text; all off by default |
+| `codSettingsSchema`, `CodSettings` | schema, type | Admin settings group `cod` (OD-07): on/off, maximum order value (default ₹15,000), fee (default ₹0), excluded PIN prefixes, refusal limit (off), confirmation window (48 hours). Defaults are proposals (B-07) |
+| `checkoutContactSchema`, `checkoutQuoteSchema`, `placeOrderSchema`, `PlaceOrderInput` | schemas, type | Bodies of `POST /checkout/quote` and `POST /checkout/orders`; addresses use `addressSchema` |
+| `DeliveryMethod`, `deliveryMethodSchema` | constant, schema | `STANDARD` only in release one |
+| `CodIneligibleReason` | type | `COD_DISABLED`, `OVER_LIMIT`, `PIN_CODE_EXCLUDED`, `REFUSAL_LIMIT` |
+
+### Orders (Phase 15)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `ORDER_TRANSITIONS`, `canTransition(from, to, actor)`, `nextStatuses(from, actor)` | constant, functions | The allowed-transitions table of `system-design.md` §5 with the staff roles for each move; `SYSTEM` may make every listed move |
+| `ORDER_NUMBER_PATTERN` | constant | `SP-YYMM-NNNNNN` (D-115) |
+
 ### Validation
 
 | Export | Kind | Description |
@@ -124,4 +141,4 @@ Six ASCII digits, first digit 1–9. Outer whitespace trimmed; one ASCII space a
 Schemas put a stable code in each issue's `message`; `toFieldErrors` adds the English message. Codes: `REQUIRED`, `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD`, `INVALID`, `MONEY_NOT_INTEGER`, `MONEY_UNSAFE`, `MONEY_NEGATIVE`, `MONEY_NOT_POSITIVE`, `MONEY_ABOVE_LIMIT`, `RUPEES_INVALID`, `RUPEES_TOO_MANY_DECIMALS`, `RUPEES_OUT_OF_RANGE`, `PHONE_INVALID`, `PHONE_NOT_MOBILE`, `PIN_CODE_INVALID`, `STATE_INVALID`, `TEXT_INVALID_CHARACTERS`. Built-in Zod issues without our code map to `INVALID_TYPE`, `TOO_SHORT`, `TOO_LONG`, `INVALID_OPTION`, `UNKNOWN_FIELD` or `INVALID`. Non-finite numbers (`NaN`, `Infinity`) are `INVALID_TYPE`.
 
 ## Not in this package (later phases)
-API routes, database schemas, GST and invoicing, catalogue, inventory, checkout, payments, UI, styling, infrastructure.
+API routes, database schemas, GST rates and invoicing, payment providers, UI, styling, infrastructure.

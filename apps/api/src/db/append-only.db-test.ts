@@ -29,8 +29,14 @@ beforeAll(async () => {
     `INSERT INTO "audit_log" ("actor_admin_id", "action", "entity_type", "entity_id", "after")
      VALUES ('${actor}', 'product.update', 'product', 'TEST', '{"name":"TEST"}') RETURNING "id"`,
   );
+  const order = await fx.order(db);
+  const [e] = await db.$queryRawUnsafe<{ id: string }[]>(
+    `INSERT INTO "order_status_event" ("order_id", "to_status", "actor_type", "note")
+     VALUES ('${order}', 'PENDING_CONFIRMATION', 'SYSTEM', 'TEST placed') RETURNING "id"`,
+  );
   ids.stock_movement = m!.id;
   ids.audit_log = a!.id;
+  ids.order_status_event = e!.id;
 });
 afterAll(() => drop());
 
@@ -40,8 +46,11 @@ describe.each(APPEND_ONLY_TABLES)("%s", (table) => {
   it("rejects UPDATE, DELETE and TRUNCATE with P0001, leaving rows intact", async () => {
     const before = await snapshot(table);
     expect(before).toHaveLength(1);
-    const column =
-      table === "audit_log" ? `"action" = 'tampered'` : `"reason" = 'tampered'`;
+    const column = {
+      audit_log: `"action" = 'tampered'`,
+      stock_movement: `"reason" = 'tampered'`,
+      order_status_event: `"note" = 'tampered'`,
+    }[table];
     await expectCode(
       db,
       `UPDATE "${table}" SET ${column}`,
@@ -70,10 +79,11 @@ describe.each(APPEND_ONLY_TABLES)("%s", (table) => {
     const [actor] = await db.$queryRawUnsafe<{ id: string }[]>(
       `SELECT "id" FROM "admin_user" LIMIT 1`,
     );
-    const sql =
-      table === "audit_log"
-        ? `INSERT INTO "audit_log" ("actor_admin_id", "action", "entity_type") VALUES ('${actor!.id}', 'settings.update', 'store_setting')`
-        : `INSERT INTO "stock_movement" ("variant_id", "type", "on_hand_delta") SELECT "variant_id", 'RECEIVED', 1 FROM "stock_movement" LIMIT 1`;
+    const sql = {
+      audit_log: `INSERT INTO "audit_log" ("actor_admin_id", "action", "entity_type") VALUES ('${actor!.id}', 'settings.update', 'store_setting')`,
+      stock_movement: `INSERT INTO "stock_movement" ("variant_id", "type", "on_hand_delta") SELECT "variant_id", 'RECEIVED', 1 FROM "stock_movement" LIMIT 1`,
+      order_status_event: `INSERT INTO "order_status_event" ("order_id", "from_status", "to_status", "actor_type") SELECT "order_id", 'PENDING_CONFIRMATION', 'CONFIRMED', 'ADMIN' FROM "order_status_event" LIMIT 1`,
+    }[table];
     await db.$executeRawUnsafe(sql);
     expect((await snapshot(table)).length).toBe(before + 1);
   });

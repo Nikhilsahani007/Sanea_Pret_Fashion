@@ -80,6 +80,31 @@ export type {
   StoreSettings,
 } from "./content/blocks.ts";
 
+// Checkout (system-design.md §4)
+export {
+  DeliveryMethod,
+  checkoutContactSchema,
+  checkoutQuoteSchema,
+  codSettingsSchema,
+  deliveryMethodSchema,
+  placeOrderSchema,
+  shippingSettingsSchema,
+} from "./checkout/checkout.ts";
+export type {
+  CodIneligibleReason,
+  CodSettings,
+  PlaceOrderInput,
+  ShippingSettings,
+} from "./checkout/checkout.ts";
+
+// Orders (system-design.md §5)
+export {
+  ORDER_NUMBER_PATTERN,
+  ORDER_TRANSITIONS,
+  canTransition,
+  nextStatuses,
+} from "./orders/transitions.ts";
+
 // Validation
 export {
   VALIDATION_CODES,

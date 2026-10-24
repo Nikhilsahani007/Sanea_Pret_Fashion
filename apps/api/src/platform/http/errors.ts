@@ -39,6 +39,35 @@ export const API_ERROR_CODES = {
     status: 409,
     message: "This change conflicts with the current state.",
   },
+  // Phase 15 checkout, orders and payments.
+  PRICE_CHANGED: {
+    status: 409,
+    message: "The total has changed. Check the new total and try again.",
+  },
+  CART_NOT_READY: {
+    status: 409,
+    message: "Your bag has changed. Check it and try again.",
+  },
+  INVALID_TRANSITION: {
+    status: 409,
+    message: "The order cannot move to that status from its current status.",
+  },
+  IDEMPOTENCY_CONFLICT: {
+    status: 409,
+    message: "This request key was already used for a different request.",
+  },
+  COD_NOT_AVAILABLE: {
+    status: 422,
+    message: "Cash on delivery is not available for this order.",
+  },
+  PAYMENT_METHOD_UNAVAILABLE: {
+    status: 422,
+    message: "This payment method is not available.",
+  },
+  WEBHOOK_INVALID: {
+    status: 400,
+    message: "The webhook could not be verified.",
+  },
   PAYLOAD_TOO_LARGE: { status: 413, message: "The request body is too large." },
   UNSUPPORTED_MEDIA_TYPE: {
     status: 415,

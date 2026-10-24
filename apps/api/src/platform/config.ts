@@ -50,6 +50,21 @@ const schema = z
           "MEDIA_PUBLIC_BASE_URL must be a path such as /media or an https URL without a trailing slash",
       })
       .default("/media"),
+    // Phase 15 payments (system-design.md §6.1, D-107). `mock` simulates a
+    // gateway in development and tests and is refused in production; `none`
+    // offers no online payment. Live providers arrive in Phase 18 (OD-06).
+    PAYMENT_PROVIDER: z
+      .enum(["none", "mock"], {
+        error: "PAYMENT_PROVIDER must be none or mock",
+      })
+      .optional(),
+    // Signs mock webhooks. Optional: a random per-process secret is used
+    // when absent, which is enough because the mock signs and verifies in
+    // the same process.
+    MOCK_PAYMENT_SECRET: z
+      .string()
+      .min(32, { error: "MOCK_PAYMENT_SECRET must be at least 32 characters" })
+      .optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
@@ -61,6 +76,13 @@ const schema = z
           message: `${key} must use https in production`,
         });
       }
+    }
+    if (env.PAYMENT_PROVIDER === "mock") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["PAYMENT_PROVIDER"],
+        message: "PAYMENT_PROVIDER mock is not allowed in production",
+      });
     }
     // The API never serves media in production (security-design.md §6).
     if (!env.MEDIA_PUBLIC_BASE_URL.startsWith("https://")) {
@@ -87,6 +109,8 @@ export type Config = {
   readonly ipHashKey: string;
   readonly mediaDir: string;
   readonly mediaPublicBaseUrl: string;
+  readonly paymentProvider: "none" | "mock";
+  readonly mockPaymentSecret: string | null;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -132,5 +156,8 @@ export function loadConfig(
     ipHashKey: e.IP_HASH_KEY,
     mediaDir: e.MEDIA_DIR,
     mediaPublicBaseUrl: e.MEDIA_PUBLIC_BASE_URL,
+    paymentProvider:
+      e.PAYMENT_PROVIDER ?? (e.NODE_ENV === "production" ? "none" : "mock"),
+    mockPaymentSecret: e.MOCK_PAYMENT_SECRET ?? null,
   };
 }
