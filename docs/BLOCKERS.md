@@ -17,6 +17,8 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
 | B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
+| B-15 | No approved tool can measure the Phase 17 targets (Lighthouse performance ≥ 85, accessibility ≥ 95); `@axe-core/playwright` and Lighthouse are outside the approved package list (D-165). | Phase 17 gate | You | Structure smoke test and keyboard tests only; numbers not claimed. |
+| B-16 | Fulfilment's right to cancel unconfirmed COD orders differs between `system-design.md` §5 and `security-design.md` §4 (D-160). | Phase 16 gate | You | Implemented as system-design §5 (Fulfilment may cancel before confirmation). |
 
 ## Environment risks (not blocking yet)
 
@@ -24,6 +26,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 |----|------|----------|--------|
 | E-02 | A native Windows PostgreSQL 18 service (`postgresql-x64-18`) runs on this machine and listens on port 5432 on all interfaces. | `Get-NetTCPConnection` and `Get-Service`, 2026-10-19. | The Compose database uses `127.0.0.1:5433` instead. The native service is yours and was not changed; consider limiting it to localhost if you do not need it on the network. |
 | E-03 | Panchang's "É" glyph is unchecked (OD-15). | Not tested. | The wordmark may need another face (Phase 11). |
+| E-05 | The build container's `pg_dump` is version 16 and cannot dump the PostgreSQL 18 test server, so the backup restore test could not run here. | `pg_dump: error: aborting because of server version mismatch`, 2026-10-24. | Restore test must run on the real environment (Phase 19). |
 | E-04 | `skills-lock.json` records only 2 of the 9 project skills. | Lock file lists `design-motion-principles` and `design-taste-frontend` only. | Source and version of the other 7 cannot be reproduced. |
 
 ## Resolved
