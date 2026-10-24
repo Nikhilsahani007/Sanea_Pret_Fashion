@@ -32,6 +32,8 @@ const CASCADES = new Set([
   "admin_invite.admin_user_id",
   "admin_recovery_code.admin_user_id",
   "admin_session.admin_user_id",
+  // Phase 11: a cart's lines go with the cart.
+  "cart_item.cart_id",
   "collection_product.collection_id",
   "collection_product.product_id",
   "product_image.product_id",
@@ -79,6 +81,8 @@ describe("tables and scope", () => {
       "admin_session",
       "admin_user",
       "audit_log",
+      "cart",
+      "cart_item",
       "category",
       "collection",
       "collection_product",
@@ -120,7 +124,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(21);
+    expect(counts).toHaveLength(23); // 21 + cart, cart_item (Phase 11)
   });
 });
 
@@ -198,7 +202,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(25);
+    expect(expected).toHaveLength(27); // 25 + two cart_item keys (Phase 11)
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -233,7 +237,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(19);
+    expect(rows).toHaveLength(20); // 19 + cart (Phase 11)
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

@@ -1,0 +1,56 @@
+.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(100%, 28rem);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: var(--sp-ground);
+  color: var(--sp-ink);
+  box-shadow: -16px 0 48px color-mix(in srgb, var(--sp-ink) 22%, transparent);
+}
+.drawer[open] {
+  display: flex;
+  flex-direction: column;
+  animation: enter var(--sp-duration-drawer) var(--sp-ease-out);
+}
+.drawer::backdrop {
+  background: color-mix(in srgb, var(--sp-ink) 40%, transparent);
+}
+@keyframes enter {
+  from {
+    transform: translateX(100%);
+  }
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-space-4) var(--sp-space-5);
+}
+.head h2 {
+  font-size: var(--sp-step-lead);
+}
+.close {
+  display: inline-grid;
+  place-items: center;
+  width: var(--sp-tap);
+  height: var(--sp-tap);
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--sp-space-5);
+}
+.foot {
+  display: grid;
+  gap: var(--sp-space-3);
+  padding: var(--sp-space-5);
+  background: var(--sp-surface);
+}

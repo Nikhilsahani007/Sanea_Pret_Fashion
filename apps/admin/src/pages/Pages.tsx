@@ -88,7 +88,11 @@ export function Pages() {
                     {p.title}
                   </Button>
                 </td>
-                <td>/pages/{p.slug}</td>
+                <td>
+                  {p.slug.startsWith("policy-")
+                    ? `/policies/${p.slug.slice(7)}`
+                    : `/${p.slug}`}
+                </td>
                 <td>
                   <Status value={p.status} />
                   {p.requiresVerification ? (
@@ -124,7 +128,7 @@ export function Pages() {
             label="Address"
             name="slug"
             required
-            hint={`Lowercase words with hyphens, for example “about”. The Rehma Foundation page is “${REHMA}”.`}
+            hint={`Lowercase words with hyphens, for example “about”. Policies start with “policy-”, for example “policy-returns”. The Rehma Foundation page is “${REHMA}”.`}
           />
           <Button type="submit" busy={create.isPending}>
             Create

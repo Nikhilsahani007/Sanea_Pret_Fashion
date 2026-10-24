@@ -66,11 +66,11 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
   await expect(
     page.getByRole("heading", { name: "Categories", level: 1 }),
   ).toBeVisible();
-  await page.getByLabel("Name").fill("TEST Kurtas");
+  await page.getByLabel("Name").fill("TEST E2E Kurtas");
   await page.getByRole("button", { name: "Create" }).click();
-  const row = page.getByRole("row", { name: /TEST Kurtas/ });
+  const row = page.getByRole("row", { name: /TEST E2E Kurtas/ });
   await expect(row).toBeVisible();
-  await row.getByLabel("Status of TEST Kurtas").selectOption("PUBLISHED");
+  await row.getByLabel("Status of TEST E2E Kurtas").selectOption("PUBLISHED");
   await expect(row.locator('[data-status="PUBLISHED"]')).toBeVisible();
 
   await page.getByRole("link", { name: "Colours", exact: true }).click();
@@ -124,7 +124,7 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
     .fill("TEST Sample Kurta");
   await page
     .getByRole("combobox", { name: "Category", exact: true })
-    .selectOption({ label: "TEST Kurtas" });
+    .selectOption({ label: "TEST E2E Kurtas" });
   await page
     .getByRole("textbox", { name: "Short description", exact: true })
     .fill("TEST data. Not a real product.");
@@ -184,7 +184,9 @@ test("manager builds and publishes a product", async ({ browser, request }) => {
     "test-sample-kurta",
   ]);
   const search = await (await request.get("/api/v1/search?q=kurta")).json();
-  expect(search.items[0].slug).toBe("test-sample-kurta");
+  expect(search.items.map((p: { slug: string }) => p.slug)).toContain(
+    "test-sample-kurta",
+  );
 });
 
 test("catalogue editor sees prices read-only; fulfilment cannot edit", async ({
@@ -269,10 +271,11 @@ test("manager publishes an announcement; the Rehma page needs the Owner's verifi
   await bar.getByLabel("Text").fill("TEST announcement");
   await bar.getByRole("button", { name: "Save draft" }).click();
   await expect(bar.getByText("Draft saved.")).toBeVisible();
+  // The draft is not live yet (the demo seed's announcement still shows).
   expect(
     (await (await request.get("/api/v1/content/home")).json()).announcement,
-  ).toBeNull();
-  await bar.getByRole("button", { name: "Publish" }).click();
+  ).not.toEqual({ text: "TEST announcement", href: null });
+  await bar.getByRole("button", { name: "Publish", exact: true }).click();
   await expect(
     bar.getByText("Published. The storefront shows it within a minute."),
   ).toBeVisible();

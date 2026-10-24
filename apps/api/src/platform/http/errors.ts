@@ -31,6 +31,10 @@ export const API_ERROR_CODES = {
     message: "The request could not be verified. Refresh and try again.",
   },
   NOT_FOUND: { status: 404, message: "Not found." },
+  OUT_OF_STOCK: {
+    status: 409,
+    message: "Some items are no longer available in the quantity requested.",
+  },
   CONFLICT: {
     status: 409,
     message: "This change conflicts with the current state.",

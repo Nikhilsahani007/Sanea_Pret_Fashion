@@ -225,9 +225,7 @@ describe("pages", () => {
 
   it("links to a published page now resolve on the homepage", async () => {
     invalidateContent();
-    expect((await pub("/content/home")).body.hero[0].ctaHref).toBe(
-      "/pages/about",
-    );
+    expect((await pub("/content/home")).body.hero[0].ctaHref).toBe("/about");
   });
 });
 
@@ -318,7 +316,7 @@ describe("navigation and settings", () => {
     expect(missing.status).toBe(400);
     const nav = (await pub("/content/navigation")).body.menus;
     expect(nav.FOOTER_HELP).toEqual([
-      { label: "About", href: "/pages/about" },
+      { label: "About", href: "/about" },
       { label: "Instagram", href: "https://instagram.com/example" },
     ]);
   });

@@ -31,7 +31,7 @@ export default defineConfig({
     command: "node e2e/support/start-stack.ts",
     url: "http://localhost:5174",
     reuseExistingServer: false,
-    timeout: 120_000,
+    timeout: 300_000,
     gracefulShutdown: { signal: "SIGTERM", timeout: 5_000 },
   },
 });

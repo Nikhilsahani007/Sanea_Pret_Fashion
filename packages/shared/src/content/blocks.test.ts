@@ -71,10 +71,11 @@ describe("content blocks", () => {
 
 describe("targetHref", () => {
   it.each([
-    [{ type: "CATEGORY", slug: "kurtas" }, "/category/kurtas"],
+    [{ type: "CATEGORY", slug: "kurtas" }, "/shop/kurtas"],
     [{ type: "COLLECTION", slug: "festive" }, "/collections/festive"],
     [{ type: "PRODUCT", slug: "a" }, "/products/a"],
-    [{ type: "PAGE", slug: "about" }, "/pages/about"],
+    [{ type: "PAGE", slug: "about" }, "/about"],
+    [{ type: "PAGE", slug: "policy-returns" }, "/policies/returns"],
     [
       { type: "URL", href: "https://wa.me/919876543210" },
       "https://wa.me/919876543210",

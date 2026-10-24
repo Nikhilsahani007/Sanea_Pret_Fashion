@@ -1,0 +1,64 @@
+.page {
+  padding: var(--sp-space-7) var(--sp-gutter) 0;
+}
+.title {
+  font-size: var(--sp-step-head);
+  font-stretch: var(--sp-display-stretch);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-space-5);
+}
+.lead {
+  font-size: var(--sp-step-lead);
+  max-width: 40ch;
+  margin-bottom: var(--sp-space-6);
+}
+.meta {
+  color: var(--sp-muted);
+  margin-bottom: var(--sp-space-5);
+}
+.prose {
+  max-width: var(--sp-measure);
+  display: grid;
+  gap: var(--sp-space-4);
+}
+.prose h2 {
+  font-size: var(--sp-step-lead);
+  margin-top: var(--sp-space-5);
+}
+.prose h3 {
+  font-size: var(--sp-step-body);
+  margin-top: var(--sp-space-4);
+}
+.prose ul,
+.prose ol {
+  margin: 0;
+  padding-left: var(--sp-space-5);
+}
+.cartLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+  gap: var(--sp-space-7);
+  align-items: start;
+}
+.summary {
+  display: grid;
+  gap: var(--sp-space-3);
+  padding: var(--sp-space-5);
+  background: var(--sp-surface);
+  position: sticky;
+  top: 8rem;
+}
+.more {
+  margin-top: var(--sp-space-6);
+}
+@media (max-width: 56rem) {
+  .cartLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .summary {
+    position: static;
+  }
+}

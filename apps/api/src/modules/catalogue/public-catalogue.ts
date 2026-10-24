@@ -299,6 +299,8 @@ export function summary(c: Catalogue, p: PublishedProduct) {
     slug: p.slug,
     name: p.name,
     ...fromPrice(p),
+    /** True when active variants differ in price, so the card says "From". */
+    priceVaries: new Set(p.variants.map((v) => v.pricePaise)).size > 1,
     currency: "INR" as const,
     labels: p.labels,
     availability: p.variants.some((v) => v.available)

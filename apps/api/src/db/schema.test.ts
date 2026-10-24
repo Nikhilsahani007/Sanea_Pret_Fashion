@@ -112,6 +112,8 @@ describe("Phase 6 scope and conventions", () => {
         "admin_session",
         "admin_user",
         "audit_log",
+        "cart",
+        "cart_item",
         "category",
         "collection",
         "collection_product",

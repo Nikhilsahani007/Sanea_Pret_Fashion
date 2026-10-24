@@ -31,7 +31,12 @@
   --sp-step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
   --sp-step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
   --sp-step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
-  --sp-step-monument: clamp(3.5rem, 12.6vw, 13.75rem);
+  /* The wordmark fills the width between the gutters: "SANÉA PRET" in
+     Archivo 800 at 125 % width, tracking −0.04em, is about 8.1em wide. */
+  --sp-wordmark-em: 8.15;
+  --sp-step-monument: calc(
+    (100vw - 2 * var(--sp-gutter)) / var(--sp-wordmark-em)
+  );
 
   /* Space (4 px base) */
   --sp-space-1: 0.25rem;

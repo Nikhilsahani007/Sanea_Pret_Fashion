@@ -34,17 +34,23 @@ export const linkTargetSchema = z.discriminatedUnion(
 );
 export type LinkTarget = z.infer<typeof linkTargetSchema>;
 
-/** Storefront path for a target. Shared so the API and storefront agree. */
+/**
+ * Storefront path for a target (project-requirements.md route list). Shared
+ * so the API and storefront agree. Pages live at `/<slug>`; a page whose slug
+ * starts with `policy-` lives under `/policies/`.
+ */
 export function targetHref(target: LinkTarget): string {
   switch (target.type) {
     case "CATEGORY":
-      return `/category/${target.slug}`;
+      return `/shop/${target.slug}`;
     case "COLLECTION":
       return `/collections/${target.slug}`;
     case "PRODUCT":
       return `/products/${target.slug}`;
     case "PAGE":
-      return `/pages/${target.slug}`;
+      return target.slug.startsWith("policy-")
+        ? `/policies/${target.slug.slice(7)}`
+        : `/${target.slug}`;
     case "URL":
       return target.href;
   }

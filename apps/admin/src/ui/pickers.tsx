@@ -124,7 +124,7 @@ export function TargetPicker({
           label="Address"
           value={value.href}
           onChange={(e) => onChange({ type: "URL", href: e.target.value })}
-          hint="A path such as /pages/about, or an https:// address."
+          hint="A path such as /about, or an https:// address."
         />
       ) : null}
     </fieldset>

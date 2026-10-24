@@ -68,6 +68,9 @@ for (const [role, a] of Object.entries(ADMINS))
 const mediaDir = join(tmpdir(), "sanea-e2e-media");
 if (existsSync(mediaDir)) rmSync(mediaDir, { recursive: true });
 mkdirSync(mediaDir, { recursive: true });
+// Demo catalogue and published content with placeholder images (TEST only).
+const { seedDemo } = await import("../../apps/api/src/db/demo-seed.ts");
+await seedDemo(db, mediaDir);
 await db.$disconnect();
 
 const children: ChildProcess[] = [];

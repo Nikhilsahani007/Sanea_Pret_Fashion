@@ -73,8 +73,8 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 ### Cart
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/cart` | Current cart (creates token cookie if absent). Re-priced lines, availability warnings, subtotal. |
-| POST | `/cart/items` | `{ variantId, quantity }`. Adds or increments. |
+| GET | `/cart` | Current cart, or an empty one; reading never creates a cart or cookie (D-149). Re-priced lines with `warning` (`UNAVAILABLE`, `SOLD_OUT`, `ONLY_N_LEFT`), `itemCount`, `subtotalPaise`, `readyForCheckout`. |
+| POST | `/cart/items` | `{ variantId, quantity }`. Adds or increments; creates the cart and its `__Host-sp_cart` cookie on first use. `409 OUT_OF_STOCK` above free stock; `409 CONFLICT { reason: LINE_LIMIT, max: 10 }`; `409 CONFLICT { reason: UNAVAILABLE }` for unpublished or inactive items. |
 | PATCH | `/cart/items/:variantId` | `{ quantity }`. 0 removes. |
 | DELETE | `/cart/items/:variantId` | Remove line. |
 

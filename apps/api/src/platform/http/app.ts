@@ -17,6 +17,7 @@ import {
 import { adminProductsRouter } from "../../modules/catalogue/admin-products.ts";
 import { adminTaxonomyRouter } from "../../modules/catalogue/admin-taxonomy.ts";
 import { publicCatalogueRouter } from "../../modules/catalogue/public-router.ts";
+import { cartRouter } from "../../modules/cart/router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
 import type { ModuleDeps } from "../../modules/deps.ts";
@@ -126,6 +127,7 @@ export function createApp({
     app.use(inventoryRouter(deps));
     app.use(contentAdminRouter(deps));
     app.use(contentPublicRouter(deps));
+    app.use(cartRouter(deps));
     if (jobs) startReservationExpiry(deps);
   }
   for (const router of routers) app.use(router);

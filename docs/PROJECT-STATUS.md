@@ -12,7 +12,8 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 | 8 Catalogue, media, catalogue API, admin shell | **Evidence ready, awaiting your approval** | `phase-8-plan.md`; commit `7c2fe4b` (API) and the UI commit that follows; 473 unit, 302 database and 10 end-to-end tests passed locally |
 | 9 Inventory and stock reservation | **Evidence ready, awaiting your approval** | `phase-9-plan.md`; concurrency tests 18 passed (three runs) |
 | 10 Content management | **Evidence ready, awaiting your approval** | `phase-10-plan.md`; content tests 16 passed; end-to-end 12 passed |
-| 11 onward | Not started | — |
+| 11 Storefront shell, search and cart | **Evidence ready, awaiting your approval** | `phase-11-plan.md`; migration `20261024120000_guest_cart` needs your approval; cart tests 12 passed; storefront end-to-end 8 passed |
+| 12 onward | Not started | — |
 
 **Needs you:** review Phase 8 evidence and screenshots; approve migration `20261024090000_catalogue_search` before any kept database; confirm or change the proposed choices D-135 to D-144.
 

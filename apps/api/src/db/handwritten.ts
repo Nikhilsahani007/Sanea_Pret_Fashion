@@ -65,6 +65,10 @@ export const HANDWRITTEN_CHECKS = [
   { table: "admin_invite", name: "admin_invite_outcome_check" },
   { table: "admin_invite", name: "admin_invite_pending_mfa_check" },
   { table: "admin_recovery_code", name: "admin_recovery_code_hash_check" },
+  // Phase 11 (guest cart)
+  { table: "cart", name: "cart_token_hash_check" },
+  { table: "cart", name: "cart_expiry_check" },
+  { table: "cart_item", name: "cart_item_quantity_check" },
 ] as const;
 
 /** Reference rows inserted by the migration (D-029, D-058), in order. */

@@ -24,7 +24,8 @@
     "db:seed": "prisma db seed",
     "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",
     "check:tokens": "node scripts/check-design-tokens.ts",
-    "build": "npm run build -w @sanea/admin -w @sanea/storefront --if-present"
+    "build": "npm run build -w @sanea/admin -w @sanea/storefront --if-present",
+    "db:seed:demo": "node apps/api/src/db/demo-seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
