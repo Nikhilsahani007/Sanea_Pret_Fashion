@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_EXCLUSIONS,
   HANDWRITTEN_INDEXES,
   HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
@@ -91,6 +92,7 @@ describe("tables and scope", () => {
       "content_block",
       "enquiry",
       "gst_rule",
+      "gst_rule_slab",
       "inventory_level",
       "media_asset",
       "navigation_item",
@@ -124,10 +126,18 @@ describe("tables and scope", () => {
        ORDER BY 1`,
     );
     expect(rows.map((r) => r.c)).toEqual([
+      "gst_rule_slab.cgst_bps",
+      "gst_rule_slab.igst_bps",
+      "gst_rule_slab.sgst_bps",
       "notification.order_id",
       "order.tax_paise",
-      "order_item.gst_rate_bps",
+      "order_item.cgst_bps",
+      "order_item.cgst_paise",
+      "order_item.igst_bps",
+      "order_item.igst_paise",
       "order_item.order_id",
+      "order_item.sgst_bps",
+      "order_item.sgst_paise",
       "order_note.order_id",
       "order_status_event.order_id",
       "payment.order_id",
@@ -149,7 +159,7 @@ describe("tables and scope", () => {
          AND relname NOT IN ('size', '_prisma_migrations')`,
     );
     expect(counts.filter((c) => c.n !== 0)).toEqual([]);
-    expect(counts).toHaveLength(35); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables + two Phase 16
+    expect(counts).toHaveLength(36); // 21 + cart, cart_item (Phase 11) + enquiry, whatsapp_click (Phase 13) + nine Phase 15 tables + two Phase 16
   });
 });
 
@@ -182,6 +192,17 @@ describe("handwritten objects exist in the live catalogue", () => {
       expect(
         await q(
           `SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND tablename = '${table}' AND indexname = '${name}'`,
+        ),
+      ).toHaveLength(1);
+    },
+  );
+
+  it.each(HANDWRITTEN_EXCLUSIONS)(
+    "exclusion constraint $name on $table",
+    async ({ table, name }) => {
+      expect(
+        await q(
+          `SELECT 1 FROM pg_constraint WHERE contype = 'x' AND conname = '${name}' AND conrelid = '"${table}"'::regclass`,
         ),
       ).toHaveLength(1);
     },
@@ -235,7 +256,7 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(45); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13) + ten Phase 15 keys + three Phase 16
+    expect(expected).toHaveLength(46); // 25 + two cart_item keys (Phase 11) + five enquiry keys (Phase 13) + eleven Phase 15 keys + three Phase 16
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -259,7 +280,10 @@ describe("handwritten objects exist in the live catalogue", () => {
     const rows = await q<{ name: string }>(
       `SELECT indexname AS name FROM pg_indexes WHERE schemaname = 'public' AND indexname NOT LIKE '%_pkey'`,
     );
-    expect(rows.map((r) => r.name).sort()).toEqual([...expected].sort());
+    // Exclusion constraints are backed by an index of the same name.
+    expect(rows.map((r) => r.name).sort()).toEqual(
+      [...expected, ...HANDWRITTEN_EXCLUSIONS.map((x) => x.name)].sort(),
+    );
     expect(expected.length).toBeGreaterThan(30);
   });
 });
@@ -270,7 +294,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(32); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13) + eight Phase 15 tables + two Phase 16
+    expect(rows).toHaveLength(33); // 19 + cart (Phase 11) + enquiry, whatsapp_click (Phase 13) + nine Phase 15 tables + two Phase 16
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

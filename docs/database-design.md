@@ -175,7 +175,11 @@ Customer, Address and WishlistItem are **deferred to a later release (D-034).** 
 | notes | text? | internal |
 | placedAt, confirmedAt, cancelledAt | timestamptz? | |
 
-**OrderItem**: id, orderId, variantId, productName, variantLabel ("Ivory / M"), sku, unitPricePaise, quantity, lineTotalPaise, gstRateBps?, hsnCode?. Snapshots keep the order correct even if the product changes later.
+**OrderItem**: id, orderId, variantId, productName, variantLabel ("Ivory / M"), sku, unitPricePaise, quantity, lineTotalPaise, hsnCode?, cgstBps?, sgstBps?, igstBps?, cgstPaise, sgstPaise, igstPaise (D-167). Snapshots keep the order correct even if the product changes later.
+
+**Order GST snapshot** (D-167): sellerState?, placeOfSupplyState?, supplyType? (`INTRA_STATE` or `INTER_STATE`); `taxPaise` is the sum of the items' components and stays 0 until the supply type is known.
+
+**GstRule** (D-033, D-167): hsnPrefix, effectiveFrom, effectiveTo?, note?, createdByAdminId; no two rules for one prefix overlap in time (exclusion constraint). **GstRuleSlab**: ruleId, upToUnitPricePaise? (inclusive; one open band per rule), cgstBps, sgstBps, igstBps. No rates are seeded (B-14).
 
 **OrderStatusEvent**: id, orderId, fromStatus?, toStatus, actorType (`SYSTEM/ADMIN/CUSTOMER/PROVIDER`), actorId?, note?, createdAt.
 

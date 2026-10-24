@@ -149,6 +149,16 @@ enum ActorType {
   @@map("actor_type")
 }
 
+/// D-033: intra-state supplies carry CGST + SGST (or UTGST), inter-state
+/// supplies IGST. Which applies is decided from the seller's state and the
+/// place of supply; the rule for that is for the accountant to confirm (B-14).
+enum GstSupplyType {
+  INTRA_STATE
+  INTER_STATE
+
+  @@map("gst_supply_type")
+}
+
 enum RefundStatus {
   PENDING
   REFUNDED
@@ -484,36 +494,43 @@ model CartItem {
 /// A guest order (database-design.md §3.4). Contact and addresses are
 /// snapshots. Totals in paise; total = subtotal − discount + shipping + COD
 /// fee (CHECK). Prices include GST, so `taxPaise` is the GST contained in the
-/// total, computed from the effective GST rules (0 while none are entered).
+/// total: the sum of the items' CGST, SGST and IGST, from the effective GST
+/// rules (0 while no rule or no seller state is entered, B-14).
 model Order {
-  id              String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id                 String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
   /// SP-YYMM-NNNNNN (D-115).
-  orderNumber     String        @unique @map("order_number")
-  email           String        @db.Citext
-  phone           String
-  shippingAddress Json          @map("shipping_address")
-  billingAddress  Json          @map("billing_address")
-  status          OrderStatus
-  needsAttention  Boolean       @default(false) @map("needs_attention")
-  attentionReason String?       @map("attention_reason")
-  paymentMethod   PaymentMethod @map("payment_method")
-  subtotalPaise   Int           @map("subtotal_paise")
-  discountPaise   Int           @default(0) @map("discount_paise")
-  shippingPaise   Int           @map("shipping_paise")
-  codFeePaise     Int           @default(0) @map("cod_fee_paise")
-  taxPaise        Int           @default(0) @map("tax_paise")
-  totalPaise      Int           @map("total_paise")
-  currency        String        @default("INR")
+  orderNumber        String         @unique @map("order_number")
+  email              String         @db.Citext
+  phone              String
+  shippingAddress    Json           @map("shipping_address")
+  billingAddress     Json           @map("billing_address")
+  status             OrderStatus
+  needsAttention     Boolean        @default(false) @map("needs_attention")
+  attentionReason    String?        @map("attention_reason")
+  paymentMethod      PaymentMethod  @map("payment_method")
+  subtotalPaise      Int            @map("subtotal_paise")
+  discountPaise      Int            @default(0) @map("discount_paise")
+  shippingPaise      Int            @map("shipping_paise")
+  codFeePaise        Int            @default(0) @map("cod_fee_paise")
+  taxPaise           Int            @default(0) @map("tax_paise")
+  totalPaise         Int            @map("total_paise")
+  /// GST snapshot (D-033): the seller's registered state as configured at
+  /// placement, the place of supply (the delivery state, pending accountant
+  /// confirmation) and the resulting supply type. Null until configured.
+  sellerState        String?        @map("seller_state")
+  placeOfSupplyState String?        @map("place_of_supply_state")
+  supplyType         GstSupplyType? @map("supply_type")
+  currency           String         @default("INR")
   /// Client Idempotency-Key and a hash of the request it came with.
-  idempotencyKey  String        @unique @map("idempotency_key") @db.Uuid
-  requestHash     String        @map("request_hash")
+  idempotencyKey     String         @unique @map("idempotency_key") @db.Uuid
+  requestHash        String         @map("request_hash")
   /// SHA-256 of the guest's order access token (status page).
-  accessTokenHash Bytes         @unique @map("access_token_hash")
-  notes           String?
-  placedAt        DateTime      @default(now()) @map("placed_at") @db.Timestamptz(3)
-  confirmedAt     DateTime?     @map("confirmed_at") @db.Timestamptz(3)
-  cancelledAt     DateTime?     @map("cancelled_at") @db.Timestamptz(3)
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  accessTokenHash    Bytes          @unique @map("access_token_hash")
+  notes              String?
+  placedAt           DateTime       @default(now()) @map("placed_at") @db.Timestamptz(3)
+  confirmedAt        DateTime?      @map("confirmed_at") @db.Timestamptz(3)
+  cancelledAt        DateTime?      @map("cancelled_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   items         OrderItem[]
   events        OrderStatusEvent[]
@@ -540,9 +557,16 @@ model OrderItem {
   unitPricePaise Int     @map("unit_price_paise")
   quantity       Int
   lineTotalPaise Int     @map("line_total_paise")
-  /// GST rate in basis points from the effective rule, if one exists (D-033).
-  gstRateBps     Int?    @map("gst_rate_bps")
   hsnCode        String? @map("hsn_code")
+  /// GST components applied (basis points) and the GST contained in the line
+  /// (paise), from the effective rule and the order's supply type (D-033).
+  /// Rates are null when no rule applied; amounts are then 0.
+  cgstBps        Int?    @map("cgst_bps")
+  sgstBps        Int?    @map("sgst_bps")
+  igstBps        Int?    @map("igst_bps")
+  cgstPaise      Int     @default(0) @map("cgst_paise")
+  sgstPaise      Int     @default(0) @map("sgst_paise")
+  igstPaise      Int     @default(0) @map("igst_paise")
 
   order   Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
   variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
@@ -648,28 +672,44 @@ model Refund {
   @@map("refund")
 }
 
-/// Effective-dated GST rules (D-030, D-033). No rates are entered by the
-/// system; the Owner enters them after accountant verification (B-14). A rule
-/// matches by HSN prefix (empty = any) and by unit price at or below / above
-/// a threshold.
+/// Effective-dated GST rules (D-030, D-033). The system enters no rates; the
+/// Owner enters them after accountant verification (B-14). A rule matches by
+/// HSN prefix (empty = any HSN) for a period; rules for the same prefix may not
+/// overlap in time (exclusion constraint). Its slabs give the components by
+/// unit price.
 model GstRule {
   id               String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   hsnPrefix        String    @default("") @map("hsn_prefix")
-  /// Unit price threshold in paise; null means one rate for all prices.
-  thresholdPaise   Int?      @map("threshold_paise")
-  rateBpsAtOrBelow Int       @map("rate_bps_at_or_below")
-  rateBpsAbove     Int?      @map("rate_bps_above")
   effectiveFrom    DateTime  @map("effective_from") @db.Timestamptz(3)
   effectiveTo      DateTime? @map("effective_to") @db.Timestamptz(3)
   note             String?
   createdByAdminId String    @map("created_by_admin_id") @db.Uuid
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  createdBy AdminUser @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  createdBy AdminUser     @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  slabs     GstRuleSlab[]
 
   @@index([effectiveFrom])
   @@index([createdByAdminId])
   @@map("gst_rule")
+}
+
+/// One price band of a rule: unit prices up to `upToUnitPricePaise`
+/// (inclusive; null = no upper limit, at most one per rule) carry these
+/// components. CGST + SGST apply to intra-state supplies, IGST to inter-state;
+/// the values come from the accountant, never from the system.
+model GstRuleSlab {
+  id                 String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  ruleId             String @map("rule_id") @db.Uuid
+  upToUnitPricePaise Int?   @map("up_to_unit_price_paise")
+  cgstBps            Int    @map("cgst_bps")
+  sgstBps            Int    @map("sgst_bps")
+  igstBps            Int    @map("igst_bps")
+
+  rule GstRule @relation(fields: [ruleId], references: [id], onDelete: Restrict)
+
+  @@unique([ruleId, upToUnitPricePaise])
+  @@map("gst_rule_slab")
 }
 
 // ─── Admin operations and notifications (Phase 16) ──────────────────────────

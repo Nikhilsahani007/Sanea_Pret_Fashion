@@ -6,54 +6,20 @@ import type {
   ShippingSettings,
 } from "@sanea/shared";
 
+import {
+  lineGst,
+  lineGstTotal,
+  supplyTypeOf,
+  type GstRuleRow,
+  type GstSupplyType,
+  type LineGst,
+} from "./gst.ts";
+
 export type PricedLine = {
   readonly unitPricePaise: number;
   readonly quantity: number;
   readonly hsnCode: string | null;
 };
-
-export type GstRuleRow = {
-  readonly hsnPrefix: string;
-  readonly thresholdPaise: number | null;
-  readonly rateBpsAtOrBelow: number;
-  readonly rateBpsAbove: number | null;
-  readonly effectiveFrom: Date;
-  readonly effectiveTo: Date | null;
-};
-
-/**
- * The GST rate for a line (D-033): the effective rule with the longest
- * matching HSN prefix, the rate chosen by unit price against its threshold.
- * Null when no rule applies; no rate is ever assumed (B-14).
- */
-export function gstRateBps(
-  line: Pick<PricedLine, "unitPricePaise" | "hsnCode">,
-  rules: readonly GstRuleRow[],
-  now: Date,
-): number | null {
-  const hsn = line.hsnCode ?? "";
-  const rule = rules
-    .filter(
-      (r) =>
-        r.effectiveFrom <= now &&
-        (r.effectiveTo === null || r.effectiveTo > now) &&
-        hsn.startsWith(r.hsnPrefix),
-    )
-    .sort((a, b) => b.hsnPrefix.length - a.hsnPrefix.length)[0];
-  if (!rule) return null;
-  if (rule.thresholdPaise === null || rule.rateBpsAbove === null)
-    return rule.rateBpsAtOrBelow;
-  return line.unitPricePaise <= rule.thresholdPaise
-    ? rule.rateBpsAtOrBelow
-    : rule.rateBpsAbove;
-}
-
-/** GST contained in a GST-inclusive amount (D-030), rounded half up to the paisa. */
-export function includedGst(amountPaise: number, rateBps: number): number {
-  return Math.floor(
-    (amountPaise * rateBps * 2 + (10_000 + rateBps)) / (2 * (10_000 + rateBps)),
-  );
-}
 
 export type Quote = {
   subtotalPaise: number;
@@ -64,7 +30,13 @@ export type Quote = {
   totalPaise: number;
   currency: "INR";
   cod: { available: true } | { available: false; reason: CodIneligibleReason };
-  lineRates: (number | null)[];
+  /** GST snapshot for the order (D-033); null fields until configured. */
+  gst: {
+    sellerState: string | null;
+    placeOfSupplyState: string | null;
+    supplyType: GstSupplyType | null;
+    lines: LineGst[];
+  };
 };
 
 export function priceOrder(input: {
@@ -72,6 +44,10 @@ export function priceOrder(input: {
   shipping: ShippingSettings;
   cod: CodSettings;
   gstRules: readonly GstRuleRow[];
+  /** The seller's registered state (tax settings; null until entered, B-14). */
+  sellerState: string | null;
+  /** The delivery state, once the address is known. */
+  placeOfSupplyState: string | undefined;
   paymentMethod: "PREPAID" | "COD" | undefined;
   pinCode: string | undefined;
   codRefusals: number;
@@ -106,19 +82,14 @@ export function priceOrder(input: {
     cod = { available: false, reason: "REFUSAL_LIMIT" };
 
   const codFeePaise = input.paymentMethod === "COD" ? input.cod.feePaise : 0;
-  const lineRates = input.lines.map((l) =>
-    gstRateBps(l, input.gstRules, input.now),
+  const placeOfSupplyState = input.placeOfSupplyState ?? null;
+  const supplyType = supplyTypeOf(input.sellerState, placeOfSupplyState);
+  const lines = input.lines.map((l) =>
+    lineGst(l, input.gstRules, input.now, supplyType),
   );
   // GST on goods only; how shipping and COD fees are taxed is for the
   // accountant (B-14), so they carry none here.
-  const taxPaise = input.lines.reduce(
-    (n, l, i) =>
-      n +
-      (lineRates[i] === null
-        ? 0
-        : includedGst(l.unitPricePaise * l.quantity, lineRates[i]!)),
-    0,
-  );
+  const taxPaise = lines.reduce((n, g) => n + lineGstTotal(g), 0);
   return {
     subtotalPaise,
     discountPaise,
@@ -128,7 +99,12 @@ export function priceOrder(input: {
     totalPaise: beforeCod + codFeePaise,
     currency: "INR",
     cod,
-    lineRates,
+    gst: {
+      sellerState: input.sellerState,
+      placeOfSupplyState,
+      supplyType,
+      lines,
+    },
   };
 }
 

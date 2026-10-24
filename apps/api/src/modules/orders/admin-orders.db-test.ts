@@ -248,6 +248,37 @@ describe("E2E-2 admin part at the API: confirm, pack, ship, deliver", () => {
   });
 });
 
+// Cancellation by role and state, through the real route. This pins the
+// behaviour implemented today, which is NOT an approved policy: D-160 is open
+// and the specifications disagree (system-design.md §5 lines 137 and 142,
+// security-design.md §4). Changing the policy must change this table.
+describe("cancellation by role (current behaviour, pending D-160)", () => {
+  const roles = ["O", "M", "F", "C"] as const;
+  const expected = {
+    PENDING_CONFIRMATION: { O: 200, M: 200, F: 200, C: 403 },
+    CONFIRMED: { O: 200, M: 200, F: 409, C: 403 },
+  } as const;
+  for (const from of ["PENDING_CONFIRMATION", "CONFIRMED"] as const)
+    for (const role of roles)
+      it(`${role} cancelling a ${from} COD order → ${expected[from][role]}`, async () => {
+        const { no } = await place("COD");
+        if (from === "CONFIRMED")
+          expect((await move(no, { toStatus: "CONFIRMED" }, s.O)).status).toBe(
+            200,
+          );
+        const res = await move(
+          no,
+          { toStatus: "CANCELLED", note: "TEST" },
+          s[role],
+        );
+        expect(res.status).toBe(expected[from][role]);
+        const o = await h.db.order.findUniqueOrThrow({
+          where: { orderNumber: no },
+        });
+        expect(o.status).toBe(res.status === 200 ? "CANCELLED" : from);
+      });
+});
+
 describe("refunds", () => {
   it("cancelling a paid online order records a pending refund that staff complete", async () => {
     const { no } = await place("PREPAID");

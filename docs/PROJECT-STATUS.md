@@ -24,6 +24,8 @@ Last updated: 2026-10-24 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 Final summary for you: `RELEASE-READINESS.md`.
 
+**2026-10-25 release-blocker preparation (proposals, nothing approved):** GST model revised in the unapproved `orders_payments` migration (D-167, `proposals/gst-model.md`); COD cancellation choice A or B (D-160, `proposals/cod-cancellation.md`; code unchanged and pinned by tests); retention and erasure evaluation (D-168, B-17); axe and Lighthouse proposal with exact versions (D-165). Not pushed.
+
 **Needs you:** review the evidence of Phases 8 to 15; approve the migrations `20261024090000_catalogue_search`, `20261024120000_guest_cart`, `20261024150000_enquiries` and `20261024180000_orders_payments` before any kept database; confirm or change the proposed choices D-135 to D-165 (D-160 settles a document conflict); approve `20261024200000_admin_operations`; answer B-07 (shipping, COD, returns text, launch offer).
 
 Phase 6 — Core database schema: gate passed (D-061). Commit `56ef435`, merged into `main` with PR #4. The results below are the Phase 6 record.

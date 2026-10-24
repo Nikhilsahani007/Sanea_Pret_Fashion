@@ -40,7 +40,7 @@ Run locally in the build container (Node 24.11, PostgreSQL 18.4 on a disposable 
 ## Decisions waiting for you (most important first)
 1. **Gate approvals** for Phases 8–16, and the five migrations (`catalogue_search`, `guest_cart`, `enquiries`, `orders_payments`, `admin_operations`).
 2. **B-07 checkout terms:** shipping fee and free threshold, COD limit, fee, excluded PIN codes and 48-hour window, returns policy text, launch offer. Defaults are in the admin, marked as proposals (D-150).
-3. **D-160:** may Fulfilment cancel an unconfirmed COD order?
+3. **D-160:** may Fulfilment cancel an unconfirmed COD order? Choice A or B in `proposals/cod-cancellation.md` (2026-10-25). The GST model (D-167), retention (D-168) and tooling (D-165) proposals are in `proposals/`.
 4. **OD-06 gateway** and **OD-22 launch mode**; **OD-19 email provider**; **OD-18 hosting**.
 5. **D-165:** approve `@axe-core/playwright` and Lighthouse so the Phase 17 targets can be measured.
 6. Content you must supply or verify: products and photographs (B-06), brand assets (B-04), GST verification (B-14), legal texts (OD-12), Rehma Foundation content (OD-13).

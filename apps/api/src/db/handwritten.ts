@@ -5,7 +5,12 @@
  * the migration SQL and, once a database exists, against the live catalogue.
  */
 
-export const HANDWRITTEN_EXTENSIONS = ["citext", "pg_trgm"] as const;
+export const HANDWRITTEN_EXTENSIONS = [
+  "citext",
+  "pg_trgm",
+  // Phase 15 (revised, D-167): equality in the GST rule exclusion constraint.
+  "btree_gist",
+] as const;
 
 export const HANDWRITTEN_FUNCTIONS = [
   "reject_append_only_change",
@@ -16,6 +21,13 @@ export const HANDWRITTEN_FUNCTIONS = [
 /** Expression indexes Prisma cannot model (Phase 8 search). */
 export const HANDWRITTEN_INDEXES = [
   { table: "product", name: "product_name_trgm_idx" },
+  // Phase 15 (revised, D-167): one open price band per GST rule (partial).
+  { table: "gst_rule_slab", name: "gst_rule_slab_open_band_idx" },
+] as const;
+
+/** Exclusion constraints Prisma cannot model (Phase 15 GST rules, D-167). */
+export const HANDWRITTEN_EXCLUSIONS = [
+  { table: "gst_rule", name: "gst_rule_no_overlap_excl" },
 ] as const;
 
 /** Sequences Prisma cannot model (Phase 15 order numbers, D-115). */
@@ -94,15 +106,19 @@ export const HANDWRITTEN_CHECKS = [
   { table: "order", name: "order_cod_fee_check" },
   { table: "order", name: "order_access_token_hash_check" },
   { table: "order", name: "order_attention_check" },
+  { table: "order", name: "order_gst_supply_check" },
+  { table: "order", name: "order_tax_supply_check" },
   { table: "order_item", name: "order_item_quantity_check" },
   { table: "order_item", name: "order_item_amounts_check" },
-  { table: "order_item", name: "order_item_gst_rate_check" },
+  { table: "order_item", name: "order_item_gst_rates_check" },
+  { table: "order_item", name: "order_item_gst_amounts_check" },
   { table: "payment", name: "payment_amount_check" },
   { table: "payment", name: "payment_method_status_check" },
   { table: "refund", name: "refund_amount_check" },
   { table: "refund", name: "refund_reason_check" },
   { table: "shipment", name: "shipment_text_check" },
-  { table: "gst_rule", name: "gst_rule_rates_check" },
+  { table: "gst_rule_slab", name: "gst_rule_slab_rates_check" },
+  { table: "gst_rule_slab", name: "gst_rule_slab_bound_check" },
   { table: "gst_rule", name: "gst_rule_effective_check" },
   { table: "gst_rule", name: "gst_rule_hsn_prefix_check" },
   // Phase 16 (admin operations)

@@ -14,7 +14,7 @@ import { OutOfStock, convert, reserve } from "../inventory/service.ts";
 import { notify } from "../notifications/service.ts";
 import { HOLD_MS } from "../payments/service.ts";
 import { orderNumber, priceOrder, type PricedLine } from "./pricing.ts";
-import { readSettings } from "./settings.ts";
+import { readSettings, readTaxSettings } from "./settings.ts";
 
 export type PlaceOrderBody = {
   contact: { email: string; phone: string };
@@ -34,6 +34,8 @@ export async function quoteCart(
     paymentMethod?: PaymentMethod | undefined;
     pinCode?: string | undefined;
     phone?: string | undefined;
+    /** Delivery state, the place of supply for GST (D-033). */
+    state?: string | undefined;
   },
 ) {
   const now = deps.now();
@@ -48,10 +50,11 @@ export async function quoteCart(
     quantity: l.quantity,
     hsnCode: hsn.get(l.variantId) ?? null,
   }));
-  const [shipping, cod, gstRules, codRefusals] = await Promise.all([
+  const [shipping, cod, tax, gstRules, codRefusals] = await Promise.all([
     readSettings(deps.db, "shipping"),
     readSettings(deps.db, "cod"),
-    deps.db.gstRule.findMany(),
+    readTaxSettings(deps.db),
+    deps.db.gstRule.findMany({ include: { slabs: true } }),
     options.phone
       ? deps.db.order.count({
           where: {
@@ -67,6 +70,8 @@ export async function quoteCart(
     shipping,
     cod,
     gstRules,
+    sellerState: tax.sellerState,
+    placeOfSupplyState: options.state,
     paymentMethod: options.paymentMethod,
     pinCode: options.pinCode,
     codRefusals,
@@ -112,6 +117,7 @@ export async function placeOrder(
     paymentMethod: body.paymentMethod,
     pinCode: body.shippingAddress.pinCode,
     phone: body.contact.phone,
+    state: body.shippingAddress.state,
   });
   const { view, quote } = priced;
   if (!view.readyForCheckout)
@@ -150,6 +156,9 @@ export async function placeOrder(
           shippingPaise: quote.shippingPaise,
           codFeePaise: quote.codFeePaise,
           taxPaise: quote.taxPaise,
+          sellerState: quote.gst.sellerState,
+          placeOfSupplyState: quote.gst.placeOfSupplyState,
+          supplyType: quote.gst.supplyType,
           totalPaise: quote.totalPaise,
           idempotencyKey: input.idempotencyKey,
           requestHash: hash,
@@ -166,8 +175,8 @@ export async function placeOrder(
               unitPricePaise: l.unitPricePaise,
               quantity: l.quantity,
               lineTotalPaise: l.lineTotalPaise,
-              gstRateBps: quote.lineRates[i] ?? null,
               hsnCode: hsn[i] ?? null,
+              ...quote.gst.lines[i]!,
             })),
           },
         },

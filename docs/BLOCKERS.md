@@ -10,15 +10,16 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 |----|---------|--------|-------|--------------|
 | B-03 | The nishorama.com screen recording is not in the repository (OD-01). Motion timing, slide duration and hover behaviour are unverified. | Phase 12 gate | You | Build from the live site; motion stays provisional. |
 | B-04 | No logo, brand colours or brand fonts supplied (OD-02). | Phase 11 final tokens; Phase 12 gate | You | Typeset Panchang wordmark and dealt palette, replaceable through tokens. |
-| B-14 | Accountant verification of GST rates, thresholds, HSN classifications, seller GSTIN and state, and invoice compliance (D-030, D-033). | Live sales (Phase 19 launch). Not the schema. | You and your accountant | No rates are entered for production until verified. |
+| B-14 | Accountant verification of GST rates, thresholds, HSN classifications, seller GSTIN and state, and invoice compliance (D-030, D-033). Since D-167 the model holds CGST, SGST and IGST per price band; the open tax questions (place of supply, rounding and split, UTGST, shipping and COD fees) are listed in `proposals/gst-model.md` §5. | Live sales (Phase 19 launch). Not the schema. | You and your accountant | No rates are entered for production until verified. |
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |
 | B-08 | Email provider and sender domain (OD-19). | Phase 16 gate | You | Log-only provider in development. |
 | B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
 | B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
+| B-17 | Retention periods missing for `order_status_event`, `order_note`, `notification` and `payment_event`, and no lawful way to minimise text in append-only rows (D-168). | Approval of the Phase 15 and 16 migrations; launch | You and your lawyer | Evaluation in `proposals/personal-data-retention.md`; no change made. |
 | B-15 | No approved tool can measure the Phase 17 targets (Lighthouse performance ≥ 85, accessibility ≥ 95); `@axe-core/playwright` and Lighthouse are outside the approved package list (D-165). | Phase 17 gate | You | Structure smoke test and keyboard tests only; numbers not claimed. |
-| B-16 | Fulfilment's right to cancel unconfirmed COD orders differs between `system-design.md` §5 and `security-design.md` §4 (D-160). | Phase 16 gate | You | Implemented as system-design §5 (Fulfilment may cancel before confirmation). |
+| B-16 | Fulfilment's right to cancel unconfirmed COD orders: `system-design.md` §5 contradicts itself (line 137 allows it, line 142 does not) and `security-design.md` §4 line 70 does not allow it (D-160). | Phase 16 gate | You | Code unchanged (Fulfilment may cancel before confirmation), pinned by tests; choice A or B in `proposals/cod-cancellation.md`. |
 
 ## Environment risks (not blocking yet)
 

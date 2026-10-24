@@ -104,6 +104,7 @@ export function checkoutRouter(deps: ModuleDeps): Router {
           paymentMethod: body.paymentMethod,
           pinCode: body.shippingAddress?.pinCode,
           phone: body.shippingAddress?.phone,
+          state: body.shippingAddress?.state,
         });
       res.json({
         cart: view,

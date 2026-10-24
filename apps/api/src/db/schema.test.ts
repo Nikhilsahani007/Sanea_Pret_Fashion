@@ -12,6 +12,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_EXCLUSIONS,
   HANDWRITTEN_INDEXES,
   HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
@@ -52,8 +53,21 @@ describe("migration SQL contains every handwritten object", () => {
   });
 
   it.each(HANDWRITTEN_INDEXES)("index $name on $table", ({ table, name }) => {
-    expect(sql).toContain(`CREATE INDEX "${name}" ON "${table}"`);
+    expect(sql).toMatch(
+      new RegExp(`CREATE (UNIQUE )?INDEX "${name}" ON "${table}"`),
+    );
   });
+
+  it.each(HANDWRITTEN_EXCLUSIONS)(
+    "exclusion constraint $name on $table",
+    ({ table, name }) => {
+      expect(sql).toMatch(
+        new RegExp(
+          `ALTER TABLE "${table}" ADD CONSTRAINT "${name}"\\s+EXCLUDE USING gist`,
+        ),
+      );
+    },
+  );
 
   it.each(HANDWRITTEN_CHECKS)("CHECK $name on $table", ({ table, name }) => {
     expect(sql).toMatch(
@@ -130,6 +144,7 @@ describe("Phase 6 scope and conventions", () => {
         "navigation_item",
         "notification",
         "gst_rule",
+        "gst_rule_slab",
         "order",
         "order_item",
         "order_note",
@@ -196,17 +211,20 @@ describe("Phase 6 scope and conventions", () => {
     expect(money.map((m) => m[1]).sort()).toEqual([
       "amount_paise", // payment
       "amount_paise", // refund
+      "cgst_paise",
       "cod_fee_paise",
       "compare_at_price_paise",
       "discount_paise",
+      "igst_paise",
       "line_total_paise",
       "price_paise",
+      "sgst_paise",
       "shipping_paise",
       "subtotal_paise",
       "tax_paise",
-      "threshold_paise",
       "total_paise",
       "unit_price_paise",
+      "up_to_unit_price_paise",
     ]);
     for (const m of money) expect(m[2]).toBe("INTEGER");
   });

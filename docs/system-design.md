@@ -143,6 +143,8 @@ The browser redirect after payment is only a hint. The order is confirmed by the
 | RETURN_TO_ORIGIN | Restock on receipt (manual) | Fulfilment, Manager, Owner |
 | RETURN_REQUESTED / RETURNED | Restock after inspection (manual) | Manager, Owner |
 
+> **Open conflict (D-160, B-16):** the PENDING_CONFIRMATION row lets Fulfilment cancel; the CANCELLED row and `security-design.md` §4 do not. Not yet decided; see `proposals/cod-cancellation.md`. The code currently follows the PENDING_CONFIRMATION row.
+
 Every transition is validated against an allowed-transitions table in the orders service and written to `OrderStatusEvent` with actor and timestamp. Invalid transitions return `409 INVALID_TRANSITION`.
 
 ## 6. Payment architecture

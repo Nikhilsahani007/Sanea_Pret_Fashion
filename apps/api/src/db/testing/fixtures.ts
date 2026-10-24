@@ -82,13 +82,14 @@ export async function media(db: PrismaClient): Promise<string> {
   );
 }
 
-/** A COD order with no items, for tests that need only an order row. */
+/** A COD order with no items, for tests that need only an order row. Its
+ * number uses month 9900, which the order sequence can never produce. */
 export function order(db: PrismaClient): Promise<string> {
   const i = next();
   const no = String(i).padStart(6, "0");
   return one(
     db,
     `INSERT INTO "order" ("order_number", "email", "phone", "shipping_address", "billing_address", "status", "payment_method", "subtotal_paise", "shipping_paise", "total_paise", "idempotency_key", "request_hash", "access_token_hash", "updated_at")
-     VALUES ('SP-2610-${no}', 'test-order-${i}@example.test', '+919000000000', '{}', '{}', 'PENDING_CONFIRMATION', 'COD', 129900, 0, 129900, gen_random_uuid(), 'TEST', sha256('TEST-${i}'::bytea), now()) RETURNING "id"`,
+     VALUES ('SP-9900-${no}', 'test-order-${i}@example.test', '+919000000000', '{}', '{}', 'PENDING_CONFIRMATION', 'COD', 129900, 0, 129900, gen_random_uuid(), 'TEST', sha256('TEST-${i}'::bytea), now()) RETURNING "id"`,
   );
 }

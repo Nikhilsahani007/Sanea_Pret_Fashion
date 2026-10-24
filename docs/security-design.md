@@ -76,6 +76,8 @@ Role-based access control enforced in the API by middleware that reads the role 
 | Staff management | ✔ | | | |
 | Audit log | ✔ | | | |
 
+> **Open conflict (D-160, B-16):** whether Fulfilment may cancel an unconfirmed COD order is undecided; `system-design.md` §5 is inconsistent on it. Proposal: `proposals/cod-cancellation.md`.
+
 Object-level checks: customers can read only their own orders, addresses and wishlist (applies once accounts exist; deferred, D-034). Guest order status requires an unguessable order access token, not just the order number.
 
 ## 5. Payment and checkout integrity
