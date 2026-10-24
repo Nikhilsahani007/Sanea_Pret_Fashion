@@ -39,6 +39,7 @@ export async function expireUnpaidOrders(deps: ModuleDeps): Promise<number> {
         { type: "SYSTEM" },
         {
           note: "Payment not completed before the hold expired",
+          reason: "PAYMENT_NOT_COMPLETED",
           now,
         },
       );
@@ -74,6 +75,7 @@ export async function expireUnconfirmedCod(deps: ModuleDeps): Promise<number> {
         { type: "SYSTEM" },
         {
           note: `Not confirmed within ${confirmWithinHours} hours`,
+          reason: "NOT_CONFIRMED_IN_WINDOW",
           now,
         },
       );

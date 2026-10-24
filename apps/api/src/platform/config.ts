@@ -25,6 +25,12 @@ const schema = z
       .string({ error: "CSRF_SECRET is required" })
       .min(32, { error: "CSRF_SECRET must be at least 32 characters" }),
     TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
+    // Requests per minute per IP across the API (D-048). Leave at the default
+    // in production; the end-to-end stack raises it (D-173).
+    GLOBAL_RATE_LIMIT_PER_MINUTE: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.coerce.number().int().min(60).max(100_000).default(300),
+    ),
     DATABASE_URL: z
       .string({ error: "DATABASE_URL is required" })
       .regex(/^postgres(ql)?:\/\/\S+$/, {
@@ -103,6 +109,7 @@ export type Config = {
   readonly adminOrigin: string;
   readonly csrfSecret: string;
   readonly trustProxy: number;
+  readonly globalRateLimitPerMinute: number;
   readonly databaseUrl: string;
   readonly mfaEncryptionKey: Buffer;
   readonly mfaKeyVersion: number;
@@ -150,6 +157,7 @@ export function loadConfig(
     adminOrigin: e.ADMIN_ORIGIN,
     csrfSecret: e.CSRF_SECRET,
     trustProxy: e.TRUST_PROXY,
+    globalRateLimitPerMinute: e.GLOBAL_RATE_LIMIT_PER_MINUTE,
     databaseUrl: e.DATABASE_URL,
     mfaEncryptionKey: Buffer.from(e.MFA_ENCRYPTION_KEY, "base64"),
     mfaKeyVersion: e.MFA_ENCRYPTION_KEY_VERSION,

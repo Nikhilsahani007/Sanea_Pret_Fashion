@@ -121,6 +121,12 @@ export const HANDWRITTEN_CHECKS = [
   { table: "gst_rule_slab", name: "gst_rule_slab_bound_check" },
   { table: "gst_rule", name: "gst_rule_effective_check" },
   { table: "gst_rule", name: "gst_rule_hsn_prefix_check" },
+  // Cancellation reasons (D-160)
+  { table: "order_status_event", name: "order_status_event_reason_check" },
+  {
+    table: "order_status_event",
+    name: "order_status_event_other_note_check",
+  },
   // Phase 16 (admin operations)
   { table: "order_note", name: "order_note_body_check" },
   { table: "notification", name: "notification_template_check" },

@@ -14,11 +14,16 @@ export const PERMISSIONS = {
   "orders.view": [O, M, F],
   "orders.fulfil": [O, M, F],
   "orders.cancelRefund": [O, M],
+  // D-160 (decided 2026-10-25): Fulfilment may decline an unconfirmed COD
+  // order, with a reason; cancelling confirmed or packed orders stays O M.
+  "orders.declineCod": [O, M, F],
   "content.edit": [O, M, C],
   "content.publishRehma": [O],
   "enquiries.manage": [O, M],
   "settings.store": [O, M],
   "settings.payments": [O],
+  // D-169 (decided 2026-10-25): tax settings and GST rules, Owner only.
+  "settings.tax": [O],
   "staff.manage": [O],
   "audit.view": [O],
 } as const satisfies Record<string, readonly AdminRole[]>;

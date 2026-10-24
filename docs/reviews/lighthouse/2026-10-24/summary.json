@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-24",
+  "profile": "Lighthouse 13.5.0 default mobile, simulated throttling",
+  "data": "demo seed, placeholder images, local API",
+  "budget": {
+    "performance": 85,
+    "accessibility": 95
+  },
+  "pages": {
+    "landing": {
+      "path": "/",
+      "runs": [
+        {
+          "performance": 85,
+          "accessibility": 100
+        },
+        {
+          "performance": 86,
+          "accessibility": 100
+        },
+        {
+          "performance": 86,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 86,
+      "medianAccessibility": 100,
+      "meetsBudget": true
+    },
+    "listing": {
+      "path": "/shop/test-demo-kurtas",
+      "runs": [
+        {
+          "performance": 85,
+          "accessibility": 98
+        },
+        {
+          "performance": 87,
+          "accessibility": 98
+        },
+        {
+          "performance": 81,
+          "accessibility": 98
+        }
+      ],
+      "medianPerformance": 85,
+      "medianAccessibility": 98,
+      "meetsBudget": true
+    },
+    "product": {
+      "path": "/products/test-demo-kurta-a",
+      "runs": [
+        {
+          "performance": 82,
+          "accessibility": 100
+        },
+        {
+          "performance": 81,
+          "accessibility": 100
+        },
+        {
+          "performance": 83,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 82,
+      "medianAccessibility": 100,
+      "meetsBudget": false
+    },
+    "checkout": {
+      "path": "/checkout",
+      "runs": [
+        {
+          "performance": 80,
+          "accessibility": 100
+        },
+        {
+          "performance": 80,
+          "accessibility": 100
+        },
+        {
+          "performance": 79,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 80,
+      "medianAccessibility": 100,
+      "meetsBudget": false
+    }
+  }
+}

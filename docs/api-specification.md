@@ -136,7 +136,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET | `/admin/dashboard` → counts from real rows, only the ones the role may use: `orders { today, todayValuePaise, pendingCodConfirmation, needsAttention, toDispatch }` (O M F), `lowStockVariants` (all), `openEnquiries` (O M) (Phase 16) | all |
 | GET | `/admin/orders` (filters: `status`, `method`, `needsAttention=true`, `q` (order number, email or phone), `from`, `to` (dates, India time), `before`, `limit`) | O M F |
 | GET | `/admin/orders/:orderNumber` → `{ order (items, events with actor names, payments with refunds, shipments, notes), nextStatuses }`; `nextStatuses` is what this role may do | O M F |
-| POST | `/admin/orders/:orderNumber/transitions` `{ toStatus, note?, shipment?: { courierName, trackingNumber, trackingUrl? (https) } }`; SHIPPED needs `shipment`; cancelling a captured online payment records a pending refund; the order email follows | O M F (by the transitions table: cancel after confirmation O M) |
+| POST | `/admin/orders/:orderNumber/transitions` `{ toStatus, note?, reason?, shipment?: { courierName, trackingNumber, trackingUrl? (https) } }`; SHIPPED needs `shipment`; CANCELLED needs `reason` (one of the six staff codes in `STAFF_CANCEL_REASONS`; `OTHER` needs `note`), else `400`; declining an unconfirmed COD order needs `orders.declineCod`, cancelling a confirmed or packed order `orders.cancelRefund`, else `403`; no cancellation after dispatch (`409 INVALID_TRANSITION`); cancelling a captured online payment records a pending refund; the order email follows (D-160) | O M F (route); the move decides further |
 | POST | `/admin/orders/:orderNumber/notes` `{ body }` (internal, append-only) | O M F |
 | POST | `/admin/orders/:orderNumber/refunds` `{ amountPaise, reason }` → `409 CONFLICT { reason: NOTHING_PAID \| OVER_REFUND, refundablePaise }`; refunds are paid out manually in release one | O M |
 | POST | `/admin/orders/:orderNumber/refunds/:refundId/complete` `{ outcome: REFUNDED \| FAILED, reference? }` (Phase 16, additive) | O M |
@@ -152,6 +152,8 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | POST | `/admin/media` (raw image body, `Content-Type: image/jpeg`, `image/png` or `image/webp`, at most 15 MB; optional `X-Filename` header, URL-encoded) → `201 { asset }` · GET `/admin/media` | O M C |
 | GET/POST/PATCH | `/admin/colours[/:id]` · GET `/admin/sizes` (reference data) · GET/POST/PATCH `/admin/size-charts[/:id]` (Phase 8, additive) | GET: all · writes: O M C |
 | GET/PUT | `/admin/settings/:group` (store, shipping, cod; payments arrives with Phase 18) | O M (payments: O) |
+| GET/PUT | `/admin/tax/settings` `{ sellerState }` (a state key or null; empty by default, B-14) (D-169, D-171) | O |
+| GET/POST | `/admin/tax/gst-rules` `{ hsnPrefix, effectiveFrom, effectiveTo?, note?, slabs: [{ upToUnitPricePaise?, cgstBps, sgstBps, igstBps }] }`; an overlapping rule for the same prefix → `409 { reason: GST_RULE_OVERLAP }`. POST `/admin/tax/gst-rules/:id/end` `{ effectiveTo }` (only in the future); rules are never edited | O |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |
 

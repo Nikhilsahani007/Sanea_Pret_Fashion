@@ -1,6 +1,6 @@
 # Proposal — Cancelling Orders, Including Unconfirmed COD (D-160)
 
-Status: **Proposal. Not approved, not implemented.** The code still behaves as built in Phase 16, pinned by `admin-orders.db-test.ts` "cancellation by role (current behaviour, pending D-160)". Date: 2026-10-25.
+Status: **Decided by you on 2026-10-25 (choice A, reason codes required) and implemented; not yet committed or gate-approved.** Kept as the record of the analysis. Implementation: `orders.declineCod` permission, transitions table, reason codes, migration `20261025100000_cancellation_reasons`, tests in `admin-orders.db-test.ts` "cancellation by role, state and reason (D-160)". Original date: 2026-10-25.
 
 ## 1. The conflict, exactly
 | Source | Statement | Unconfirmed COD: may Fulfilment cancel? |

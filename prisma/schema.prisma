@@ -585,6 +585,9 @@ model OrderStatusEvent {
   actorType  ActorType    @map("actor_type")
   actorId    String?      @map("actor_id")
   note       String?
+  /// Cancellation reason code (D-160): required exactly when the order is
+  /// cancelled; `OTHER` needs a note. Codes: CANCEL_REASONS in @sanea/shared.
+  reason     String?
   createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)

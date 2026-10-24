@@ -20,9 +20,8 @@ export type SettingsGroup = keyof typeof SETTINGS_GROUPS;
 /**
  * Tax settings (D-033, D-167): the seller's registered state, which decides
  * intra- or inter-state supply. Empty until the Owner enters the
- * accountant-verified value (B-14). Read only here: no admin route edits it
- * yet, because who may edit tax settings is an open choice (proposed: Owner
- * only, like payment settings).
+ * accountant-verified value (B-14). Edited only by the Owner at
+ * /admin/tax/settings (`settings.tax`, D-169).
  */
 export const taxSettingsSchema = z.strictObject({
   sellerState: indianStateSchema.nullable().default(null),

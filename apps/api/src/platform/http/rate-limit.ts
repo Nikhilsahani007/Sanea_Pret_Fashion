@@ -24,9 +24,13 @@ export function createRateLimiter(options: LimitOptions): RequestHandler {
   });
 }
 
-/** Global default: 300 requests per minute per IP, health exempt (D-048). */
-export function globalRateLimit(): RequestHandler {
-  const limiter = createRateLimiter({ windowMs: 60_000, limit: 300 });
+/**
+ * Global default: 300 requests per minute per IP, health exempt (D-048).
+ * `limit` comes from GLOBAL_RATE_LIMIT_PER_MINUTE; only the disposable
+ * end-to-end stack raises it, because all its browsers share one IP (D-173).
+ */
+export function globalRateLimit(limit = 300): RequestHandler {
+  const limiter = createRateLimiter({ windowMs: 60_000, limit });
   return (req, res, next) =>
     req.path === HEALTH_PATH ? next() : limiter(req, res, next);
 }

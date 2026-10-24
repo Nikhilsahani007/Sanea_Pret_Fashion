@@ -1,7 +1,8 @@
 // Starts the end-to-end stack: a fresh migrated `sanea_test_e2e` database on
 // the TEST_DATABASE_URL server, one admin per role, the API on port 4100, and
 // the admin (5174) and storefront (5173) dev servers proxying to it.
-// Run by Playwright's webServer; stops everything on SIGTERM.
+// Run by Playwright's webServer and by scripts/lighthouse.ts; stops
+// everything on SIGTERM.
 //
 //   TEST_DATABASE_URL=postgresql://…@127.0.0.1:5433/sanea_test node e2e/support/start-stack.ts
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
@@ -111,6 +112,9 @@ run(process.execPath, ["apps/api/src/main.ts"], {
   DATABASE_URL: dbUrl.toString(),
   MFA_ENCRYPTION_KEY: MFA_KEY_B64,
   IP_HASH_KEY: "e2e-only-ip-hash-key-at-least-32-chars",
+  // Every browser in the suite shares 127.0.0.1; the per-route limits
+  // (sign-in, checkout, enquiries) stay as in production (D-173).
+  GLOBAL_RATE_LIMIT_PER_MINUTE: "5000",
   MEDIA_DIR: mediaDir,
 });
 const apiUrl = `http://127.0.0.1:${API_PORT}`;
@@ -119,12 +123,32 @@ run(
   ["node_modules/vite/bin/vite.js", "apps/admin", "--strictPort"],
   { API_URL: apiUrl },
 );
-if (existsSync(join(root, "apps/storefront/index.html")))
-  run(
-    process.execPath,
-    ["node_modules/vite/bin/vite.js", "apps/storefront", "--strictPort"],
-    { API_URL: apiUrl },
-  );
+// STOREFRONT_MODE=preview serves a production build (Lighthouse, D-165)
+// instead of the dev server, on the same port and with the same proxy.
+if (existsSync(join(root, "apps/storefront/index.html"))) {
+  if (process.env.STOREFRONT_MODE === "preview") {
+    execFileSync(
+      process.execPath,
+      ["node_modules/vite/bin/vite.js", "build", "apps/storefront"],
+      { cwd: root, stdio: "ignore" },
+    );
+    run(
+      process.execPath,
+      [
+        "node_modules/vite/bin/vite.js",
+        "preview",
+        "apps/storefront",
+        "--strictPort",
+      ],
+      { API_URL: apiUrl },
+    );
+  } else
+    run(
+      process.execPath,
+      ["node_modules/vite/bin/vite.js", "apps/storefront", "--strictPort"],
+      { API_URL: apiUrl },
+    );
+}
 
 for (const signal of ["SIGTERM", "SIGINT"] as const)
   process.on(signal, () => {

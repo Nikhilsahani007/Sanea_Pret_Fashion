@@ -94,6 +94,7 @@ Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 | Export | Kind | Description |
 |--------|------|-------------|
 | `ORDER_TRANSITIONS`, `canTransition(from, to, actor)`, `nextStatuses(from, actor)` | constant, functions | The allowed-transitions table of `system-design.md` §5 with the staff roles for each move; `SYSTEM` may make every listed move |
+| `CANCEL_REASONS`, `STAFF_CANCEL_REASONS`, `CancelReason` | constants, type | Cancellation reason codes (D-160): six for staff (`OTHER` needs a note), three for the system. Cancellation moves carry the permission the API checks (`orders.declineCod` before confirmation, `orders.cancelRefund` after) |
 | `ORDER_NUMBER_PATTERN` | constant | `SP-YYMM-NNNNNN` (D-115) |
 
 ### Validation

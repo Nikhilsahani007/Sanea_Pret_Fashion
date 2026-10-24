@@ -41,6 +41,7 @@ import {
 } from "../../modules/media/storage.ts";
 import { seoRouter } from "../../modules/seo/router.ts";
 import { staffRouter } from "../../modules/staff/router.ts";
+import { taxAdminRouter } from "../../modules/tax/admin-router.ts";
 import type { Config } from "../config.ts";
 import type { Db } from "../db.ts";
 import { jsonBody, requireJson } from "./body.ts";
@@ -131,7 +132,7 @@ export function createApp({
       }),
     );
   }
-  app.use(globalRateLimit()); // 5. 300/min per IP, health exempt
+  app.use(globalRateLimit(config.globalRateLimitPerMinute)); // 5. 300/min per IP by default, health exempt
   app.use(cookieParser()); // 6. cookies for CSRF and admin sessions
   if (deps) app.use(adminSession(deps)); // 6a. admin session, so CSRF can bind to it
   app.use(csrfProtection(config)); // 7. Origin + token on state-changing methods
@@ -159,6 +160,7 @@ export function createApp({
     app.use(enquiriesAdminRouter(deps));
     app.use(dashboardRouter(deps));
     app.use(seoRouter(deps));
+    app.use(taxAdminRouter(deps));
     if (jobs) {
       startReservationExpiry(deps);
       startOrderJobs(deps);

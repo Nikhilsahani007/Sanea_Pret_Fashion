@@ -216,10 +216,21 @@ describe("E2E-2 admin part at the API: confirm, pack, ship, deliver", () => {
   it("Fulfilment cannot cancel a confirmed order; Manager can, the stock returns and a cancel email goes", async () => {
     const { no, variant } = await place("COD");
     await move(no, { toStatus: "CONFIRMED" });
-    const f = await move(no, { toStatus: "CANCELLED" });
-    expect(f.status).toBe(409);
-    expect(f.body.error.code).toBe("INVALID_TRANSITION");
-    expect((await move(no, { toStatus: "CANCELLED" }, s.M)).status).toBe(200);
+    const f = await move(no, {
+      toStatus: "CANCELLED",
+      reason: "CUSTOMER_REQUESTED",
+    });
+    expect(f.status).toBe(403);
+    expect(f.body.error.code).toBe("FORBIDDEN");
+    expect(
+      (
+        await move(
+          no,
+          { toStatus: "CANCELLED", reason: "CUSTOMER_REQUESTED" },
+          s.M,
+        )
+      ).status,
+    ).toBe(200);
     expect(await level(variant)).toMatchObject({ reserved: 0, onHand: 5 });
     expect(
       await h.db.notification.count({
@@ -248,35 +259,113 @@ describe("E2E-2 admin part at the API: confirm, pack, ship, deliver", () => {
   });
 });
 
-// Cancellation by role and state, through the real route. This pins the
-// behaviour implemented today, which is NOT an approved policy: D-160 is open
-// and the specifications disagree (system-design.md §5 lines 137 and 142,
-// security-design.md §4). Changing the policy must change this table.
-describe("cancellation by role (current behaviour, pending D-160)", () => {
+// D-160 (decided 2026-10-25), through the real route: Fulfilment may decline
+// only an unconfirmed COD order; Owner and Manager may also cancel confirmed
+// or packed ones; nobody cancels after dispatch. 403 = the role lacks the
+// permission for that move; 409 = no such move from that status.
+describe("cancellation by role, state and reason (D-160)", () => {
   const roles = ["O", "M", "F", "C"] as const;
   const expected = {
     PENDING_CONFIRMATION: { O: 200, M: 200, F: 200, C: 403 },
-    CONFIRMED: { O: 200, M: 200, F: 409, C: 403 },
+    CONFIRMED: { O: 200, M: 200, F: 403, C: 403 },
+    PACKED: { O: 200, M: 200, F: 403, C: 403 },
+    SHIPPED: { O: 409, M: 409, F: 409, C: 403 },
   } as const;
-  for (const from of ["PENDING_CONFIRMATION", "CONFIRMED"] as const)
+  const steps = {
+    PENDING_CONFIRMATION: [],
+    CONFIRMED: [{ toStatus: "CONFIRMED" }],
+    PACKED: [{ toStatus: "CONFIRMED" }, { toStatus: "PACKED" }],
+    SHIPPED: [
+      { toStatus: "CONFIRMED" },
+      { toStatus: "PACKED" },
+      {
+        toStatus: "SHIPPED",
+        shipment: { courierName: "TEST Courier", trackingNumber: "T1" },
+      },
+    ],
+  } as const;
+  for (const from of Object.keys(expected) as (keyof typeof expected)[])
     for (const role of roles)
       it(`${role} cancelling a ${from} COD order → ${expected[from][role]}`, async () => {
         const { no } = await place("COD");
-        if (from === "CONFIRMED")
-          expect((await move(no, { toStatus: "CONFIRMED" }, s.O)).status).toBe(
-            200,
-          );
+        for (const step of steps[from])
+          expect((await move(no, step, s.O)).status).toBe(200);
         const res = await move(
           no,
-          { toStatus: "CANCELLED", note: "TEST" },
+          { toStatus: "CANCELLED", reason: "CUSTOMER_REQUESTED" },
           s[role],
         );
-        expect(res.status).toBe(expected[from][role]);
+        expect(res.status, JSON.stringify(res.body)).toBe(expected[from][role]);
         const o = await h.db.order.findUniqueOrThrow({
           where: { orderNumber: no },
         });
         expect(o.status).toBe(res.status === 200 ? "CANCELLED" : from);
       });
+
+  it("a reason is required, must be a staff code, and OTHER needs a note", async () => {
+    const { no } = await place("COD");
+    const cases: [object, string][] = [
+      [{ toStatus: "CANCELLED" }, "body.reason"],
+      [{ toStatus: "CANCELLED", reason: "PAID_NO_STOCK" }, "body.reason"],
+      [{ toStatus: "CANCELLED", reason: "LOST" }, "body.reason"],
+      [{ toStatus: "CANCELLED", reason: "OTHER" }, "body.note"],
+      [{ toStatus: "CANCELLED", reason: "OTHER", note: "   " }, "body.note"],
+      [{ toStatus: "CONFIRMED", reason: "OTHER", note: "x" }, "body.reason"],
+    ];
+    for (const [body, path] of cases) {
+      const res = await move(no, body);
+      expect(res.status, JSON.stringify(body)).toBe(400);
+      expect(res.body.error.details[0].path).toBe(path);
+    }
+    expect(
+      (await h.db.order.findUniqueOrThrow({ where: { orderNumber: no } }))
+        .status,
+    ).toBe("PENDING_CONFIRMATION");
+  });
+
+  it("records the reason in the history and the audit log; the note only in the history", async () => {
+    const { no } = await place("COD");
+    const note = "TEST Customer Asha said she ordered twice";
+    const res = await move(no, {
+      toStatus: "CANCELLED",
+      reason: "OTHER",
+      note,
+    });
+    expect(res.status).toBe(200);
+    const d = (await h.get(`/api/v1/admin/orders/${no}`, s.O)).body.order;
+    expect(d.events.at(-1)).toMatchObject({
+      toStatus: "CANCELLED",
+      reason: "OTHER",
+      note,
+      actorType: "ADMIN",
+    });
+    const audit = await h.db.auditLog.findFirstOrThrow({
+      where: { action: "order.status_changed", entityId: d.id },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit.after).toEqual({ status: "CANCELLED", reason: "OTHER" });
+    expect(JSON.stringify(audit)).not.toContain("Asha");
+    expect(JSON.stringify(audit)).not.toContain("shopper@example.test");
+  });
+
+  it("the database refuses a cancellation without a reason, or OTHER without a note", async () => {
+    const id = await fx.order(h.db);
+    const event = (reason: string | null, note: string | null) =>
+      h.db.$executeRawUnsafe(
+        `INSERT INTO "order_status_event" ("order_id", "to_status", "actor_type", "reason", "note")
+         VALUES ('${id}', 'CANCELLED', 'SYSTEM', ${reason ? `'${reason}'` : "NULL"}, ${note ? `'${note}'` : "NULL"})`,
+      );
+    await expect(event(null, null)).rejects.toThrow(
+      /order_status_event_reason_check/,
+    );
+    await expect(event("LOST", null)).rejects.toThrow(
+      /order_status_event_reason_check/,
+    );
+    await expect(event("OTHER", null)).rejects.toThrow(
+      /order_status_event_other_note_check/,
+    );
+    await event("OTHER", "TEST note");
+  });
 });
 
 describe("refunds", () => {
@@ -285,7 +374,15 @@ describe("refunds", () => {
     expect(
       (await h.get(`/api/v1/admin/orders/${no}`, s.O)).body.order.status,
     ).toBe("CONFIRMED");
-    expect((await move(no, { toStatus: "CANCELLED" }, s.O)).status).toBe(200);
+    expect(
+      (
+        await move(
+          no,
+          { toStatus: "CANCELLED", reason: "CUSTOMER_REQUESTED" },
+          s.O,
+        )
+      ).status,
+    ).toBe(200);
     let d = (await h.get(`/api/v1/admin/orders/${no}`, s.O)).body.order;
     expect(d.payments[0].status).toBe("REFUND_PENDING");
     const refund = d.payments[0].refunds[0];

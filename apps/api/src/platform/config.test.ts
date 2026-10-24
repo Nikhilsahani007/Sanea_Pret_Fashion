@@ -33,6 +33,7 @@ describe("loadConfig()", () => {
       adminOrigin: "http://localhost:5174",
       csrfSecret: "a".repeat(32),
       trustProxy: 0,
+      globalRateLimitPerMinute: 300,
       databaseUrl: "postgresql://u:p@127.0.0.1:5433/sanea_dev",
       mfaEncryptionKey: Buffer.alloc(32, 7),
       mfaKeyVersion: 1,
@@ -128,6 +129,20 @@ describe("loadConfig()", () => {
     expect(problems({ ...valid, MOCK_PAYMENT_SECRET: "short" })).toHaveLength(
       1,
     );
+  });
+
+  it("reads the global rate limit, treating an empty value as the default", () => {
+    expect(
+      loadConfig({ ...valid, GLOBAL_RATE_LIMIT_PER_MINUTE: "" })
+        .globalRateLimitPerMinute,
+    ).toBe(300);
+    expect(
+      loadConfig({ ...valid, GLOBAL_RATE_LIMIT_PER_MINUTE: "5000" })
+        .globalRateLimitPerMinute,
+    ).toBe(5000);
+    expect(
+      problems({ ...valid, GLOBAL_RATE_LIMIT_PER_MINUTE: "10" }),
+    ).toHaveLength(1);
   });
 
   it("validates the media URL prefix", () => {

@@ -1,9 +1,11 @@
 // /api/v1/admin/orders (api-specification.md §4). Staff list and read orders
-// (O M F), move them through the allowed transitions (cancel: O M by the
-// table), add internal notes, record refunds (O M; executed manually in
+// (O M F), move them through the allowed transitions (D-160: declining an
+// unconfirmed COD order O M F, cancelling a confirmed or packed one O M, both
+// with a reason code), add internal notes, record refunds (O M; executed manually in
 // release one, project-requirements.md UF-7) and restock returns (SR-13).
 // Every write is audited without personal data; emails follow the change.
 import {
+  STAFF_CANCEL_REASONS,
   can,
   nextStatuses,
   orderStatusSchema,
@@ -49,6 +51,8 @@ const oneLine = (max: number) =>
 const transitionBody = z.strictObject({
   toStatus: orderStatusSchema,
   note: z.string().trim().max(500).optional(),
+  /** Required for CANCELLED (D-160); OTHER needs a note. */
+  reason: z.enum(STAFF_CANCEL_REASONS).optional(),
   shipment: z
     .strictObject({
       courierName: oneLine(100),
@@ -235,6 +239,7 @@ export function ordersAdminRouter(deps: ModuleDeps): Router {
             actorType: e.actorType,
             actorName: actors.find((a) => a.id === e.actorId)?.name ?? null,
             note: e.note,
+            reason: e.reason,
             createdAt: e.createdAt.toISOString(),
           })),
           payments: o.payments.map((p) => ({
@@ -288,6 +293,7 @@ export function ordersAdminRouter(deps: ModuleDeps): Router {
           { type: "ADMIN", adminId: admin.id, role: admin.role },
           {
             note: body.note,
+            reason: body.reason,
             ...(body.shipment ? { shipment: body.shipment } : {}),
             now,
           },
@@ -299,7 +305,12 @@ export function ordersAdminRouter(deps: ModuleDeps): Router {
           action: "order.status_changed",
           entityId: o.id,
           before: { status: r.from },
-          after: { status: r.to },
+          // The reason code only; the note may name the customer, so it
+          // stays in the order history (D-160).
+          after: {
+            status: r.to,
+            ...(body.reason ? { reason: body.reason } : {}),
+          },
         });
         return r;
       });

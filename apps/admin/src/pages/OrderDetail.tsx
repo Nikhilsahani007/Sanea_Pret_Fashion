@@ -1,6 +1,7 @@
 // Order detail: everything about one order, the moves this role may make
 // (from the API's allowed-transitions answer), shipment entry, internal notes,
 // refunds (recorded here, paid out manually in release one) and restocking.
+import { CANCEL_REASONS, STAFF_CANCEL_REASONS } from "@sanea/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
@@ -69,6 +70,7 @@ type Detail = {
       actorType: string;
       actorName: string | null;
       note: string | null;
+      reason: string | null;
       createdAt: string;
     }[];
     payments: {
@@ -117,6 +119,7 @@ export function OrderDetail() {
     queryFn: () => get<Detail>(`/admin/orders/${orderNumber}`),
   });
   const [moveTo, setMoveTo] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
   const [done, setDone] = useState<string | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: key });
 
@@ -171,6 +174,7 @@ export function OrderDetail() {
     move.mutate({
       toStatus: moveTo,
       ...(v("note") ? { note: v("note") } : {}),
+      ...(moveTo === "CANCELLED" && v("reason") ? { reason: v("reason") } : {}),
       ...(moveTo === "SHIPPED"
         ? {
             shipment: {
@@ -285,6 +289,7 @@ export function OrderDetail() {
                       setDone(null);
                       move.reset();
                       setMoveTo(s);
+                      setReason("");
                     }}
                   >
                     {ACTION_LABELS[s] ?? s}
@@ -295,6 +300,7 @@ export function OrderDetail() {
                 <form
                   className={ui.stack}
                   onSubmit={onMove}
+                  noValidate
                   aria-label={ACTION_LABELS[moveTo]}
                 >
                   {moveTo === "SHIPPED" ? (
@@ -332,18 +338,48 @@ export function OrderDetail() {
                     </p>
                   ) : null}
                   {moveTo === "CANCELLED" ? (
-                    <p className={ui.muted}>
-                      Held stock is released.{" "}
-                      {o.paymentMethod === "PREPAID" && paid
-                        ? "A refund record is created for the online payment."
-                        : ""}
-                    </p>
+                    <>
+                      <p className={ui.muted}>
+                        Held stock is released.{" "}
+                        {o.paymentMethod === "PREPAID" && paid
+                          ? "A refund record is created for the online payment."
+                          : ""}
+                      </p>
+                      <Select
+                        label="Reason"
+                        name="reason"
+                        required
+                        defaultValue=""
+                        error={fieldErr("reason")}
+                        onChange={(e) => setReason(e.currentTarget.value)}
+                      >
+                        <option value="" disabled>
+                          Choose a reason
+                        </option>
+                        {STAFF_CANCEL_REASONS.map((r) => (
+                          <option key={r} value={r}>
+                            {CANCEL_REASONS[r]}
+                          </option>
+                        ))}
+                      </Select>
+                    </>
                   ) : null}
                   <TextArea
-                    label="Note for the history (optional)"
+                    label={
+                      moveTo === "CANCELLED" && reason === "OTHER"
+                        ? "Note for the history"
+                        : "Note for the history (optional)"
+                    }
+                    hint={
+                      moveTo === "CANCELLED"
+                        ? "Kept in the order history only. Do not record payment details."
+                        : undefined
+                    }
                     name="note"
                     rows={2}
                     maxLength={500}
+                    required={moveTo === "CANCELLED" && reason === "OTHER"}
+                    error={fieldErr("note")}
                   />
                   <ErrorSummary error={move.error} />
                   <div className={ui.row}>
@@ -371,6 +407,15 @@ export function OrderDetail() {
                   {dateTime(e.createdAt)}:{" "}
                   {STATUS_LABELS[e.toStatus] ?? e.toStatus} ·{" "}
                   {e.actorName ?? ACTOR[e.actorType]}
+                  {e.reason ? (
+                    <span>
+                      {" "}
+                      ·{" "}
+                      {CANCEL_REASONS[
+                        e.reason as keyof typeof CANCEL_REASONS
+                      ] ?? e.reason}
+                    </span>
+                  ) : null}
                   {e.note ? (
                     <span className={ui.muted}> · {e.note}</span>
                   ) : null}

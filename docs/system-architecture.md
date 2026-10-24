@@ -205,6 +205,15 @@ Argon2id (`crypto.argon2`), TOTP (HMAC-SHA-1), AES-256-GCM and HMAC all use Node
 
 Not installed: `@testing-library/react` (component behaviour is covered by Playwright against the real app instead, so no DOM-emulation package is needed). Self-hosted font files (Archivo, OFL) are assets, not packages (D-141).
 
+### Installed on 2026-10-25 (development only, pinned exactly, D-165)
+
+| Package | Version | Reason |
+|---------|---------|--------|
+| @axe-core/playwright | 4.13.0 | Automated WCAG checks in the Playwright suite (`e2e/accessibility.spec.ts`); brings `axe-core` 4.13.0; MPL-2.0 |
+| lighthouse | 13.5.0 | Performance and accessibility scores on the production storefront build (`npm run lighthouse`); Apache-2.0; uses the installed Chromium through `CHROME_PATH` |
+
+Lock file: 105 new entries, all development-only; no existing package changed version.
+
 ### Planned for later phases
 
 Not installed yet. Planned dependencies and the reason for each:

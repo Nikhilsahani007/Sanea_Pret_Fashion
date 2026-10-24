@@ -67,6 +67,8 @@ const PUBLIC_RUNTIME_EXPORTS = [
   "ORDER_TRANSITIONS",
   "canTransition",
   "nextStatuses",
+  "CANCEL_REASONS",
+  "STAFF_CANCEL_REASONS",
 ];
 
 describe("@sanea/shared public API", () => {

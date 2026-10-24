@@ -36,7 +36,7 @@ This document records the confirmed business rules, the first-release scope, the
 | Admin: Owner | Business owner. | Everything, including staff, payment settings and Rehma Foundation publishing. |
 | Admin: Manager | Operations lead. | Catalogue, content, inventory, orders, enquiries. No staff or payment settings. |
 | Admin: Catalogue editor | Merchandiser or content editor. | Products, collections, content. Read-only inventory. No orders. |
-| Admin: Fulfilment | Packing and dispatch staff. | Orders (view, fulfilment updates), inventory adjustments. No pricing. |
+| Admin: Fulfilment | Packing and dispatch staff. | Orders (view, fulfilment updates, declining an unconfirmed COD order with a reason, D-160), inventory adjustments. No pricing. |
 
 The permission matrix is in `security-design.md` §4.
 

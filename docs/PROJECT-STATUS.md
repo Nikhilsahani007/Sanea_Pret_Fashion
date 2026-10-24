@@ -18,11 +18,13 @@ Last updated: 2026-10-24 · Repository: https://github.com/Nikhilsahani007/Sanea
 | 14 Customer accounts | Deferred (D-034) | — |
 | 15 Checkout, orders, COD and mock payments | **Evidence ready, awaiting your approval** | `phase-15-plan.md`; migration `20261024180000_orders_payments` needs your approval; checkout tests 34 passed; end-to-end 39 passed (E2E-1, E2E-3, E2E-2 storefront part); B-07 defaults are proposals (D-150) |
 | 16 Admin operations and notifications | **Evidence ready, awaiting your approval** | `phase-16-plan.md`; migration `20261024200000_admin_operations` needs your approval; admin order tests 11 passed; E2E-2, E2E-5, E2E-6 passed; D-160 needs your decision |
-| 17 Hardening and legal content | **Partly done**: SEO, accessibility smoke test, security review, bundle budget; Lighthouse/axe need package approval (D-165); legal text needs OD-12 | `phase-17-plan.md`, `security-review.md`; end-to-end 62 passed |
+| 17 Hardening and legal content | **Partly done**: SEO, accessibility smoke test, axe scans, security review, bundle budget; Lighthouse measured, product 82 and checkout 80 below the 85 budget (B-18); legal text needs OD-12 | `phase-17-plan.md`, `security-review.md`, `docs/reviews/lighthouse/2026-10-24/`; end-to-end 84 passed |
 | 18 Live payment gateway | **Blocked (OD-06, your approval).** Preparation only: provider contract test passes on the mock | `phase-18-plan.md`; `mock.test.ts` 7 passed |
 | 19 Infrastructure and launch | **Plan proposed; nothing provisioned** (OD-18). Restore test not run (E-05) | `phase-19-plan.md` |
 
 Final summary for you: `RELEASE-READINESS.md`.
+
+**2026-10-25 your decisions applied (uncommitted, on top of pushed `a0bc623`):** COD cancellation D-160 implemented (permission `orders.declineCod`; Owner and Manager only for confirmed or packed; none after dispatch; reason codes D-170 with migration `20261025100000_cancellation_reasons`, needs your approval); tax settings and GST rules Owner only (D-169, API D-171, no rates or legal facts entered); `@axe-core/playwright` 4.13.0 and `lighthouse` 13.5.0 installed (D-165, D-172); configurable global rate limit for the test stack (D-173). Verification: 576 unit, 462 database, 84 end-to-end passed; Lighthouse below budget on two pages (B-18). **Next:** your review, then permission to commit and push.
 
 **2026-10-25 release-blocker preparation (proposals, nothing approved):** GST model revised in the unapproved `orders_payments` migration (D-167, `proposals/gst-model.md`); COD cancellation choice A or B (D-160, `proposals/cod-cancellation.md`; code unchanged and pinned by tests); retention and erasure evaluation (D-168, B-17); axe and Lighthouse proposal with exact versions (D-165). Not pushed.
 

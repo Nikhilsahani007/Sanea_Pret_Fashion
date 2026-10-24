@@ -163,8 +163,11 @@ export function Product() {
         </ol>
       </nav>
       <div className={s.layout}>
+        {/* Focusable: on phones the gallery scrolls sideways, and keyboard
+            users must be able to scroll it too (WCAG 2.1.1, axe). */}
         <ul
           className={s.gallery}
+          tabIndex={0}
           aria-label={`Photographs of ${p.name}${colour ? ` in ${colour.name}` : ""}`}
         >
           {images.length === 0 ? (

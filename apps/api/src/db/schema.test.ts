@@ -2,7 +2,7 @@
 // Database-level checks of the same objects run in the integration tests.
 import { readdirSync, readFileSync } from "node:fs";
 
-import { AdminRole as SharedAdminRole } from "@sanea/shared";
+import { CANCEL_REASONS, AdminRole as SharedAdminRole } from "@sanea/shared";
 import { describe, expect, it } from "vitest";
 
 import { AdminRole as DbAdminRole } from "../generated/prisma/enums.ts";
@@ -107,6 +107,18 @@ describe("migration SQL contains every handwritten object", () => {
       (m) => m[1],
     );
     expect(named.sort()).toEqual(HANDWRITTEN_CHECKS.map((c) => c.name).sort());
+  });
+});
+
+describe("cancellation reasons (D-160)", () => {
+  it("the database CHECK lists exactly the shared reason codes", () => {
+    const check = sql.match(
+      /"order_status_event_reason_check"[\s\S]*?IN \(([^)]+)\)/,
+    );
+    const codes = [...(check?.[1] ?? "").matchAll(/'([A-Z_]+)'/g)].map(
+      (m) => m[1],
+    );
+    expect(codes.sort()).toEqual(Object.keys(CANCEL_REASONS).sort());
   });
 });
 

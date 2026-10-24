@@ -1,7 +1,15 @@
 // The order state machine (system-design.md §5). Every change goes through
 // `transition`, which checks the allowed-transitions table, applies the stock
 // effect and writes an OrderStatusEvent. Run inside a transaction.
-import { AdminRole, OrderStatus, canTransition } from "@sanea/shared";
+import {
+  AdminRole,
+  ORDER_TRANSITIONS,
+  OrderStatus,
+  STAFF_CANCEL_REASONS,
+  can,
+  canTransition,
+  type CancelReason,
+} from "@sanea/shared";
 
 import type { Prisma } from "../../generated/prisma/client.ts";
 import { AppError } from "../../platform/http/errors.ts";
@@ -39,21 +47,42 @@ export async function lockOrder(tx: Tx, orderId: string) {
 /**
  * Moves an order to `to`. Staff need the role the table gives; the system,
  * customer and provider actors are the system for the table. CANCELLED
- * releases every hold and allocation; SHIPPED needs a shipment and takes the
- * units out of stock. A COD order's payment follows delivery or refusal.
+ * releases every hold and allocation and needs a reason (D-160): staff use
+ * the staff codes, `OTHER` with a note; declining an unconfirmed COD order
+ * needs `orders.declineCod`, cancelling a confirmed or packed one
+ * `orders.cancelRefund` (403 otherwise). SHIPPED needs a shipment and takes
+ * the units out of stock. A COD order's payment follows delivery or refusal.
  */
 export async function transition(
   tx: Tx,
   orderId: string,
   to: OrderStatus,
   actor: Actor,
-  options: { note?: string | undefined; shipment?: ShipmentInput; now: Date },
+  options: {
+    note?: string | undefined;
+    reason?: CancelReason | undefined;
+    shipment?: ShipmentInput;
+    now: Date;
+  },
 ) {
   const order = await lockOrder(tx, orderId);
+  const move = ORDER_TRANSITIONS.find(
+    (t) => t.from === order.status && t.to === to,
+  );
+  // A listed move this role's permission does not cover is forbidden; a move
+  // that does not exist from this status (for example cancelling after
+  // dispatch) is an invalid transition for everyone.
+  if (
+    move?.permission &&
+    actor.type === "ADMIN" &&
+    !can(actor.role, move.permission)
+  )
+    throw new AppError("FORBIDDEN");
   const who = actor.type === "ADMIN" ? actor.role : "SYSTEM";
   if (!canTransition(order.status, to, who))
     throw new AppError("INVALID_TRANSITION", { from: order.status, to });
   const adminId = actor.type === "ADMIN" ? actor.adminId : undefined;
+  checkReason(to, actor, options.reason, options.note);
 
   if (to === "SHIPPED") {
     if (!options.shipment)
@@ -101,10 +130,48 @@ export async function transition(
       actorType: actor.type,
       actorId: adminId ?? null,
       note: options.note ?? null,
+      reason: options.reason ?? null,
       createdAt: options.now,
     },
   });
   return { from: order.status, to };
+}
+
+/** Cancellations need a reason; `OTHER` a note; staff only the staff codes. */
+function checkReason(
+  to: OrderStatus,
+  actor: Actor,
+  reason: CancelReason | undefined,
+  note: string | undefined,
+) {
+  const problem = (path: string, code: string, message: string) =>
+    new AppError("VALIDATION_FAILED", [{ path, code, message }]);
+  if (to !== "CANCELLED") {
+    if (reason)
+      throw problem(
+        "body.reason",
+        "INVALID",
+        "Only cancellations take a reason.",
+      );
+    return;
+  }
+  if (!reason)
+    throw problem(
+      "body.reason",
+      "REQUIRED",
+      "Choose why the order is cancelled.",
+    );
+  if (
+    actor.type === "ADMIN" &&
+    !(STAFF_CANCEL_REASONS as readonly string[]).includes(reason)
+  )
+    throw problem(
+      "body.reason",
+      "INVALID",
+      "Choose one of the listed reasons.",
+    );
+  if (reason === "OTHER" && !note?.trim())
+    throw problem("body.note", "REQUIRED", "Describe the reason in the note.");
 }
 
 /** Flags an order for staff (system-design.md §5: an exception flag, not a status). */

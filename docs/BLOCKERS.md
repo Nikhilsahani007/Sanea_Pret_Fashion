@@ -16,10 +16,9 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | B-08 | Email provider and sender domain (OD-19). | Phase 16 gate | You | Log-only provider in development. |
 | B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
+| B-18 | Lighthouse below the Phase 17 budget on two of four pages (product 82, checkout 80; budget 85), mainly layout shift (CLS 0.16 and 0.19) and render-blocking requests; measured on placeholder images and a local API. | Phase 17 gate | Engineering, then your review | Landing 86 and listing 85 meet it; accessibility 98–100 everywhere. |
 | B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
 | B-17 | Retention periods missing for `order_status_event`, `order_note`, `notification` and `payment_event`, and no lawful way to minimise text in append-only rows (D-168). | Approval of the Phase 15 and 16 migrations; launch | You and your lawyer | Evaluation in `proposals/personal-data-retention.md`; no change made. |
-| B-15 | No approved tool can measure the Phase 17 targets (Lighthouse performance ≥ 85, accessibility ≥ 95); `@axe-core/playwright` and Lighthouse are outside the approved package list (D-165). | Phase 17 gate | You | Structure smoke test and keyboard tests only; numbers not claimed. |
-| B-16 | Fulfilment's right to cancel unconfirmed COD orders: `system-design.md` §5 contradicts itself (line 137 allows it, line 142 does not) and `security-design.md` §4 line 70 does not allow it (D-160). | Phase 16 gate | You | Code unchanged (Fulfilment may cancel before confirmation), pinned by tests; choice A or B in `proposals/cod-cancellation.md`. |
 
 ## Environment risks (not blocking yet)
 
@@ -43,3 +42,5 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | R-07 (was B-13) | Scope change OD-26 awaited approval. | You approved it. | D-034 |
 | R-09 (was B-12) | Styling approach (TD-001) and token sharing (TD-002) undecided. | You decided CSS Modules with shared token custom properties, no Tailwind; ST-01 cancelled. | D-077, D-078 (2026-10-24) |
 | R-08 (was E-01) | Docker daemon untested. | Containers ran for the Phase 5 shutdown test and the Phase 6 compatibility test. | `phase-5-plan.md`, `phase-6-plan.md` |
+| R-10 (was B-16) | Fulfilment's right to cancel unconfirmed COD orders: the specifications disagreed. | Decided by you on 2026-10-25 (D-160): Fulfilment may decline only an unconfirmed COD order, with a reason; documents aligned. | `admin-orders.db-test.ts` role, state and reason matrix; not committed |
+| R-11 (was B-15) | No approved tool could measure the Phase 17 targets. | `@axe-core/playwright` 4.13.0 and `lighthouse` 13.5.0 installed with your approval (D-165). The measured results opened B-18. | `docs/reviews/lighthouse/2026-10-24/summary.json`; not committed |

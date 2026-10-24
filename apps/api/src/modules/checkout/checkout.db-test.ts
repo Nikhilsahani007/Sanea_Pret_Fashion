@@ -754,10 +754,13 @@ describe("order lifecycle", () => {
         code: "INVALID_TRANSITION",
       });
     await move(o.id, "CONFIRMED");
+    // D-160: cancelling a confirmed order needs orders.cancelRefund.
     await expect(
-      move(o.id, "CANCELLED", staff("FULFILMENT")),
+      move(o.id, "CANCELLED", staff("FULFILMENT"), {
+        reason: "CUSTOMER_REQUESTED",
+      }),
     ).rejects.toMatchObject({
-      code: "INVALID_TRANSITION",
+      code: "FORBIDDEN",
     });
     await expect(
       move(o.id, "PACKED", staff("CATALOGUE_EDITOR")),
@@ -772,7 +775,9 @@ describe("order lifecycle", () => {
     const o = await order(no);
     await move(o.id, "CONFIRMED");
     await move(o.id, "PACKED");
-    await move(o.id, "CANCELLED", staff("MANAGER"));
+    await move(o.id, "CANCELLED", staff("MANAGER"), {
+      reason: "OUT_OF_STOCK",
+    });
     expect(await level(v)).toMatchObject({ onHand: 5, reserved: 0 });
     await expect(move(o.id, "CANCELLED")).rejects.toMatchObject({
       code: "INVALID_TRANSITION",

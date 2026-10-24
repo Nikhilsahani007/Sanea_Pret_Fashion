@@ -169,6 +169,7 @@ async function apply(
         { type: "SYSTEM" },
         {
           note: "Paid after the hold expired and stock was gone; refund recorded",
+          reason: "PAID_NO_STOCK",
           now,
         },
       );

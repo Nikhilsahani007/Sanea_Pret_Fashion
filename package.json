@@ -24,10 +24,12 @@
     "db:seed": "prisma db seed",
     "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",
     "check:tokens": "node scripts/check-design-tokens.ts",
+    "lighthouse": "node scripts/lighthouse.ts",
     "build": "npm run build -w @sanea/admin -w @sanea/storefront --if-present",
     "db:seed:demo": "node apps/api/src/db/demo-seed.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
@@ -36,6 +38,7 @@
     "@vitejs/plugin-react": "6.1.2",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
+    "lighthouse": "13.5.0",
     "prettier": "3.9.10",
     "prisma": "7.10.1",
     "typescript": "6.0.3",

@@ -101,6 +101,34 @@ test("E2E-2: COD order confirmed, packed, shipped and delivered by fulfilment", 
   ).toBeVisible();
 });
 
+test("D-160: Fulfilment declines an unconfirmed COD order with a reason; OTHER needs a note", async ({
+  browser,
+}) => {
+  const shop = await browser.newPage({ baseURL: STORE });
+  const no = await placeCod(shop, "test-demo-dupatta-a");
+  const page = await pageAs(browser, "FULFILMENT");
+  await page.goto(`/orders/${no}`);
+  await page.getByRole("button", { name: "Cancel order" }).click();
+  const form = page.getByRole("form", { name: "Cancel order" });
+  await form.getByLabel("Reason").selectOption("OTHER");
+  await form.getByRole("button", { name: "Cancel order" }).click();
+  await expect(
+    page.getByText("Describe the reason in the note.").first(),
+  ).toBeVisible();
+  await form
+    .getByLabel("Note for the history")
+    .fill("TEST customer changed the size");
+  await form.getByRole("button", { name: "Cancel order" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Order moved to" }),
+  ).toBeVisible();
+  await expect(page.getByText("Other (note required)")).toBeVisible();
+  await page.screenshot({
+    path: join(shots, "cod-declined-with-reason-1440.png"),
+    fullPage: true,
+  });
+});
+
 test("catalogue editors see no orders", async ({ browser }) => {
   const page = await pageAs(browser, "CATALOGUE_EDITOR");
   await expect(

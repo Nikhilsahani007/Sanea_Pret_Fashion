@@ -8,6 +8,7 @@ import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 
 import { pageAs, rememberSession, signIn } from "./support/admin.ts";
+import { scan } from "./support/axe.ts";
 import { ADMINS } from "./support/env.ts";
 
 const shots = join(
@@ -349,6 +350,32 @@ test("keyboard: skip link and focus after navigation", async ({ browser }) => {
   ).toBeVisible();
   await expect(page.locator("main#main")).toBeFocused();
 });
+
+const ADMIN = [
+  ["dashboard", "/"],
+  ["orders", "/orders"],
+  ["products", "/products"],
+  ["new product", "/products/new"],
+  ["inventory", "/inventory"],
+  ["homepage content", "/content/home"],
+  ["settings", "/settings"],
+  ["enquiries", "/enquiries"],
+] as const;
+
+for (const width of [390, 1440]) {
+  test(`axe admin screens at ${width} px`, async ({ browser }) => {
+    const page = await pageAs(browser, "OWNER", { width, height: 900 });
+    const failures: Record<string, unknown> = {};
+    for (const [name, path] of ADMIN) {
+      await page.goto(path);
+      await expect(page.locator("h1").first()).toBeVisible();
+      await page.waitForLoadState("networkidle");
+      const found = await scan(page);
+      if (found.length) failures[name] = found;
+    }
+    expect(failures).toEqual({});
+  });
+}
 
 test("sign-out ends the session on the server", async ({ browser }) => {
   const page = await pageAs(browser, "OWNER");

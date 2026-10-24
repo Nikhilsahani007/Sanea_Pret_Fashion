@@ -134,16 +134,16 @@ The browser redirect after payment is only a hint. The order is confirmed by the
 | Status | Stock effect | Who can move it |
 |--------|--------------|-----------------|
 | PENDING_PAYMENT | Reserved (with expiry) | System |
-| PENDING_CONFIRMATION | Reserved | System (create), Manager/Owner/Fulfilment (confirm, cancel) |
+| PENDING_CONFIRMATION | Reserved | System (create, cancel after the window), Manager/Owner/Fulfilment (confirm, decline with a reason) |
 | CONFIRMED | Reserved | System or staff |
 | PACKED | Reserved | Fulfilment, Manager, Owner |
 | SHIPPED | onHand and reserved decreased | Fulfilment, Manager, Owner |
 | DELIVERED | None | Fulfilment, Manager, Owner |
-| CANCELLED | Reservation released | System, Manager, Owner |
+| CANCELLED | Reservation released | From PENDING_CONFIRMATION: System, Owner, Manager, Fulfilment (`orders.declineCod`). From CONFIRMED or PACKED: System, Owner, Manager (`orders.cancelRefund`). Never after SHIPPED. Always with a reason code |
 | RETURN_TO_ORIGIN | Restock on receipt (manual) | Fulfilment, Manager, Owner |
 | RETURN_REQUESTED / RETURNED | Restock after inspection (manual) | Manager, Owner |
 
-> **Open conflict (D-160, B-16):** the PENDING_CONFIRMATION row lets Fulfilment cancel; the CANCELLED row and `security-design.md` §4 do not. Not yet decided; see `proposals/cod-cancellation.md`. The code currently follows the PENDING_CONFIRMATION row.
+Cancellation (D-160, decided 2026-10-25): every move to CANCELLED records a reason code (`CANCEL_REASONS` in `@sanea/shared`; staff choose from six, `OTHER` needs a note; the system uses `PAYMENT_NOT_COMPLETED`, `NOT_CONFIRMED_IN_WINDOW` and `PAID_NO_STOCK`). The code is stored in the order history and the audit entry; the note only in the order history. A role without the move's permission gets `403 FORBIDDEN`; a move that does not exist from the status gets `409 INVALID_TRANSITION`.
 
 Every transition is validated against an allowed-transitions table in the orders service and written to `OrderStatusEvent` with actor and timestamp. Invalid transitions return `409 INVALID_TRANSITION`.
 
