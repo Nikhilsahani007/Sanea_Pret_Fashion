@@ -73,9 +73,11 @@ export function checkoutRouter(deps: ModuleDeps): Router {
     return parsed.data;
   }
 
+  // The quote has no side effects and is asked for as the shopper types, so
+  // it shares the read limit; placement and payment keep the tighter one.
   router.post(
     `${BASE}/quote`,
-    writes,
+    reads,
     validate({ body: checkoutQuoteSchema }),
     handle(async (req, res) => {
       const { body } = input<z.output<typeof checkoutQuoteSchema>>(res);

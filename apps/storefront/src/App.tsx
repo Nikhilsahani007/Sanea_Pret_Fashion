@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router";
 
 import { Layout } from "./components/Layout.tsx";
@@ -9,6 +10,20 @@ import { Collections, Listing } from "./pages/Listing.tsx";
 import { NotFound } from "./pages/NotFound.tsx";
 import { Product } from "./pages/Product.tsx";
 import { SearchPage } from "./pages/SearchPage.tsx";
+
+// Checkout pages load on demand: they carry the shared validation schemas.
+const Checkout = lazy(() =>
+  import("./pages/Checkout.tsx").then((m) => ({ default: m.Checkout })),
+);
+const MockPay = lazy(() =>
+  import("./pages/MockPay.tsx").then((m) => ({ default: m.MockPay })),
+);
+const OrderStatus = lazy(() =>
+  import("./pages/OrderStatus.tsx").then((m) => ({ default: m.OrderStatus })),
+);
+const later = (page: ReactNode) => (
+  <Suspense fallback={<p role="status">Loading…</p>}>{page}</Suspense>
+);
 
 const router = createBrowserRouter([
   {
@@ -25,6 +40,9 @@ const router = createBrowserRouter([
       { path: "products/:slug", element: <Product /> },
       { path: "contact", element: <Contact /> },
       { path: "cart", element: <CartPage /> },
+      { path: "checkout", element: later(<Checkout />) },
+      { path: "checkout/pay/mock/:paymentId", element: later(<MockPay />) },
+      { path: "order/:orderNumber", element: later(<OrderStatus />) },
       { path: "policies/:slug", element: <ContentPage policy /> },
       { path: ":slug", element: <ContentPage /> },
       { path: "*", element: <NotFound /> },

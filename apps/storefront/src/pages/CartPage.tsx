@@ -27,14 +27,19 @@ export function CartPage() {
           <CartLines cart={c} />
           <aside className={s.summary} aria-label="Order summary">
             <CartSummary cart={c} />
-            {/* Checkout arrives in Phase 15. */}
-            <span
-              className={cartStyles.button}
-              aria-disabled="true"
-              role="link"
-            >
-              Checkout opens soon
-            </span>
+            {c.readyForCheckout ? (
+              <Link to="/checkout" className={cartStyles.button}>
+                Checkout
+              </Link>
+            ) : (
+              <span
+                className={cartStyles.button}
+                aria-disabled="true"
+                role="link"
+              >
+                Checkout
+              </span>
+            )}
             {!c.readyForCheckout ? (
               <p className={cartStyles.warning}>
                 Fix the items marked above before checking out.

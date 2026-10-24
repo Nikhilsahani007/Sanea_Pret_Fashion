@@ -102,3 +102,63 @@ export type Cart = {
   currency: "INR";
   readyForCheckout: boolean;
 };
+
+export type CodIneligible =
+  "COD_DISABLED" | "OVER_LIMIT" | "PIN_CODE_EXCLUDED" | "REFUSAL_LIMIT";
+
+export type Quote = {
+  cart: Cart;
+  subtotalPaise: number;
+  discountPaise: number;
+  shippingPaise: number;
+  codFeePaise: number;
+  taxPaise: number;
+  totalPaise: number;
+  currency: "INR";
+  cod: { available: true } | { available: false; reason: CodIneligible };
+  deliveryEstimate: string | null;
+  paymentMethods: { PREPAID: boolean; COD: boolean };
+};
+
+export type OrderStatus =
+  | "PENDING_PAYMENT"
+  | "PENDING_CONFIRMATION"
+  | "CONFIRMED"
+  | "PACKED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "RETURN_TO_ORIGIN"
+  | "RETURN_REQUESTED"
+  | "RETURNED";
+
+export type OrderView = {
+  order: {
+    orderNumber: string;
+    status: OrderStatus;
+    paymentMethod: "PREPAID" | "COD";
+    placedAt: string;
+    email: string;
+    shipTo: { fullName: string; city: string; pinCode: string };
+    items: {
+      productName: string;
+      variantLabel: string;
+      quantity: number;
+      unitPricePaise: number;
+      lineTotalPaise: number;
+    }[];
+    subtotalPaise: number;
+    discountPaise: number;
+    shippingPaise: number;
+    codFeePaise: number;
+    taxPaise: number;
+    totalPaise: number;
+    currency: "INR";
+    payBy: string | null;
+  };
+  payment: {
+    method: "PREPAID" | "COD";
+    status: string;
+    clientPayload: { provider: string; payPath: string } | null;
+  } | null;
+};

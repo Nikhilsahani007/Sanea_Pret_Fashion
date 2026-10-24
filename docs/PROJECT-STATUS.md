@@ -1,6 +1,6 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-24 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
@@ -16,9 +16,10 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 | 12 Landing page | **Built and tested on placeholders; gate blocked by real photography (B-06) and the recording (B-03), then needs your visual approval** | `phase-12-plan.md`; landing tests 11 passed; screenshots in `docs/reviews/landing/2026-10-24/` |
 | 13 Browsing, product detail and enquiries | **Evidence ready, awaiting your approval** | `phase-13-plan.md`; migration `20261024150000_enquiries` needs your approval; enquiry tests 9 passed; end-to-end 5 passed |
 | 14 Customer accounts | Deferred (D-034) | — |
-| 15 onward | Not started | — |
+| 15 Checkout, orders, COD and mock payments | **Evidence ready, awaiting your approval** | `phase-15-plan.md`; migration `20261024180000_orders_payments` needs your approval; checkout tests 34 passed; end-to-end 39 passed (E2E-1, E2E-3, E2E-2 storefront part); B-07 defaults are proposals (D-150) |
+| 16 onward | In progress | — |
 
-**Needs you:** review Phase 8 evidence and screenshots; approve migration `20261024090000_catalogue_search` before any kept database; confirm or change the proposed choices D-135 to D-144.
+**Needs you:** review the evidence of Phases 8 to 15; approve the migrations `20261024090000_catalogue_search`, `20261024120000_guest_cart`, `20261024150000_enquiries` and `20261024180000_orders_payments` before any kept database; confirm or change the proposed choices D-135 to D-159; answer B-07 (shipping, COD, returns text, launch offer).
 
 Phase 6 — Core database schema: gate passed (D-061). Commit `56ef435`, merged into `main` with PR #4. The results below are the Phase 6 record.
 

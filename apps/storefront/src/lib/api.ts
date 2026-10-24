@@ -31,6 +31,7 @@ async function parse<T>(res: Response): Promise<T> {
 export async function get<T>(
   path: string,
   query?: URLSearchParams | Record<string, string | undefined>,
+  headers: Record<string, string> = {},
 ): Promise<T> {
   const params =
     query instanceof URLSearchParams
@@ -44,6 +45,7 @@ export async function get<T>(
   return parse<T>(
     await fetch(`/api/v1${path}${qs ? `?${qs}` : ""}`, {
       credentials: "same-origin",
+      headers,
     }),
   );
 }
@@ -60,12 +62,14 @@ export async function send<T>(
   method: "POST" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
+  headers: Record<string, string> = {},
 ): Promise<T> {
   const attempt = async () =>
     fetch(`/api/v1${path}`, {
       method,
       credentials: "same-origin",
       headers: {
+        ...headers,
         "X-CSRF-Token": await csrfToken(),
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
       },

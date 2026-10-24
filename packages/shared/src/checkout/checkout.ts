@@ -45,9 +45,12 @@ export const checkoutContactSchema = z.strictObject({
   phone: indianMobileSchema,
 });
 
-/** `POST /checkout/quote`: no side effects. */
+/**
+ * `POST /checkout/quote`: no side effects. The address may be partly filled
+ * in, so COD eligibility can follow the PIN code as it is typed.
+ */
 export const checkoutQuoteSchema = z.strictObject({
-  shippingAddress: addressSchema.optional(),
+  shippingAddress: addressSchema.partial().optional(),
   deliveryMethod: deliveryMethodSchema.default("STANDARD"),
   paymentMethod: paymentMethodSchema.optional(),
 });

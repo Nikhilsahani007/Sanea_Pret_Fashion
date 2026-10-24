@@ -44,8 +44,9 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 | 404 | `NOT_FOUND` |
 | 413 | `PAYLOAD_TOO_LARGE` (JSON body over 100 KB) |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` (a request body that is not `application/json`) |
-| 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED`, `IDEMPOTENCY_CONFLICT`, `CONFLICT` (for example the last Owner, or an email that already has an account) |
-| 422 | `COD_NOT_AVAILABLE`, `PIN_CODE_NOT_SERVICEABLE` |
+| 409 | `OUT_OF_STOCK`, `INVALID_TRANSITION`, `PRICE_CHANGED` (details: `totalPaise`), `IDEMPOTENCY_CONFLICT`, `CART_NOT_READY` (details: `reason` `EMPTY` or `LINES_CHANGED`), `CONFLICT` (for example the last Owner, or an email that already has an account) |
+| 422 | `COD_NOT_AVAILABLE` (details: `reason`), `PAYMENT_METHOD_UNAVAILABLE` (no online provider), `PIN_CODE_NOT_SERVICEABLE` (reserved; unused while every valid PIN code is served, OD-07) |
+| 400 (webhooks) | `WEBHOOK_INVALID` (signature or body) |
 | 429 | `RATE_LIMITED` |
 | 500 | `INTERNAL_ERROR` (no stack traces) |
 
@@ -81,10 +82,11 @@ The admin surface accepts requests only from the admin origin (CORS allow-list) 
 ### Checkout
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/checkout/quote` | `{ shippingAddress, deliveryMethod, paymentMethod }` → totals, COD eligibility, delivery estimate. No side effects. |
-| POST | `/checkout/orders` | `{ contact, shippingAddress, billingAddress?, deliveryMethod, paymentMethod, expectedTotalPaise }`. Re-prices; returns `409 PRICE_CHANGED` if the total differs from `expectedTotalPaise`. Reserves stock and creates the order. COD → `PENDING_CONFIRMATION`. Prepaid → `PENDING_PAYMENT` and a payment session. |
-| POST | `/checkout/orders/:orderNumber/payment` | Restart a payment session for a `PENDING_PAYMENT` order whose reservation is still active. |
-| GET | `/checkout/orders/:orderNumber/status` | Requires the order access token returned at placement (guest) or the owning customer session. |
+| POST | `/checkout/quote` | `{ shippingAddress?, deliveryMethod?, paymentMethod? }`; the address may be partial (a PIN code alone gives COD eligibility). → `{ cart, subtotalPaise, discountPaise, shippingPaise, codFeePaise, taxPaise, totalPaise, currency, cod: { available, reason? }, deliveryEstimate, paymentMethods: { PREPAID, COD } }`. No side effects. |
+| POST | `/checkout/orders` | `{ contact: { email, phone }, shippingAddress, billingAddress?, deliveryMethod: "STANDARD", paymentMethod, expectedTotalPaise, notes? }` and the `Idempotency-Key` header. Re-prices the bag; `409 PRICE_CHANGED` if the total differs from `expectedTotalPaise`; `422 COD_NOT_AVAILABLE` when ineligible. Reserves stock and creates the order, then empties the bag. COD → `PENDING_CONFIRMATION`. Prepaid → `PENDING_PAYMENT`, a 15-minute hold and `payment.clientPayload` (for the mock: `payPath`). `201 { order, payment, accessToken }`; a replay with the same key and body answers `200` with the same order and token; a different body `409 IDEMPOTENCY_CONFLICT`. |
+| POST | `/checkout/orders/:orderNumber/payment` | `X-Order-Token` and `Idempotency-Key`. Restart a payment session for a `PENDING_PAYMENT` order whose hold is still active; an open session is returned as it is. Otherwise `409 INVALID_TRANSITION`. |
+| GET | `/checkout/orders/:orderNumber/status` | Requires the order access token returned at placement, in the `X-Order-Token` header; a missing or wrong token is `404`. Returns `{ order, payment }` (no full address). |
+| POST | `/checkout/mock/:providerPaymentId` | **Development and tests only**, mounted only with the mock provider (refused in production). `{ outcome: "success" \| "failure" \| "timeout" }` with `X-Order-Token`: the mock "gateway" sends its signed webhook through the real pipeline. |
 
 ### Enquiries and events
 | Method | Path | Description |
@@ -145,7 +147,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 | GET/PUT | `/admin/content/navigation/:menu` | O M C |
 | POST | `/admin/media` (raw image body, `Content-Type: image/jpeg`, `image/png` or `image/webp`, at most 15 MB; optional `X-Filename` header, URL-encoded) → `201 { asset }` · GET `/admin/media` | O M C |
 | GET/POST/PATCH | `/admin/colours[/:id]` · GET `/admin/sizes` (reference data) · GET/POST/PATCH `/admin/size-charts[/:id]` (Phase 8, additive) | GET: all · writes: O M C |
-| GET/PUT | `/admin/settings/:group` (store, shipping, cod, payments) | O (store, shipping, cod also M) |
+| GET/PUT | `/admin/settings/:group` (store, shipping, cod; payments arrives with Phase 18) | O M (payments: O) |
 | GET/POST/PATCH | `/admin/staff[/:id]` | O |
 | GET | `/admin/audit-log` | O |
 
@@ -153,7 +155,7 @@ Role legend: O Owner, M Manager, C Catalogue editor, F Fulfilment.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/webhooks/payments/:provider` | Raw body preserved for signature check. Verified, stored, deduplicated, processed. Always returns 200 after durable storage so the provider stops retrying; processing errors are handled internally. Disabled for `mock` in production. |
+| POST | `/webhooks/payments/:provider` | Raw body preserved for signature check; no CSRF or Origin check. Verified (`400 WEBHOOK_INVALID` otherwise, nothing stored), stored once per provider event ID, processed with the order locked: amount and currency must match or the order is flagged. Always returns 200 after durable storage so the provider stops retrying; processing errors are logged and handled internally. Only the configured provider answers; `mock` never exists in production. |
 
 ## 6. Product detail response (example shape)
 
