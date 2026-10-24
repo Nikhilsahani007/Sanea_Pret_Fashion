@@ -10,7 +10,7 @@
   border: 0;
   background: var(--sp-ground);
   color: var(--sp-ink);
-  box-shadow: -16px 0 48px color-mix(in srgb, var(--sp-ink) 22%, transparent);
+  box-shadow: -16px 0 48px color-mix(in srgb, var(--sp-ink) 22%, transparent); /* taste-skill-ignore: modal sheet, the one floating element (design-system.md §6) */
 }
 .drawer[open] {
   display: flex;

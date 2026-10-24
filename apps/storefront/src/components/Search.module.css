@@ -37,7 +37,7 @@
   padding: var(--sp-space-2) 0;
   list-style: none;
   background: var(--sp-field);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--sp-ink) 18%, transparent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--sp-ink) 18%, transparent); /* taste-skill-ignore: floating suggestion menu */
 }
 .option {
   display: flex;

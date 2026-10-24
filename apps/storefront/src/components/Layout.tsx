@@ -55,6 +55,23 @@ export function Layout() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // The hero fills the viewport below the announcement bar and header.
+  const headerRef = useRef<HTMLElement>(null);
+  const announcementRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const set = () => {
+      const h =
+        (headerRef.current?.getBoundingClientRect().height ?? 0) +
+        (announcementRef.current?.getBoundingClientRect().height ?? 0);
+      document.documentElement.style.setProperty("--chrome", `${h}px`);
+    };
+    const observer = new ResizeObserver(set);
+    if (headerRef.current) observer.observe(headerRef.current);
+    if (announcementRef.current) observer.observe(announcementRef.current);
+    set();
+    return () => observer.disconnect();
+  });
+
   const count = cart.data?.itemCount ?? 0;
   const announcement = home.data?.announcement;
   const header = menus.data?.menus.HEADER ?? [];
@@ -66,7 +83,7 @@ export function Layout() {
         Skip to content
       </a>
       {announcement ? (
-        <p className={s.announcement}>
+        <p ref={announcementRef} className={s.announcement}>
           {announcement.href ? (
             <SmartLink href={announcement.href}>{announcement.text}</SmartLink>
           ) : (
@@ -74,7 +91,7 @@ export function Layout() {
           )}
         </p>
       ) : null}
-      <header className={s.header}>
+      <header ref={headerRef} className={s.header}>
         <div className={s.bar}>
           <div
             style={{

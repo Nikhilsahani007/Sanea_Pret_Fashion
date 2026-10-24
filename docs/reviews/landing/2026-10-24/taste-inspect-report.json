@@ -1,0 +1,1120 @@
+{
+  "url": "http://localhost:5173/",
+  "at": "2026-10-24T09:36:00.681Z",
+  "allow": [],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "load": "load",
+      "screens": 4,
+      "filled": [0.87, 0.13, 0.14, 0.68],
+      "motion": {
+        "elements": 18,
+        "css": 1,
+        "transitions": 17,
+        "scripted": 0,
+        "videos": 0,
+        "playingVideos": 0
+      },
+      "metrics": {
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "page": {
+          "height": 3428,
+          "screens": 3.8,
+          "words": 187,
+          "img": 36,
+          "video": 0,
+          "canvas": 0,
+          "svg": 5,
+          "sections": 7,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 32,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "1440.avif",
+            "1440.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif"
+          ],
+          "blendText": 0,
+          "sideScrollers": 1,
+          "brokenImages": [],
+          "emoji": []
+        },
+        "hero": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "chars": 10,
+          "lines": 1,
+          "size": 168.8,
+          "vw": 11.7,
+          "font": "Archivo",
+          "weight": 800,
+          "tracking": -0.04,
+          "leading": 0.82,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "center",
+          "widthRatio": 0.96,
+          "top": 714,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "lines": 1,
+          "size": 168.8,
+          "font": "Archivo"
+        },
+        "headings": [
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 1,
+            "size": 168.8,
+            "vw": 11.7,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.82,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.96,
+            "top": 714,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "New Ins",
+            "words": 2,
+            "chars": 7,
+            "lines": 1,
+            "size": 64,
+            "vw": 4.4,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.21,
+            "top": 964,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Suits",
+            "words": 1,
+            "chars": 5,
+            "lines": 1,
+            "size": 64,
+            "vw": 4.4,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.13,
+            "top": 1551,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Shop by piece",
+            "words": 3,
+            "chars": 13,
+            "lines": 1,
+            "size": 64,
+            "vw": 4.4,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.37,
+            "top": 2138,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 1,
+            "size": 168.8,
+            "vw": 11.7,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.82,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.96,
+            "top": 3317,
+            "tag": "p",
+            "kind": "statement"
+          }
+        ],
+        "headingSummary": {
+          "count": 5,
+          "maxLines": 1,
+          "over2Lines": 0,
+          "statements": 1,
+          "centered": 1,
+          "medianWords": 2,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "Archivo",
+              "share": 1,
+              "mono": false
+            }
+          ],
+          "familyCount": 1,
+          "sizes": [14, 18, 20, 24, 26, 64, 169],
+          "sizeCount": 7,
+          "notLoaded": [],
+          "body": null,
+          "measureChars": null,
+          "max": {
+            "size": 168.8,
+            "vw": 11.7,
+            "font": "Archivo",
+            "text": "SANÉA"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 0,
+          "microLabelShare": 0,
+          "microSamples": [],
+          "upperShare": 0.03,
+          "centerShare": 0.18,
+          "smallText": 0
+        },
+        "eyebrows": [
+          {
+            "text": "Shop the edit",
+            "above": "SANÉA PRET",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 18,
+            "top": 644
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#f6f1e7",
+          "bodyBgHsl": {
+            "h": 40,
+            "s": 0.45,
+            "l": 0.94
+          },
+          "dark": false,
+          "sectionBgs": [
+            {
+              "color": "#1c1a17",
+              "top": 160,
+              "hsl": {
+                "h": 36,
+                "s": 0.1,
+                "l": 0.1
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#1c1a17",
+              "share": 0.66
+            },
+            {
+              "color": "#f6f1e7",
+              "share": 0.31
+            },
+            {
+              "color": "#615a50",
+              "share": 0.04
+            }
+          ],
+          "button": {
+            "bg": "#ece4d4",
+            "hsl": {
+              "h": 40,
+              "s": 0.39,
+              "l": 0.88
+            },
+            "fg": "#1c1a17"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 7,
+          "inHero": 7,
+          "radius": "pill",
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Skip to content",
+            "Kurtas",
+            "Co-ord sets",
+            "Suits",
+            "Dupattas"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 1,
+          "scrims": 0,
+          "gradientSamples": [
+            "div._scrim_3z597_31 → linear-gradient(to top, color(srgb 0.109804 0.101961 0.0901961 / 0.72), rgba(0, 0, 0, 0))"
+          ],
+          "gradientText": 0,
+          "hairlines": 0,
+          "hairlineSamples": [],
+          "outlinedBoxes": 0,
+          "dashed": 0,
+          "blurred": 0,
+          "roundedBoxes": 0,
+          "boxRadius": 0,
+          "squareMedia": 36,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": []
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.83
+          },
+          {
+            "type": "img",
+            "ratio": 0.82
+          }
+        ],
+        "nav": {
+          "links": 9,
+          "fixed": true,
+          "height": 128,
+          "floatingPill": false,
+          "blur": false
+        },
+        "fontsLoaded": ["archivo"]
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "load": "load",
+      "screens": 3,
+      "filled": [0.85, 0.29, 0.61],
+      "motion": {
+        "elements": 18,
+        "css": 1,
+        "transitions": 17,
+        "scripted": 0,
+        "videos": 0,
+        "playingVideos": 0
+      },
+      "metrics": {
+        "viewport": {
+          "w": 768,
+          "h": 1024
+        },
+        "page": {
+          "height": 2949,
+          "screens": 2.9,
+          "words": 184,
+          "img": 36,
+          "video": 0,
+          "canvas": 0,
+          "svg": 5,
+          "sections": 7,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 36,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "960.avif",
+            "960.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif"
+          ],
+          "blendText": 0,
+          "sideScrollers": 1,
+          "brokenImages": [],
+          "emoji": []
+        },
+        "hero": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "chars": 10,
+          "lines": 1,
+          "size": 88.5,
+          "vw": 11.5,
+          "font": "Archivo",
+          "weight": 800,
+          "tracking": -0.04,
+          "leading": 0.82,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "center",
+          "widthRatio": 0.94,
+          "top": 903,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "lines": 1,
+          "size": 88.5,
+          "font": "Archivo"
+        },
+        "headings": [
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 1,
+            "size": 88.5,
+            "vw": 11.5,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.82,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 903,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "New Ins",
+            "words": 2,
+            "chars": 7,
+            "lines": 1,
+            "size": 45.4,
+            "vw": 5.9,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.28,
+            "top": 1089,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Suits",
+            "words": 1,
+            "chars": 5,
+            "lines": 1,
+            "size": 45.4,
+            "vw": 5.9,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.18,
+            "top": 1534,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Shop by piece",
+            "words": 3,
+            "chars": 13,
+            "lines": 1,
+            "size": 45.4,
+            "vw": 5.9,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.49,
+            "top": 1925,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 1,
+            "size": 88.5,
+            "vw": 11.5,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.82,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.94,
+            "top": 2891,
+            "tag": "p",
+            "kind": "statement"
+          }
+        ],
+        "headingSummary": {
+          "count": 5,
+          "maxLines": 1,
+          "over2Lines": 0,
+          "statements": 1,
+          "centered": 1,
+          "medianWords": 2,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "Archivo",
+              "share": 1,
+              "mono": false
+            }
+          ],
+          "familyCount": 1,
+          "sizes": [13, 17, 20, 21, 23, 45, 89],
+          "sizeCount": 7,
+          "notLoaded": [],
+          "body": null,
+          "measureChars": null,
+          "max": {
+            "size": 88.5,
+            "vw": 11.5,
+            "font": "Archivo",
+            "text": "SANÉA"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 0,
+          "microLabelShare": 0,
+          "microSamples": [],
+          "upperShare": 0.04,
+          "centerShare": 0.17,
+          "smallText": 0
+        },
+        "eyebrows": [
+          {
+            "text": "Shop the edit",
+            "above": "SANÉA PRET",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 16.9,
+            "top": 844
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#f6f1e7",
+          "bodyBgHsl": {
+            "h": 40,
+            "s": 0.45,
+            "l": 0.94
+          },
+          "dark": false,
+          "sectionBgs": [
+            {
+              "color": "#1c1a17",
+              "top": 160,
+              "hsl": {
+                "h": 36,
+                "s": 0.1,
+                "l": 0.1
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#1c1a17",
+              "share": 0.64
+            },
+            {
+              "color": "#f6f1e7",
+              "share": 0.32
+            },
+            {
+              "color": "#615a50",
+              "share": 0.04
+            }
+          ],
+          "button": {
+            "bg": "#ece4d4",
+            "hsl": {
+              "h": 40,
+              "s": 0.39,
+              "l": 0.88
+            },
+            "fg": "#1c1a17"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 7,
+          "inHero": 7,
+          "radius": "pill",
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Skip to content",
+            "Kurtas",
+            "Co-ord sets",
+            "Suits",
+            "Dupattas"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 1,
+          "scrims": 0,
+          "gradientSamples": [
+            "div._scrim_3z597_31 → linear-gradient(to top, color(srgb 0.109804 0.101961 0.0901961 / 0.72), rgba(0, 0, 0, 0))"
+          ],
+          "gradientText": 0,
+          "hairlines": 0,
+          "hairlineSamples": [],
+          "outlinedBoxes": 0,
+          "dashed": 0,
+          "blurred": 0,
+          "roundedBoxes": 0,
+          "boxRadius": 0,
+          "squareMedia": 2,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": []
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.86
+          },
+          {
+            "type": "img",
+            "ratio": 0.84
+          }
+        ],
+        "nav": {
+          "links": 6,
+          "fixed": true,
+          "height": 128,
+          "floatingPill": false,
+          "blur": false
+        },
+        "fontsLoaded": ["archivo"]
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "load": "load",
+      "screens": 4,
+      "filled": [0.91, 0.36, 0.34, 0.97],
+      "motion": {
+        "elements": 18,
+        "css": 1,
+        "transitions": 17,
+        "scripted": 0,
+        "videos": 0,
+        "playingVideos": 0
+      },
+      "metrics": {
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "page": {
+          "height": 3190,
+          "screens": 3.8,
+          "words": 180,
+          "img": 36,
+          "video": 0,
+          "canvas": 0,
+          "svg": 5,
+          "sections": 7,
+          "horizontalOverflow": 0,
+          "overflowCulprits": [],
+          "uiFragments": 0,
+          "uiAbuse": false,
+          "realPictures": 32,
+          "videoCount": 0,
+          "uiPictures": 0,
+          "pictureSamples": [
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif",
+            "480.avif"
+          ],
+          "blendText": 0,
+          "sideScrollers": 3,
+          "brokenImages": [],
+          "emoji": []
+        },
+        "hero": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "chars": 10,
+          "lines": 2,
+          "size": 77.6,
+          "vw": 19.9,
+          "font": "Archivo",
+          "weight": 800,
+          "tracking": -0.04,
+          "leading": 0.84,
+          "upper": true,
+          "italic": false,
+          "mono": false,
+          "align": "left",
+          "position": "center",
+          "widthRatio": 0.91,
+          "top": 594,
+          "tag": "h1",
+          "kind": "heading"
+        },
+        "h1": {
+          "text": "SANÉA PRET",
+          "words": 2,
+          "lines": 2,
+          "size": 77.6,
+          "font": "Archivo"
+        },
+        "headings": [
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 2,
+            "size": 77.6,
+            "vw": 19.9,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.84,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "center",
+            "widthRatio": 0.91,
+            "top": 594,
+            "tag": "h1",
+            "kind": "heading"
+          },
+          {
+            "text": "New Ins",
+            "words": 2,
+            "chars": 7,
+            "lines": 1,
+            "size": 33.3,
+            "vw": 8.5,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.41,
+            "top": 808,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Suits",
+            "words": 1,
+            "chars": 5,
+            "lines": 1,
+            "size": 33.3,
+            "vw": 8.5,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.26,
+            "top": 1205,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "Shop by piece",
+            "words": 3,
+            "chars": 13,
+            "lines": 1,
+            "size": 33.3,
+            "vw": 8.5,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.03,
+            "leading": 0.95,
+            "upper": false,
+            "italic": false,
+            "mono": false,
+            "align": "left",
+            "position": "left",
+            "widthRatio": 0.7,
+            "top": 1536,
+            "tag": "h2",
+            "kind": "heading"
+          },
+          {
+            "text": "SANÉA PRET",
+            "words": 2,
+            "chars": 10,
+            "lines": 1,
+            "size": 43.8,
+            "vw": 11.2,
+            "font": "Archivo",
+            "weight": 800,
+            "tracking": -0.04,
+            "leading": 0.82,
+            "upper": true,
+            "italic": false,
+            "mono": false,
+            "align": "center",
+            "position": "center",
+            "widthRatio": 0.91,
+            "top": 3161,
+            "tag": "p",
+            "kind": "statement"
+          }
+        ],
+        "headingSummary": {
+          "count": 5,
+          "maxLines": 2,
+          "over2Lines": 0,
+          "statements": 1,
+          "centered": 1,
+          "medianWords": 2,
+          "mixedFontHeadings": 0
+        },
+        "type": {
+          "families": [
+            {
+              "family": "Archivo",
+              "share": 1,
+              "mono": false
+            }
+          ],
+          "familyCount": 1,
+          "sizes": [13, 16, 18, 20, 33, 44, 78],
+          "sizeCount": 7,
+          "notLoaded": [],
+          "body": null,
+          "measureChars": null,
+          "max": {
+            "size": 77.6,
+            "vw": 19.9,
+            "font": "Archivo",
+            "text": "SANÉA"
+          },
+          "monoShare": 0,
+          "monoProseShare": 0,
+          "monoFamilies": [],
+          "monoSamples": [],
+          "microLabels": 0,
+          "microLabelShare": 0,
+          "microSamples": [],
+          "upperShare": 0.04,
+          "centerShare": 0.17,
+          "smallText": 0
+        },
+        "eyebrows": [
+          {
+            "text": "Shop the edit",
+            "above": "SANÉA PRET",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 16.1,
+            "top": 540
+          },
+          {
+            "text": "₹8,999",
+            "above": "Shop by piece",
+            "upper": false,
+            "tracked": false,
+            "mono": false,
+            "pill": false,
+            "size": 16.1,
+            "top": 1460
+          }
+        ],
+        "numbered": [],
+        "color": {
+          "bodyBg": "#f6f1e7",
+          "bodyBgHsl": {
+            "h": 40,
+            "s": 0.45,
+            "l": 0.94
+          },
+          "dark": false,
+          "sectionBgs": [
+            {
+              "color": "#1c1a17",
+              "top": 160,
+              "hsl": {
+                "h": 36,
+                "s": 0.1,
+                "l": 0.1
+              }
+            }
+          ],
+          "textColors": [
+            {
+              "color": "#1c1a17",
+              "share": 0.64
+            },
+            {
+              "color": "#f6f1e7",
+              "share": 0.32
+            },
+            {
+              "color": "#615a50",
+              "share": 0.04
+            }
+          ],
+          "button": {
+            "bg": "#ece4d4",
+            "hsl": {
+              "h": 40,
+              "s": 0.39,
+              "l": 0.88
+            },
+            "fg": "#1c1a17"
+          },
+          "lowContrast": []
+        },
+        "buttons": {
+          "count": 7,
+          "inHero": 7,
+          "radius": "pill",
+          "height": 44,
+          "withShadow": 0,
+          "withGradient": 0,
+          "mono": 0,
+          "upper": 0,
+          "heroLabels": [
+            "Skip to content",
+            "Kurtas",
+            "Co-ord sets",
+            "Suits",
+            "Dupattas"
+          ]
+        },
+        "surfaces": {
+          "shadowStatic": 0,
+          "shadowOverlay": 0,
+          "shadowSamples": [],
+          "gradients": 1,
+          "scrims": 0,
+          "gradientSamples": [
+            "div._scrim_3z597_31 → linear-gradient(to top, color(srgb 0.109804 0.101961 0.0901961 / 0.72), rgba(0, 0, 0, 0))"
+          ],
+          "gradientText": 0,
+          "hairlines": 0,
+          "hairlineSamples": [],
+          "outlinedBoxes": 0,
+          "dashed": 0,
+          "blurred": 0,
+          "roundedBoxes": 0,
+          "boxRadius": 0,
+          "squareMedia": 2,
+          "roundedMedia": 0,
+          "mediaRadius": 0,
+          "textShadow": 0,
+          "cardRows": []
+        },
+        "heroMedia": [
+          {
+            "type": "img",
+            "ratio": 0.75
+          },
+          {
+            "type": "img",
+            "ratio": 0.73
+          }
+        ],
+        "nav": {
+          "links": 6,
+          "fixed": true,
+          "height": 128,
+          "floatingPill": false,
+          "blur": false
+        },
+        "fontsLoaded": ["archivo"]
+      },
+      "consoleErrors": []
+    }
+  ],
+  "findings": [
+    {
+      "level": "FAIL",
+      "id": "eyebrow",
+      "width": 1440,
+      "message": "1 eyebrow/kicker label(s) above headings: \"Shop the edit\" above \"SANÉA PRET\"",
+      "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence.",
+      "alsoAt": [768, 390]
+    },
+    {
+      "level": "FAIL",
+      "id": "gradient",
+      "width": 1440,
+      "message": "1 gradient fill(s): div._scrim_3z597_31 → linear-gradient(to top, color(srgb 0.109804 0.101961 0.0901961 / 0.72), rgba(0, 0, 0, 0))",
+      "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+      "alsoAt": [768, 390]
+    },
+    {
+      "level": "WARN",
+      "id": "palette-cream",
+      "width": 1440,
+      "message": "Yellow-cream background (page background #f6f1e7, button #ece4d4, text #f6f1e7).",
+      "fix": "Use the drawn palette. If you want warmth, take a low-chroma stone or bone, not a yellow cream.",
+      "alsoAt": [768, 390]
+    },
+    {
+      "level": "WARN",
+      "id": "no-footage",
+      "width": 1440,
+      "message": "No video anywhere on the page.",
+      "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+    },
+    {
+      "level": "WARN",
+      "id": "side-scroll",
+      "width": 1440,
+      "message": "1 row(s) scroll sideways with content past their edge.",
+      "fix": "Jurors and most visitors read a row cut at the edge as clipped, not as scrollable. Wrap it onto more lines, or end it inside the grid.",
+      "alsoAt": [768, 390]
+    },
+    {
+      "level": "FAIL",
+      "id": "empty-screens",
+      "width": 1440,
+      "message": "2 of 4 desktop screens are almost empty ground (under 20% of the screen holds text, a picture or a colour field): screens 2, 3.",
+      "fix": "An empty screen is a rest only once per page. Elsewhere it means the section is underbuilt: set its content larger, give it the full information, put it on a colour field, or cut it."
+    }
+  ],
+  "images": [
+    {
+      "viewport": "desktop",
+      "width": 1440,
+      "fold": "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/desktop-fold.jpg",
+      "pages": [
+        "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/desktop-page-01.jpg"
+      ]
+    },
+    {
+      "viewport": "tablet",
+      "width": 768,
+      "fold": "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/tablet-fold.jpg",
+      "pages": [
+        "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/tablet-page-01.jpg"
+      ]
+    },
+    {
+      "viewport": "mobile",
+      "width": 390,
+      "fold": "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/mobile-fold.jpg",
+      "pages": [
+        "/home/user/Sanea_Pret_Fashion/.taste-skill/inspect/mobile-page-01.jpg"
+      ]
+    }
+  ]
+}

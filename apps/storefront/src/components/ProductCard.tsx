@@ -11,10 +11,13 @@ export function ProductCard({
   product,
   sizes = "(max-width: 40rem) 50vw, 25vw",
   eager = false,
+  onAdd,
 }: {
   product: ProductSummary;
   sizes?: string;
   eager?: boolean;
+  /** Opens the size sheet; nothing is added without a chosen size. */
+  onAdd?: (p: ProductSummary) => void;
 }) {
   const label =
     product.availability === "SOLD_OUT"
@@ -71,16 +74,29 @@ export function ProductCard({
           {product.name}
         </Link>
       </h3>
-      <p className={s.price}>
-        {product.priceVaries ? "From " : ""}
-        {inr(product.fromPricePaise)}
-        {discounted ? (
-          <span className={s.was}>
-            <span className="visually-hidden">was </span>
-            {inr(product.compareAtPricePaise!)}
-          </span>
+      <div className={s.foot}>
+        <p className={s.price}>
+          {product.priceVaries ? "From " : ""}
+          {inr(product.fromPricePaise)}
+          {discounted ? (
+            <span className={s.was}>
+              <span className="visually-hidden">was </span>
+              {inr(product.compareAtPricePaise!)}
+            </span>
+          ) : null}
+        </p>
+        {onAdd && product.availability !== "SOLD_OUT" ? (
+          <button
+            type="button"
+            className={s.add}
+            onClick={() => onAdd(product)}
+            aria-label={`Add ${product.name}: choose a size`}
+            aria-haspopup="dialog"
+          >
+            Add
+          </button>
         ) : null}
-      </p>
+      </div>
     </article>
   );
 }

@@ -87,15 +87,9 @@ export function createApp({
   app.use(pinoHttp({ logger, genReqId: (req) => req.id })); // 2. request logs
   app.use(securityHeaders(config.nodeEnv === "production")); // 3. headers on every response
   app.use(corsPolicy(config)); // 4. CORS, including preflight
-  app.use(globalRateLimit()); // 5. 300/min per IP, health exempt
-  app.use(cookieParser()); // 6. cookies for CSRF and admin sessions
-  if (deps) app.use(adminSession(deps)); // 6a. admin session, so CSRF can bind to it
-  app.use(csrfProtection(config)); // 7. Origin + token on state-changing methods
-  app.use(requireJson); // 8. 415 for non-JSON bodies
-  app.use(jsonBody); // 9. 100 KB JSON
-
-  // Development only: serve local media derivatives. In production a CDN
-  // serves them and the API never does (security-design.md §6).
+  // 4a. Development only: serve local media derivatives, before the API rate
+  // limit (a page loads dozens of images). In production a CDN serves them and
+  // the API never does (security-design.md §6).
   const mediaDir = deps?.media.localPublicDir;
   if (
     deps &&
@@ -113,6 +107,12 @@ export function createApp({
       }),
     );
   }
+  app.use(globalRateLimit()); // 5. 300/min per IP, health exempt
+  app.use(cookieParser()); // 6. cookies for CSRF and admin sessions
+  if (deps) app.use(adminSession(deps)); // 6a. admin session, so CSRF can bind to it
+  app.use(csrfProtection(config)); // 7. Origin + token on state-changing methods
+  app.use(requireJson); // 8. 415 for non-JSON bodies
+  app.use(jsonBody); // 9. 100 KB JSON
 
   app.use(healthRouter());
   app.use(csrfRouter(config));

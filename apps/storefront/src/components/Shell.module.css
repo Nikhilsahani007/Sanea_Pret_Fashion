@@ -24,7 +24,7 @@
 }
 .announcement a:focus-visible {
   outline-color: var(--sp-inverse-ink);
-  box-shadow: none;
+  box-shadow: none; /* taste-skill-ignore: removes a shadow */
 }
 
 .header {
@@ -142,7 +142,7 @@
 }
 .footer a:focus-visible {
   outline-color: var(--sp-inverse-ink);
-  box-shadow: none;
+  box-shadow: none; /* taste-skill-ignore: removes a shadow */
 }
 .footerGrid {
   display: grid;
@@ -217,7 +217,7 @@
   .actionText {
     position: absolute;
     width: 1px;
-    height: 1px;
+    height: 1px; /* taste-skill-ignore: visually hidden text, not a rule */
     overflow: hidden;
     clip-path: inset(50%);
   }

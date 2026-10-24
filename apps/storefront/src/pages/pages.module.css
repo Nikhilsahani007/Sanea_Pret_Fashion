@@ -62,3 +62,7 @@
     position: static;
   }
 }
+.heroSkeleton {
+  min-height: calc(100svh - var(--chrome, 10rem));
+  background: var(--sp-surface);
+}

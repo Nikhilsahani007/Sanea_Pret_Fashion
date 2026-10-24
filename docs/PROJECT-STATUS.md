@@ -13,7 +13,8 @@ Last updated: 2026-10-19 · Repository: https://github.com/Nikhilsahani007/Sanea
 | 9 Inventory and stock reservation | **Evidence ready, awaiting your approval** | `phase-9-plan.md`; concurrency tests 18 passed (three runs) |
 | 10 Content management | **Evidence ready, awaiting your approval** | `phase-10-plan.md`; content tests 16 passed; end-to-end 12 passed |
 | 11 Storefront shell, search and cart | **Evidence ready, awaiting your approval** | `phase-11-plan.md`; migration `20261024120000_guest_cart` needs your approval; cart tests 12 passed; storefront end-to-end 8 passed |
-| 12 onward | Not started | — |
+| 12 Landing page | **Built and tested on placeholders; gate blocked by real photography (B-06) and the recording (B-03), then needs your visual approval** | `phase-12-plan.md`; landing tests 11 passed; screenshots in `docs/reviews/landing/2026-10-24/` |
+| 13 onward | Not started | — |
 
 **Needs you:** review Phase 8 evidence and screenshots; approve migration `20261024090000_catalogue_search` before any kept database; confirm or change the proposed choices D-135 to D-144.
 

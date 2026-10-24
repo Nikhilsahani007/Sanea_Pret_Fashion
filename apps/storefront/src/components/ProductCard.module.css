@@ -57,7 +57,7 @@
 }
 .name:focus-visible {
   outline: none;
-  box-shadow: none;
+  box-shadow: none; /* taste-skill-ignore: removes a shadow */
 }
 .card:has(.name:focus-visible) {
   outline: 2px solid var(--sp-focus);
@@ -83,4 +83,25 @@
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--sp-space-2);
+}
+.add {
+  position: relative;
+  z-index: 1;
+  min-height: var(--sp-tap);
+  min-width: var(--sp-tap);
+  padding: 0 var(--sp-space-3);
+  border: 0;
+  background: var(--sp-surface);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--sp-duration-press) var(--sp-ease-out);
+}
+.add:active {
+  transform: scale(0.97);
 }
