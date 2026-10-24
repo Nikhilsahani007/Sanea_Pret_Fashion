@@ -39,40 +39,48 @@
   background: var(--sp-bg);
 }
 
+/* Phone: menu, logo, bag; search on its own row. Desktop (below): main links
+   left, the logo centred, search and bag right (phase-12-plan.md §12). */
 .bar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   grid-template-areas:
     "menu home bag"
     "search search search";
   align-items: center;
-  gap: var(--sp-space-3) var(--sp-space-4);
+  gap: var(--sp-space-2) var(--sp-space-4);
   max-width: var(--sp-page-max);
   margin-inline: auto;
-  padding: var(--sp-space-2) var(--sp-space-4);
+  padding: var(--sp-space-3) clamp(var(--sp-space-4), 0.5rem + 3.5vw, 3.5rem);
+}
+
+.actions {
+  display: contents;
 }
 
 .menuButton {
   grid-area: menu;
+  justify-self: start;
   min-height: var(--sp-target-min);
   padding: 0;
   border: 0;
   background: transparent;
+  font-size: var(--sp-step-small);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.3em;
 }
 
 .home {
   grid-area: home;
   display: block;
-  justify-self: start;
-  padding-block: var(--sp-space-2);
+  justify-self: center;
+  padding-block: var(--sp-space-1);
 }
 
-/* About 120 px wide on a phone, 160 px on desktop: within the raster's
+/* About 112 px wide on a phone, 144 px on desktop: within the raster's
    sharp range at 2x (phase-11-plan.md §3.1). */
 .wordmark {
-  width: 7.5rem;
+  width: 7rem;
   height: auto;
 }
 
@@ -87,16 +95,17 @@
 
 .bag {
   grid-area: bag;
+  justify-self: end;
   min-height: var(--sp-target-min);
-  padding: 0 var(--sp-space-2);
+  padding: 0;
   border: 0;
   background: transparent;
-  font-weight: var(--sp-weight-medium);
+  font-size: var(--sp-step-small);
 }
 
 .bag:hover {
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.3em;
 }
 
 .links {
@@ -121,13 +130,12 @@
 
 @media (min-width: 64rem) {
   .bar {
-    grid-template-columns: auto auto 1fr minmax(16rem, 24rem) auto;
-    grid-template-areas: "home links . search bag";
-    padding-inline: var(--sp-space-8);
+    grid-template-areas: "links home actions";
+    padding-block: var(--sp-space-4);
   }
 
   .wordmark {
-    width: 10rem;
+    width: 9rem;
   }
 
   .menuButton {
@@ -137,13 +145,27 @@
   .mainLinks {
     grid-area: links;
     display: block;
+    font-size: var(--sp-step-small);
+  }
+
+  .actions {
+    grid-area: actions;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--sp-space-6);
+  }
+
+  .search {
+    width: min(100%, 17rem);
   }
 }
 
+/* Category pills: quiet, centred on desktop, scrolling on a phone. */
 .pills {
   max-width: var(--sp-page-max);
   margin-inline: auto;
-  padding: 0 var(--sp-space-4) var(--sp-space-3);
+  padding: 0 clamp(var(--sp-space-4), 0.5rem + 3.5vw, 3.5rem) var(--sp-space-3);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -153,41 +175,34 @@
   display: flex;
   gap: var(--sp-space-2);
   width: max-content;
+  margin-inline: auto;
 }
 
 .pills a {
   display: inline-flex;
   align-items: center;
   min-height: var(--sp-target-min);
-  padding: 0 var(--sp-space-4);
+  padding: 0 var(--sp-space-5);
   border: var(--sp-border-width) solid var(--sp-line);
   border-radius: var(--sp-radius-pill);
-  background: var(--sp-surface);
+  background: transparent;
   color: var(--sp-ink);
+  font-size: var(--sp-step-small);
   text-decoration: none;
   white-space: nowrap;
-  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+  transition:
+    background-color var(--sp-duration-base) var(--sp-ease-out),
+    color var(--sp-duration-base) var(--sp-ease-out);
 }
 
 .pills a:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.pills a:active {
-  transform: scale(0.97);
+  background: var(--sp-surface);
 }
 
 .pills a[aria-current="page"] {
   background: var(--sp-ink);
   border-color: var(--sp-ink);
   color: var(--sp-bg);
-}
-
-@media (min-width: 64rem) {
-  .pills {
-    padding-inline: var(--sp-space-8);
-  }
 }
 
 .menuSheet .links {

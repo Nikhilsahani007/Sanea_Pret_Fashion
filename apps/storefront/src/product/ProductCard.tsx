@@ -1,5 +1,6 @@
-// A product card (design-system.md §6): a 4:5 image well, square corners,
-// the name at body size and the price under it. "Add" opens the size sheet;
+// A product card (design-system.md §6; redesigned, phase-12-plan.md §12): the
+// 4:5 picture leads, square corners; the name and price sit quietly beside
+// each other under it. "Add" opens the size sheet;
 // it never adds a default size. A product without photographs keeps an
 // empty well: no stock photography stands in (D-120).
 import { useRef, useState } from "react";
@@ -27,7 +28,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         {product.primaryImage ? (
           <Picture
             image={product.primaryImage}
-            sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 30vw, 46vw"
+            sizes="(min-width: 64rem) 28vw, (min-width: 48rem) 40vw, 62vw"
           />
         ) : null}
         {product.labels.includes("NEW") ? (
@@ -36,13 +37,16 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           <span className={s.label}>Sold out</span>
         ) : null}
       </Link>
-      <h2 id={`p-${product.id}`} className={s.cardName}>
-        <Link to={`/products/${product.slug}`}>{product.name}</Link>
-      </h2>
-      <p className={`${s.cardPrice} tabular`}>
-        {/* The lowest price among the variants on sale. */}
-        From {rupees(product.fromPricePaise)}
-      </p>
+      <div className={s.meta}>
+        <h2 id={`p-${product.id}`} className={s.cardName}>
+          <Link to={`/products/${product.slug}`}>{product.name}</Link>
+        </h2>
+        <p className={`${s.cardPrice} tabular`}>
+          {/* The lowest price among the variants on sale. */}
+          <span className={s.from}>From </span>
+          {rupees(product.fromPricePaise)}
+        </p>
+      </div>
       <button
         type="button"
         className={s.add}

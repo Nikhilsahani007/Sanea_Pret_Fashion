@@ -54,6 +54,7 @@ None of them blocks building; all of them block the gate.
 | P12-6 | **OD-23** | Editorial band and Rehma teaser stay off |
 | P12-7 | **SEO** | Title "Sanéa Pret · Effortless Elegance"; a factual meta description; no structured-data claims. The SPA limit stays (OD-14: a link-preview meta endpoint in Phase 17) |
 | P12-8 | **Second image on hover** in product cards | Not in this phase: catalogue summaries carry one image. Added with Phase 13's product data if you want it |
+| P12-9 | **Cards per row** (after your first review) | Fewer, larger pictures: 1.6 on a phone, 2.4 on a tablet, 3.4 on desktop, instead of `design-system.md` §3's 2.3 and 4.5. For your review |
 
 ## 5. Sections
 
@@ -210,3 +211,44 @@ Your vector logo (B-04); real product data and at least eight real photographs, 
 | The raster monument looks soft on large screens | Development only; the vector is required (B-04) |
 | Motion values differ from the reference | Provisional until the recording (B-03); one token file to change |
 | The hero picture slows the first screen | Derivatives, `fetchpriority`, no extra libraries; measured with real photographs before the gate |
+
+## 12. Redesign after your first visual review (2026-10-24)
+
+**Your feedback:** not premium enough, so rethink the design; the hero wordmark too large; spacing to adjust; motion subtle and elegant.
+
+### 12.1 What changed
+
+| Area | Before | After |
+|------|--------|-------|
+| **Hero** | The wordmark at about 92 % of the width, over the bottom of the picture | **Campaign first.** The photograph fills the frame. The campaign line is the headline (Switzer regular, 32 to 60 px, two lines at most), bottom left, with one quiet outlined CTA. The wordmark is a **masthead** at the top centre, `clamp(9rem, 24vw, 21rem)`: about a quarter of the width, and never above the raster's native 889 px at 2× (no stretching; B-04 stands). The indicators are fine 2 px bars, and pause sits bottom right. The scrim darkens only the top (for the masthead) and the bottom (for the headline) |
+| **Header** | Logo left, links, a filled search button, bag | **The logo centred** (144 px on desktop); main links left; on the right, search as an underlined field with a text control, then the bag. On a phone: menu, logo, bag, then search. The pills are outlined and centred |
+| **Product cards** | Smaller images, a boxed "Add" | **The picture leads** (4:5, larger). The name and price sit on one line under it ("From" in taupe), with a quiet underlined "Add" (44 px target, same accessible name). A slight 1.02 settle on hover where a pointer can hover |
+| **Rows** | 4.5 cards on desktop, 2.3 on a phone; large heavy titles | 3.4, 2.4 and 1.6 cards (P12-9); titles at regular weight, 24 to 40 px; arrows as quiet text controls |
+| **Tabs** | Left aligned | Centred text tabs with a fine underline |
+| **Spacing** | Fixed gaps | A section rhythm of `clamp(4.5rem, 3rem + 6vw, 9rem)` and a gutter of `clamp(1rem, 0.5rem + 3.5vw, 3.5rem)`, shared by the header, hero and sections |
+| **Motion** | 600 ms crossfade; a 1.03 scale; the monument scaling on scroll; 20 px entrances on every item | 1100 ms crossfade, a 1.015 settle over 2.4 s, no scroll-linked move; entrances of 12 px over 600 ms on a section's title and first four pictures only, 60 ms apart. Nothing moves under reduced motion. The 6 s interval stays provisional (B-03) |
+
+The palette is unchanged (D-096); `admin.css` is unchanged.
+
+### 12.2 Evidence
+
+| Check | Result |
+|-------|--------|
+| Unit and component | 718 passed (40 files) |
+| Lint, design tokens, format, typecheck | clean |
+| Storefront build | JS 92.85 kB gzipped, CSS 5.39 kB |
+| End to end | 20 passed (11 admin, 5 landing, 4 storefront) on the redesign; after the last CSS change (hidden faded slides) the 5 landing tests passed again |
+| Lighthouse 13.5.0 (`/`, mobile, throttled, placeholders) | **Accessibility 100, performance 91**, FCP 1.8 s, LCP 3.3 s, TBT 50 ms, CLS 0 |
+| Taste lint | 0 FAIL, 0 WARN |
+| **Taste inspector** (obtained this time) | **2 FAIL, 3 WARN.** One finding fixed: `covered-text` (the hidden slides' headlines were under the current one; faded slides are now hidden). Recorded, not hidden: `gradient` (the neutral scrim over the photograph, the one allowed exception); `still-page` (5 elements move; the inspector wants 8 or more, and your direction is subtle motion); `palette-cream` (your approved ivory, D-096); `no-footage` (none exists); `side-scroll` (the horizontal product rows D-012 requires) |
+
+**Screenshots** in `docs/reviews/landing/2026-10-24/`, regenerated for the redesign (the earlier versions are in commit `2c25dbb`):
+- first screen and full page at 1440, 1024, 768, 390 and 360;
+- hero slide 2 at 390; the size picker from New Ins at 390;
+- the empty landing at 1440.
+
+### 12.3 Still pending (not claimed)
+
+- **The live-reference comparison** (gate 3) and **the motion audit** (gate 4): not performed.
+- **Real assets:** B-04 (vector logo), B-06 (at least eight real product photographs and campaign photographs) and B-03 (the reference recording). Every image here is a labelled placeholder.
+- **Your visual review of the redesign.** Phase 12 is not passed.

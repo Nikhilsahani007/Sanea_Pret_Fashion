@@ -120,10 +120,14 @@ export function Layout() {
               <Links links={header} label="Main" />
             </div>
           ) : null}
-          <div className={s.search}>
-            <SearchBox id="header-q" initial={query} key={query} />
+          {/* Search and bag share the right-hand column on desktop; on a
+              phone the wrapper dissolves and search takes its own row. */}
+          <div className={s.actions}>
+            <div className={s.search}>
+              <SearchBox id="header-q" initial={query} key={query} />
+            </div>
+            <BagButton />
           </div>
-          <BagButton />
         </div>
         {pills.length ? (
           <nav aria-label="Categories" className={s.pills}>

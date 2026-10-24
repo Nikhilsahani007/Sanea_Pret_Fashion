@@ -1,19 +1,24 @@
-/* The landing page (phase-12-plan.md §5; design-system.md §3, §6, §8). The
-   hero is full bleed; the monument is the logo at about 92 % of the width,
-   bottom-anchored on a neutral scrim. Square corners; no resting shadows. */
+/* The landing page, redesigned after your first review (phase-12-plan.md §12).
+   Editorial and campaign first: the photograph leads, the campaign line is the
+   headline, the wordmark is a masthead at about a quarter of the width, and
+   the sections breathe. One face (Switzer) at regular weight for display,
+   ivory ground, soft black ink, square corners, no resting shadows.
+
+   Literal layout measures here (each justified, as in Phase 11 §14.8):
+   - the masthead cap of 21rem keeps the raster logo at or below its native
+     889 px at 2x density (B-04: the vector replaces it without layout change);
+   - campaign and title measures in `ch`, which follow the type;
+   - breakpoints, which cannot use custom properties. */
 .pending {
   min-height: 100dvh;
 }
 
 .landing {
+  /* The rhythm between sections: clearly larger than any gap inside one. */
+  --section-gap: clamp(4.5rem, 3rem + 6vw, 9rem);
+  --gutter: clamp(var(--sp-space-4), 0.5rem + 3.5vw, 3.5rem);
   display: grid;
-  gap: var(--sp-space-8);
-}
-
-@media (min-width: 48rem) {
-  .landing {
-    gap: var(--sp-space-16);
-  }
+  gap: var(--section-gap);
 }
 
 /* The page column for the sections after the hero. */
@@ -21,14 +26,10 @@
   width: 100%;
   max-width: var(--sp-page-max);
   margin-inline: auto;
-  padding-inline: var(--sp-space-4);
+  padding-inline: var(--gutter);
 }
 
-@media (min-width: 64rem) {
-  .inner {
-    padding-inline: var(--sp-space-8);
-  }
-}
+/* ── Hero ──────────────────────────────────────────────────────────────── */
 
 .hero {
   position: relative;
@@ -36,11 +37,11 @@
   min-height: var(--hero-height, 80svh);
   overflow: hidden;
   background: var(--sp-field-1);
-  color: var(--sp-field-1-ink);
+  color: var(--sp-paper);
 }
 
 .field {
-  align-content: end;
+  place-items: center;
 }
 
 .slides {
@@ -48,19 +49,29 @@
   inset: 0;
 }
 
+/* A slow crossfade; the incoming picture settles from a hair's scale. A
+   slide that has faded out is also hidden, so its headline never lies under
+   the current one (inspector `covered-text`). */
 .slide {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: scale(1.03);
+  visibility: hidden;
+  transform: scale(1.015);
   transition:
-    opacity 600ms var(--sp-ease-out),
-    transform 1200ms var(--sp-ease-out);
+    opacity 1100ms var(--sp-ease-out),
+    transform 2400ms var(--sp-ease-out),
+    visibility 0s linear 1100ms;
 }
 
 .active {
   opacity: 1;
+  visibility: visible;
   transform: none;
+  transition:
+    opacity 1100ms var(--sp-ease-out),
+    transform 2400ms var(--sp-ease-out),
+    visibility 0s;
 }
 
 .heroImage {
@@ -69,104 +80,95 @@
   object-fit: cover;
 }
 
-/* A neutral scrim in the lower part only, so the photograph stays clean
-   above and the white monument and text keep their contrast. */
+/* The one allowed gradient: a neutral scrim at the top for the masthead and
+   at the bottom for the headline, so the picture stays clean in between. */
 .scrim {
   position: absolute;
-  /* From a third of the way down, so the campaign line and CTA sit on it. */
-  inset: 30% 0 0;
-  /* The one allowed gradient: a neutral scrim under text on a photograph. */
+  inset: 0;
   /* prettier-ignore */
-  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--sp-ink) 55%, transparent)); /* taste-skill-ignore */
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--sp-ink) 32%, transparent), transparent 26%, transparent 48%, color-mix(in srgb, var(--sp-ink) 62%, transparent)); /* taste-skill-ignore */
 }
 
-.slideText {
+.masthead {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  align-self: start;
+  width: clamp(9rem, 24vw, 21rem);
+  margin-block-start: clamp(var(--sp-space-6), 4vw, var(--sp-space-12));
+  pointer-events: none;
+}
+
+.field .masthead {
+  align-self: center;
+  margin: 0;
+}
+
+.copy {
   position: absolute;
-  inset-inline: var(--sp-space-4);
-  /* Above the monument: the logo is 236/889 of its width high (about
-     26.5vw at full width), then a gap. */
-  inset-block-end: calc(var(--sp-space-16) + 27vw + var(--sp-space-6));
+  inset-inline-start: var(--gutter);
+  inset-block-end: calc(var(--sp-space-16) + var(--sp-space-6));
   z-index: 1;
   display: grid;
-  gap: var(--sp-space-4);
+  gap: var(--sp-space-6);
   justify-items: start;
-  max-width: 36rem;
-  color: var(--sp-paper);
+  max-width: min(36rem, calc(100% - 2 * var(--gutter)));
 }
 
 .campaign {
-  font-size: var(--sp-step-lead);
-  line-height: var(--sp-leading-tight);
+  font-size: clamp(2rem, 1.25rem + 3vw, 3.75rem);
+  font-weight: var(--sp-weight-regular);
+  line-height: 1.04;
+  letter-spacing: var(--sp-tracking-display);
+  text-wrap: balance;
+  max-width: 14ch;
 }
 
+/* A quiet, square, outlined CTA; it fills on hover and press. */
 .cta {
   display: inline-flex;
   align-items: center;
   min-height: var(--sp-control-height);
-  padding: 0 var(--sp-space-6);
-  background: var(--sp-paper);
-  color: var(--sp-ink);
+  padding: 0 var(--sp-space-8);
+  border: var(--sp-border-width) solid var(--sp-paper);
+  color: var(--sp-paper);
   text-decoration: none;
-  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+  transition:
+    background-color var(--sp-duration-base) var(--sp-ease-out),
+    color var(--sp-duration-base) var(--sp-ease-out);
 }
 
 .cta:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.cta:active {
-  transform: scale(0.97);
-}
-
-.monumentWrap {
-  position: relative;
-  align-self: end;
-  padding: 0 var(--sp-space-4) var(--sp-space-16);
-  pointer-events: none;
-  animation: settle linear both;
-  animation-timeline: view();
-  animation-range: exit 0% exit 100%;
-}
-
-@keyframes settle {
-  to {
-    transform: scale(0.96);
-  }
-}
-
-@media (min-width: 64rem) {
-  .monumentWrap {
-    padding-inline: var(--sp-space-8);
-  }
-
-  .slideText {
-    inset-inline: var(--sp-space-8);
-    inset-block-end: calc(var(--sp-space-16) + 26vw + var(--sp-space-8));
-  }
+  background: var(--sp-paper);
+  color: var(--sp-ink);
 }
 
 .controls {
   position: absolute;
-  inset-inline: var(--sp-space-4);
-  inset-block-end: var(--sp-space-4);
+  inset-inline: var(--gutter);
+  inset-block-end: var(--sp-space-6);
+  z-index: 1;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: var(--sp-space-4);
 }
 
 @media (min-width: 64rem) {
+  .copy {
+    inset-block-end: var(--sp-space-16);
+  }
+
   .controls {
-    inset-inline: var(--sp-space-8);
+    inset-block-end: var(--sp-space-16);
   }
 }
 
 .dots {
   display: flex;
-  gap: var(--sp-space-1);
 }
 
-/* The bar is small; the button around it is a 44 px target. */
+/* A fine bar inside a 44 px target. */
 .dot {
   display: grid;
   place-items: center;
@@ -179,9 +181,10 @@
 
 .dot span {
   display: block;
-  width: 2rem;
-  height: 0.25rem;
-  background: color-mix(in srgb, var(--sp-paper) 55%, transparent);
+  width: 1.75rem;
+  height: 2px;
+  background: color-mix(in srgb, var(--sp-paper) 45%, transparent);
+  transition: background-color var(--sp-duration-base) var(--sp-ease-out);
 }
 
 .dot[aria-current="true"] span {
@@ -190,25 +193,28 @@
 
 .pause {
   min-height: var(--sp-target-min);
-  padding: 0 var(--sp-space-3);
+  padding: 0 var(--sp-space-2);
   border: 0;
   background: transparent;
   color: var(--sp-paper);
+  font-size: var(--sp-step-small);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.3em;
 }
 
 .pause:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
 .hero :focus-visible {
   outline-color: var(--sp-paper);
 }
 
+/* ── Product rows ──────────────────────────────────────────────────────── */
+
 .row {
   display: grid;
-  gap: var(--sp-space-6);
+  gap: clamp(var(--sp-space-6), 2vw, var(--sp-space-8));
 }
 
 .rowHead {
@@ -219,26 +225,35 @@
 }
 
 .rowTitle {
-  font-size: var(--sp-step-head);
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.5rem);
+  font-weight: var(--sp-weight-regular);
   letter-spacing: var(--sp-tracking-display);
+  line-height: var(--sp-leading-tight);
+  max-width: 20ch;
 }
 
 .arrows {
   display: none;
-  gap: var(--sp-space-2);
+  gap: var(--sp-space-1);
 }
 
 .arrows button {
   min-width: var(--sp-target-min);
   min-height: var(--sp-target-min);
-  border: var(--sp-border-width) solid var(--sp-ink);
+  border: 0;
   background: transparent;
+  color: var(--sp-ink);
   font-size: var(--sp-step-lead);
+  transition: transform var(--sp-duration-fast) var(--sp-ease-out);
 }
 
 .arrows button:hover {
-  background: var(--sp-ink);
-  color: var(--sp-bg);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.arrows button:active {
+  transform: scale(0.94);
 }
 
 @media (min-width: 64rem) {
@@ -247,22 +262,36 @@
   }
 }
 
+/* Fewer, larger pictures: 1.6 cards on a phone, 2.4 on a tablet, 3.4 on a
+   desktop (product-image prominence; design-system.md §3 said 2.3 and 4.5,
+   see phase-12-plan.md P12-9). */
 .track {
+  --peek: 1.6;
+  --gap: var(--sp-space-4);
   list-style: none;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: calc((100% - 2 * var(--sp-space-4)) / 2.3);
-  gap: var(--sp-space-4);
+  grid-auto-columns: calc(
+    (100% - (var(--peek) - 0.6) * var(--gap)) / var(--peek)
+  );
+  gap: var(--gap);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
 }
 
+@media (min-width: 48rem) {
+  .track {
+    --peek: 2.4;
+    --gap: var(--sp-space-6);
+  }
+}
+
 @media (min-width: 64rem) {
   .track {
-    grid-auto-columns: calc((100% - 4 * var(--sp-space-6)) / 4.5);
-    gap: var(--sp-space-6);
+    --peek: 3.4;
+    --gap: var(--sp-space-8);
   }
 }
 
@@ -270,15 +299,18 @@
   scroll-snap-align: start;
 }
 
+/* ── Tabbed products ───────────────────────────────────────────────────── */
+
 .tabbed {
   display: grid;
-  gap: var(--sp-space-8);
+  gap: clamp(var(--sp-space-8), 3vw, var(--sp-space-12));
 }
 
 .tablist {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-space-2) var(--sp-space-6);
+  justify-content: center;
+  gap: var(--sp-space-2) clamp(var(--sp-space-6), 3vw, var(--sp-space-12));
 }
 
 .tab {
@@ -287,13 +319,16 @@
   border: 0;
   background: transparent;
   color: var(--sp-muted);
-  font-size: var(--sp-step-lead);
+  font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
+  letter-spacing: var(--sp-tracking-display);
+  transition: color var(--sp-duration-base) var(--sp-ease-out);
 }
 
 .tab[aria-selected="true"] {
   color: var(--sp-ink);
   text-decoration: underline;
-  text-underline-offset: 0.3em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35em;
 }
 
 .tab:hover {
@@ -303,9 +338,6 @@
 @media (prefers-reduced-motion: reduce) {
   .slide {
     transform: none;
-  }
-
-  .monumentWrap {
-    animation: none;
+    transition: none;
   }
 }

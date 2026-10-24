@@ -1,9 +1,10 @@
-// The landing hero (phase-12-plan.md §5.1; design-system.md §3): the campaign
-// photograph full width below the header, the monument (the supplied logo,
-// never retyped) bottom-anchored over it on a neutral scrim, one campaign
-// line, one CTA, slide indicators and a pause control. WAI-ARIA carousel
-// pattern. With no published slide, the monument stands on the deep
-// aubergine field alone (P12-3): nothing fake is shown.
+// The landing hero (phase-12-plan.md §5.1, §12; design-system.md §3), redesigned
+// after your first review: campaign first. The photograph fills the frame;
+// the campaign line is the headline, with one quiet CTA, bottom left; the
+// wordmark (the supplied logo, never retyped or enlarged past its raster
+// size) sits above as a masthead, at about a quarter of the width; the slide
+// indicators and pause sit bottom right. WAI-ARIA carousel pattern. With no
+// published slide, the masthead stands on the deep aubergine field (P12-3).
 import {
   useLayoutEffect,
   useRef,
@@ -78,8 +79,9 @@ function useHeroHeight(ref: RefObject<HTMLElement | null>) {
       const el = ref.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      // The section gap (32 px) plus most of the New Ins heading.
-      const peek = window.innerWidth < 768 ? 88 : 0;
+      // On a phone, the section gap (72 px) and part of the New Ins title
+      // stay in view, so the page shows there is more below.
+      const peek = window.innerWidth < 768 ? 112 : 0;
       el.style.setProperty("--hero-height", `calc(100svh - ${top + peek}px)`);
     };
     set();
@@ -108,7 +110,7 @@ export function Hero({ slides }: { slides: readonly HeroSlide[] }) {
         className={`${s.hero} ${s.field}`}
         aria-label="Sanéa Pret"
       >
-        <div className={s.monumentWrap}>
+        <div className={s.masthead}>
           <Monument />
         </div>
       </section>
@@ -148,7 +150,7 @@ export function Hero({ slides }: { slides: readonly HeroSlide[] }) {
           >
             <SlidePicture slide={slide} first={i === 0} />
             <div className={s.scrim} />
-            <div className={s.slideText}>
+            <div className={s.copy}>
               {slide.campaignLine ? (
                 <p className={s.campaign}>{slide.campaignLine}</p>
               ) : null}
@@ -159,7 +161,7 @@ export function Hero({ slides }: { slides: readonly HeroSlide[] }) {
           </div>
         ))}
       </div>
-      <div className={s.monumentWrap}>
+      <div className={s.masthead}>
         <Monument />
       </div>
       {slides.length > 1 ? (
