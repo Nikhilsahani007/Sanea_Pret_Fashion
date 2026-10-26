@@ -1,6 +1,6 @@
 # Phase 16 Plan — Admin Operations and Notifications
 
-Status: **Built and tested 2026-10-26 on `phase-12-landing`; gate pending your review.** Started on your approval of the Phase 15 gate (D-188). The email provider is deferred (D-190), so emails go to the log provider only. Ported from the reference branch's Phase 16, adapted to the canonical modules; the reference work is a candidate, not a decision (D-175).
+Status: **Gate passed 2026-10-26 (D-192); P16-1 and P16-2 confirmed.** Started on your approval of the Phase 15 gate (D-188). The email provider is deferred (D-190), so emails go to the log provider only. Ported from the reference branch's Phase 16, adapted to the canonical modules; the reference work is a candidate, not a decision (D-175).
 
 ## 1. Scope (index Phase 16)
 

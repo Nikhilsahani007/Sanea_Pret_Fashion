@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-26",
+  "profile": "Lighthouse default mobile profile, simulated throttling",
+  "data": "fictional demo catalogue (D-187), placeholder images, local API",
+  "budget": {
+    "performance": 85,
+    "accessibility": 95
+  },
+  "pages": {
+    "landing": {
+      "path": "/",
+      "runs": [
+        {
+          "performance": 88,
+          "accessibility": 100
+        },
+        {
+          "performance": 88,
+          "accessibility": 100
+        },
+        {
+          "performance": 87,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 88,
+      "medianAccessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "largestContentfulPaint": "3.7 s",
+      "cumulativeLayoutShift": "0",
+      "totalBlockingTime": "50 ms",
+      "meetsBudget": true
+    },
+    "listing": {
+      "path": "/shop/festive-wear",
+      "runs": [
+        {
+          "performance": 92,
+          "accessibility": 100
+        },
+        {
+          "performance": 92,
+          "accessibility": 100
+        },
+        {
+          "performance": 96,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 92,
+      "medianAccessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "largestContentfulPaint": "3.3 s",
+      "cumulativeLayoutShift": "0",
+      "totalBlockingTime": "10 ms",
+      "meetsBudget": true
+    },
+    "product": {
+      "path": "/products/noor-embroidered-suit",
+      "runs": [
+        {
+          "performance": 93,
+          "accessibility": 100
+        },
+        {
+          "performance": 93,
+          "accessibility": 100
+        },
+        {
+          "performance": 92,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 93,
+      "medianAccessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "largestContentfulPaint": "3.1 s",
+      "cumulativeLayoutShift": "0",
+      "totalBlockingTime": "60 ms",
+      "meetsBudget": true
+    },
+    "checkout": {
+      "path": "/checkout",
+      "runs": [
+        {
+          "performance": 91,
+          "accessibility": 100
+        },
+        {
+          "performance": 92,
+          "accessibility": 100
+        },
+        {
+          "performance": 92,
+          "accessibility": 100
+        }
+      ],
+      "medianPerformance": 92,
+      "medianAccessibility": 100,
+      "bestPractices": 100,
+      "seo": 69,
+      "largestContentfulPaint": "3.2 s",
+      "cumulativeLayoutShift": "0",
+      "totalBlockingTime": "50 ms",
+      "meetsBudget": true
+    }
+  }
+}

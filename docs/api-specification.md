@@ -100,6 +100,14 @@ Phase 15 (`phase-15-plan.md`; D-186). Guest only (D-034). Every response is `no-
 | POST | `/checkout/orders/:orderNumber/payment` | Headers `Idempotency-Key`, `X-Order-Token`. A new payment session for a `PENDING_PAYMENT` order whose hold is live; an open session is returned as it is. Otherwise `409 INVALID_TRANSITION`. |
 | POST | `/checkout/mock/:providerPaymentId` | **Development and tests only**, mounted only with the mock provider (refused in production, D-107). Header `X-Order-Token`; body `{ outcome: "success" \| "failure" \| "timeout" }`. Sends the signed webhook the mock "gateway" would send; the browser return confirms nothing. |
 
+### SEO (Phase 17)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/seo/meta?path=/…` | `{ meta: { title, description, canonical, image, type, noindex } }` for a storefront path whose content is public now; `404` otherwise. Bag, checkout, orders and search are `noindex`. Cached 60 s |
+| GET | `/seo/preview?path=/…` | A small HTML document with the same meta, every value escaped, for crawlers and link-preview bots (the hosting layer routes them here, Phase 19). Unknown paths: `404` with `noindex` |
+| GET | `/seo/sitemap.xml` · `/seo/robots.txt` | From published content; served at the storefront's `/sitemap.xml` and `/robots.txt` |
+
 ### Payment webhooks
 | Method | Path | Description |
 |--------|------|-------------|
