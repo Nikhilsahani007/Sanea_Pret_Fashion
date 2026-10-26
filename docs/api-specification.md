@@ -90,12 +90,20 @@ Cart rules (D-099, `system-design.md` §3):
 - **Expiry:** carts expire 30 days after the last write; an hourly job deletes expired carts.
 
 ### Checkout
+Phase 15 (`phase-15-plan.md`; D-186). Guest only (D-034). Every response is `no-store`. Writes need the CSRF token and the storefront Origin; 20 writes and 120 reads per minute per IP.
+
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/checkout/quote` | `{ shippingAddress, deliveryMethod, paymentMethod }` → totals, COD eligibility, delivery estimate. No side effects. |
-| POST | `/checkout/orders` | `{ contact, shippingAddress, billingAddress?, deliveryMethod, paymentMethod, expectedTotalPaise }`. Re-prices; returns `409 PRICE_CHANGED` if the total differs from `expectedTotalPaise`. Reserves stock and creates the order. COD → `PENDING_CONFIRMATION`. Prepaid → `PENDING_PAYMENT` and a payment session. |
-| POST | `/checkout/orders/:orderNumber/payment` | Restart a payment session for a `PENDING_PAYMENT` order whose reservation is still active. |
-| GET | `/checkout/orders/:orderNumber/status` | Requires the order access token returned at placement (guest) or the owning customer session. |
+| POST | `/checkout/quote` | `{ shippingAddress?, deliveryMethod?, paymentMethod? }` (`checkoutQuoteSchema`). Re-prices the bag: `{ cart, subtotalPaise, discountPaise, shippingPaise, codFeePaise, taxPaise, totalPaise, currency, cod: { available } or { available: false, reason }, deliveryEstimate, paymentMethods: { PREPAID, COD } }`. No side effects. `reason` is `COD_DISABLED`, `OVER_LIMIT`, `PIN_CODE_EXCLUDED` or `REFUSAL_LIMIT`. `taxPaise` is the GST contained in the prices from effective GST rules; 0 while none are entered (B-14). |
+| POST | `/checkout/orders` | Header `Idempotency-Key` (a UUID, required). Body `{ contact, shippingAddress, billingAddress?, deliveryMethod, paymentMethod, expectedTotalPaise, notes? }` (`placeOrderSchema`, strict). Re-prices and returns `409 PRICE_CHANGED` with `{ totalPaise }` if the total differs; `409 CART_NOT_READY` for an empty bag or a line not on sale; `409 OUT_OF_STOCK` with each line's availability; `422 COD_NOT_AVAILABLE` with the reason; `422 PAYMENT_METHOD_UNAVAILABLE` for prepaid with no provider. One transaction reserves every line and creates the order, its items, its first status event and its payment, then empties the bag. COD → `PENDING_CONFIRMATION` (stock allocated at once); prepaid → `PENDING_PAYMENT` with a hold of `RESERVATION_TTL_MINUTES` and a payment session. `201 { order, payment, accessToken }`; a replay with the same key and body returns `200` with the same order and token; the same key with a different body is `409 IDEMPOTENCY_CONFLICT`. |
+| GET | `/checkout/orders/:orderNumber/status` | Header `X-Order-Token` (the `accessToken`). `{ order, payment }`; a wrong or missing token is `404`, the same as an unknown order. |
+| POST | `/checkout/orders/:orderNumber/payment` | Headers `Idempotency-Key`, `X-Order-Token`. A new payment session for a `PENDING_PAYMENT` order whose hold is live; an open session is returned as it is. Otherwise `409 INVALID_TRANSITION`. |
+| POST | `/checkout/mock/:providerPaymentId` | **Development and tests only**, mounted only with the mock provider (refused in production, D-107). Header `X-Order-Token`; body `{ outcome: "success" \| "failure" \| "timeout" }`. Sends the signed webhook the mock "gateway" would send; the browser return confirms nothing. |
+
+### Payment webhooks
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/webhooks/payments/:provider` | No CSRF, cookies or Origin: the provider's signature (HMAC over the raw body, header `X-Mock-Signature` for the mock) is the only proof; an invalid one is `400 WEBHOOK_INVALID` and nothing is stored. Each event is stored raw once per provider event ID, then applied in one transaction with the order locked: captured → `CONFIRMED` (stock allocated); failed → the payment `FAILED`, the order waits for a retry; amount or currency mismatch → the order is flagged `AMOUNT_MISMATCH`; paid after cancellation or after the stock was sold → a refund record and a flag (SR-10). `200 { received: true }`. An unknown provider is `404`. |
 
 ### Enquiries and events
 | Method | Path | Description |
