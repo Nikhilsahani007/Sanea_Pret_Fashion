@@ -24,6 +24,7 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:seed": "prisma db seed",
+    "demo:seed": "node apps/api/src/db/demo-seed.ts",
     "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",
     "media:serve": "node --env-file-if-exists=.env apps/api/src/modules/media/dev-image-server.ts"
   },

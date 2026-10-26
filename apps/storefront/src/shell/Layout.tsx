@@ -167,9 +167,9 @@ export function Layout() {
       >
         <Outlet />
       </main>
-      {/* The footer (phase-12-plan.md §13): the logo with its tagline on the
-          left, then the published menus, contact and social links as quiet
-          columns. Only what is published is drawn. */}
+      {/* The footer (phase-12-plan.md §13): the logo lockup on the left, then
+          the published menus, contact and social links as quiet columns.
+          Only what is published is drawn. */}
       <footer className={s.footer}>
         <div className={s.footerInner}>
           <div className={s.footerBrand}>

@@ -1,0 +1,1219 @@
+{
+  "_notice": "FICTIONAL DEMO CATALOGUE supplied by the owner on 2026-10-26 (sanea_pret_demo_products.xlsx). Development and demo databases only; never production (D-187). Names, descriptions, prices and stock are illustrative. Swatch colours are approximations of the colour names. XS rows are left out: XS is not an approved size (D-029).",
+  "categories": [
+    {
+      "name": "Embroidered Suits",
+      "slug": "embroidered-suits"
+    },
+    {
+      "name": "Festive Wear",
+      "slug": "festive-wear"
+    },
+    {
+      "name": "Everyday Elegance",
+      "slug": "everyday-elegance"
+    },
+    {
+      "name": "Formal Wear",
+      "slug": "formal-wear"
+    },
+    {
+      "name": "Co-ord Sets",
+      "slug": "co-ord-sets"
+    },
+    {
+      "name": "Light Occasion Wear",
+      "slug": "light-occasion-wear"
+    }
+  ],
+  "collections": [
+    {
+      "name": "The Festive Edit",
+      "slug": "the-festive-edit"
+    },
+    {
+      "name": "Everyday Elegance",
+      "slug": "everyday-elegance"
+    },
+    {
+      "name": "Occasion Dressing",
+      "slug": "occasion-dressing"
+    },
+    {
+      "name": "Modern Heirlooms",
+      "slug": "modern-heirlooms"
+    }
+  ],
+  "products": [
+    {
+      "sku": "SP-DEMO-001",
+      "slug": "noor-embroidered-suit",
+      "name": "Noor Embroidered Suit",
+      "category": "embroidered-suits",
+      "collection": "the-festive-edit",
+      "pricePaise": 749000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece suit",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A refined three-piece occasion set with delicate tonal embroidery, an airy dupatta, and a softly tailored silhouette.",
+      "colours": [
+        {
+          "name": "Ivory",
+          "slug": "ivory",
+          "hex": "#F3EDE0"
+        },
+        {
+          "name": "Dusty Rose",
+          "slug": "dusty-rose",
+          "hex": "#D4A5A5"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Ivory",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Ivory",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Ivory",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Ivory",
+          "size": "XL",
+          "onHand": 5
+        },
+        {
+          "colour": "Dusty Rose",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Dusty Rose",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Dusty Rose",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Dusty Rose",
+          "size": "XL",
+          "onHand": 1
+        }
+      ],
+      "tags": ["festive", "embroidered", "occasion"],
+      "featured": true,
+      "newArrival": true,
+      "imageDirection": "Portrait editorial; ivory embroidered outfit; warm stone studio; soft natural light"
+    },
+    {
+      "sku": "SP-DEMO-002",
+      "slug": "zareen-festive-ensemble",
+      "name": "Zareen Festive Ensemble",
+      "category": "festive-wear",
+      "collection": "the-festive-edit",
+      "pricePaise": 1299000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece festive ensemble",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A statement festive look with intricate-looking surface detailing, a graceful long shirt, and a coordinated dupatta.",
+      "colours": [
+        {
+          "name": "Deep Aubergine",
+          "slug": "deep-aubergine",
+          "hex": "#4E2A3A"
+        },
+        {
+          "name": "Antique Gold",
+          "slug": "antique-gold",
+          "hex": "#B8995A"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Deep Aubergine",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Deep Aubergine",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Deep Aubergine",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Deep Aubergine",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Antique Gold",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Antique Gold",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Antique Gold",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Antique Gold",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["festive", "statement", "occasion"],
+      "featured": true,
+      "newArrival": true,
+      "imageDirection": "Full-length model image; deep neutral backdrop; visible embroidery and drape"
+    },
+    {
+      "sku": "SP-DEMO-003",
+      "slug": "mehr-chikankari-set",
+      "name": "Mehr Chikankari Set",
+      "category": "everyday-elegance",
+      "collection": "everyday-elegance",
+      "pricePaise": 529000,
+      "compareAtPricePaise": null,
+      "garmentType": "2-piece set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "An easy, polished set with fine whitework-inspired detailing and a relaxed shape for day-to-evening dressing.",
+      "colours": [
+        {
+          "name": "Soft White",
+          "slug": "soft-white",
+          "hex": "#F7F5EF"
+        },
+        {
+          "name": "Sage",
+          "slug": "sage",
+          "hex": "#A9B8A0"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Soft White",
+          "size": "S",
+          "onHand": 5
+        },
+        {
+          "colour": "Soft White",
+          "size": "M",
+          "onHand": 1
+        },
+        {
+          "colour": "Soft White",
+          "size": "L",
+          "onHand": 2
+        },
+        {
+          "colour": "Soft White",
+          "size": "XL",
+          "onHand": 3
+        },
+        {
+          "colour": "Sage",
+          "size": "S",
+          "onHand": 1
+        },
+        {
+          "colour": "Sage",
+          "size": "M",
+          "onHand": 2
+        },
+        {
+          "colour": "Sage",
+          "size": "L",
+          "onHand": 3
+        },
+        {
+          "colour": "Sage",
+          "size": "XL",
+          "onHand": 4
+        }
+      ],
+      "tags": ["chikankari-inspired", "everyday", "light"],
+      "featured": true,
+      "newArrival": true,
+      "imageDirection": "Natural daylight; garden or limewashed wall; three-quarter crop with embroidery detail"
+    },
+    {
+      "sku": "SP-DEMO-004",
+      "slug": "inaya-silk-occasion-suit",
+      "name": "Inaya Occasion Suit",
+      "category": "formal-wear",
+      "collection": "occasion-dressing",
+      "pricePaise": 999000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece occasion suit",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A graceful occasion silhouette with a lustrous visual finish, balanced embellishment, and an elegant matching dupatta.",
+      "colours": [
+        {
+          "name": "Midnight Blue",
+          "slug": "midnight-blue",
+          "hex": "#1F2A44"
+        },
+        {
+          "name": "Wine",
+          "slug": "wine",
+          "hex": "#6B1F2E"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Midnight Blue",
+          "size": "S",
+          "onHand": 1
+        },
+        {
+          "colour": "Midnight Blue",
+          "size": "M",
+          "onHand": 2
+        },
+        {
+          "colour": "Midnight Blue",
+          "size": "L",
+          "onHand": 3
+        },
+        {
+          "colour": "Midnight Blue",
+          "size": "XL",
+          "onHand": 4
+        },
+        {
+          "colour": "Wine",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Wine",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Wine",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Wine",
+          "size": "XL",
+          "onHand": 5
+        }
+      ],
+      "tags": ["formal", "occasion", "refined"],
+      "featured": true,
+      "newArrival": false,
+      "imageDirection": "Evening editorial; low-contrast studio; textile texture in focus"
+    },
+    {
+      "sku": "SP-DEMO-005",
+      "slug": "aabroo-formal-three-piece",
+      "name": "Aabroo Formal Three-Piece",
+      "category": "formal-wear",
+      "collection": "occasion-dressing",
+      "pricePaise": 1149000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece suit",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A composed formal look with carefully placed decorative details and a long, fluid silhouette.",
+      "colours": [
+        {
+          "name": "Black",
+          "slug": "black",
+          "hex": "#151515"
+        },
+        {
+          "name": "Champagne",
+          "slug": "champagne",
+          "hex": "#E3D3BE"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Black",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Black",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Black",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Black",
+          "size": "XL",
+          "onHand": 5
+        },
+        {
+          "colour": "Champagne",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Champagne",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Champagne",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Champagne",
+          "size": "XL",
+          "onHand": 1
+        }
+      ],
+      "tags": ["formal", "evening", "three-piece"],
+      "featured": false,
+      "newArrival": true,
+      "imageDirection": "Full-length portrait; soft directional light; neutral architecture"
+    },
+    {
+      "sku": "SP-DEMO-006",
+      "slug": "gulnaar-embroidered-coord",
+      "name": "Gulnaar Embroidered Co-ord",
+      "category": "co-ord-sets",
+      "collection": "modern-heirlooms",
+      "pricePaise": 649000,
+      "compareAtPricePaise": null,
+      "garmentType": "2-piece co-ord",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A contemporary matching set with a clean silhouette and subtle ornamental accents for effortless styling.",
+      "colours": [
+        {
+          "name": "Terracotta",
+          "slug": "terracotta",
+          "hex": "#B8644A"
+        },
+        {
+          "name": "Olive",
+          "slug": "olive",
+          "hex": "#6E7148"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Terracotta",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Terracotta",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Terracotta",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Terracotta",
+          "size": "XL",
+          "onHand": 2
+        },
+        {
+          "colour": "Olive",
+          "size": "S",
+          "onHand": 5
+        },
+        {
+          "colour": "Olive",
+          "size": "M",
+          "onHand": 1
+        },
+        {
+          "colour": "Olive",
+          "size": "L",
+          "onHand": 2
+        },
+        {
+          "colour": "Olive",
+          "size": "XL",
+          "onHand": 3
+        }
+      ],
+      "tags": ["co-ord", "contemporary", "versatile"],
+      "featured": true,
+      "newArrival": true,
+      "imageDirection": "Modern studio; confident stance; simple backdrop and clean silhouette"
+    },
+    {
+      "sku": "SP-DEMO-007",
+      "slug": "meher-e-noor-festive-set",
+      "name": "Meher-e-Noor Festive Set",
+      "category": "festive-wear",
+      "collection": "the-festive-edit",
+      "pricePaise": 1399000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece festive set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A dress-up ensemble imagined with rich tonal accents, delicate border work, and a softly flowing dupatta.",
+      "colours": [
+        {
+          "name": "Emerald",
+          "slug": "emerald",
+          "hex": "#1F6B52"
+        },
+        {
+          "name": "Antique Rose",
+          "slug": "antique-rose",
+          "hex": "#C48B8B"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Emerald",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Emerald",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Emerald",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Emerald",
+          "size": "XL",
+          "onHand": 2
+        },
+        {
+          "colour": "Antique Rose",
+          "size": "S",
+          "onHand": 5
+        },
+        {
+          "colour": "Antique Rose",
+          "size": "M",
+          "onHand": 1
+        },
+        {
+          "colour": "Antique Rose",
+          "size": "L",
+          "onHand": 2
+        },
+        {
+          "colour": "Antique Rose",
+          "size": "XL",
+          "onHand": 3
+        }
+      ],
+      "tags": ["festive", "premium", "occasion"],
+      "featured": true,
+      "newArrival": false,
+      "imageDirection": "Editorial full look; jewel-tone garment against warm ivory set"
+    },
+    {
+      "sku": "SP-DEMO-008",
+      "slug": "saira-everyday-kurta-set",
+      "name": "Saira Everyday Kurta Set",
+      "category": "everyday-elegance",
+      "collection": "everyday-elegance",
+      "pricePaise": 329000,
+      "compareAtPricePaise": null,
+      "garmentType": "2-piece kurta set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A versatile everyday set with understated detailing and a relaxed, easy-to-style silhouette.",
+      "colours": [
+        {
+          "name": "Sand",
+          "slug": "sand",
+          "hex": "#D9C7A7"
+        },
+        {
+          "name": "Sky Blue",
+          "slug": "sky-blue",
+          "hex": "#A9C6DE"
+        },
+        {
+          "name": "Black",
+          "slug": "black",
+          "hex": "#151515"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Sand",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Sand",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Sand",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Sand",
+          "size": "XL",
+          "onHand": 5
+        },
+        {
+          "colour": "Sky Blue",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Sky Blue",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Sky Blue",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Sky Blue",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Black",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Black",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Black",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Black",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["everyday", "kurta", "versatile"],
+      "featured": false,
+      "newArrival": true,
+      "imageDirection": "Bright daylight; clean architectural wall; simple styling and natural pose"
+    },
+    {
+      "sku": "SP-DEMO-009",
+      "slug": "afsana-occasion-ensemble",
+      "name": "Afsana Occasion Ensemble",
+      "category": "formal-wear",
+      "collection": "occasion-dressing",
+      "pricePaise": 899000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece ensemble",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "An elegant occasion look with a refined neckline, coordinated layers, and a balanced mix of texture and detail.",
+      "colours": [
+        {
+          "name": "Mauve",
+          "slug": "mauve",
+          "hex": "#A57F98"
+        },
+        {
+          "name": "Deep Teal",
+          "slug": "deep-teal",
+          "hex": "#1F5559"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Mauve",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Mauve",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Mauve",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Mauve",
+          "size": "XL",
+          "onHand": 5
+        },
+        {
+          "colour": "Deep Teal",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Deep Teal",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Deep Teal",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Deep Teal",
+          "size": "XL",
+          "onHand": 1
+        }
+      ],
+      "tags": ["occasion", "elegant", "layered"],
+      "featured": false,
+      "newArrival": false,
+      "imageDirection": "Three-quarter and full-length image pair; understated studio backdrop"
+    },
+    {
+      "sku": "SP-DEMO-010",
+      "slug": "mahira-classic-suit",
+      "name": "Mahira Classic Suit",
+      "category": "embroidered-suits",
+      "collection": "modern-heirlooms",
+      "pricePaise": 579000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece suit",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A timeless-looking suit concept built around clean tailoring, subtle embroidery placement, and coordinated layers.",
+      "colours": [
+        {
+          "name": "Ivory",
+          "slug": "ivory",
+          "hex": "#F3EDE0"
+        },
+        {
+          "name": "Cocoa",
+          "slug": "cocoa",
+          "hex": "#6B4A3A"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Ivory",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Ivory",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Ivory",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Ivory",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Cocoa",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Cocoa",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Cocoa",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Cocoa",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["classic", "embroidered", "versatile"],
+      "featured": true,
+      "newArrival": false,
+      "imageDirection": "Warm neutral background; close-up detail plus full-length look"
+    },
+    {
+      "sku": "SP-DEMO-011",
+      "slug": "roohani-embroidered-edit",
+      "name": "Roohani Embroidered Edit",
+      "category": "embroidered-suits",
+      "collection": "modern-heirlooms",
+      "pricePaise": 849000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece suit",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A polished ensemble with intricate-looking motifs, a coordinated dupatta, and a graceful occasion-ready shape.",
+      "colours": [
+        {
+          "name": "Dusty Blue",
+          "slug": "dusty-blue",
+          "hex": "#7F96AE"
+        },
+        {
+          "name": "Plum",
+          "slug": "plum",
+          "hex": "#5E2A4C"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Dusty Blue",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Dusty Blue",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Dusty Blue",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Dusty Blue",
+          "size": "XL",
+          "onHand": 2
+        },
+        {
+          "colour": "Plum",
+          "size": "S",
+          "onHand": 5
+        },
+        {
+          "colour": "Plum",
+          "size": "M",
+          "onHand": 1
+        },
+        {
+          "colour": "Plum",
+          "size": "L",
+          "onHand": 2
+        },
+        {
+          "colour": "Plum",
+          "size": "XL",
+          "onHand": 3
+        }
+      ],
+      "tags": ["embroidered", "classic", "occasion"],
+      "featured": false,
+      "newArrival": true,
+      "imageDirection": "Soft side lighting; textile detail; full outfit visible"
+    },
+    {
+      "sku": "SP-DEMO-012",
+      "slug": "sitara-signature-set",
+      "name": "Sitara Signature Set",
+      "category": "festive-wear",
+      "collection": "the-festive-edit",
+      "pricePaise": 1549000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece signature set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A statement look imagined with ornate borders, a long silhouette, and a softly layered finish.",
+      "colours": [
+        {
+          "name": "Ruby",
+          "slug": "ruby",
+          "hex": "#9B1B30"
+        },
+        {
+          "name": "Black",
+          "slug": "black",
+          "hex": "#151515"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Ruby",
+          "size": "S",
+          "onHand": 1
+        },
+        {
+          "colour": "Ruby",
+          "size": "M",
+          "onHand": 2
+        },
+        {
+          "colour": "Ruby",
+          "size": "L",
+          "onHand": 3
+        },
+        {
+          "colour": "Ruby",
+          "size": "XL",
+          "onHand": 4
+        },
+        {
+          "colour": "Black",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Black",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Black",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Black",
+          "size": "XL",
+          "onHand": 5
+        }
+      ],
+      "tags": ["signature", "statement", "festive"],
+      "featured": true,
+      "newArrival": true,
+      "imageDirection": "Luxury campaign portrait; deep tones balanced with warm lighting"
+    },
+    {
+      "sku": "SP-DEMO-013",
+      "slug": "raabta-printed-kurta-set",
+      "name": "Raabta Printed Kurta Set",
+      "category": "everyday-elegance",
+      "collection": "everyday-elegance",
+      "pricePaise": 289000,
+      "compareAtPricePaise": null,
+      "garmentType": "2-piece kurta set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A relaxed everyday set with a print-led look and easy proportions for repeat styling.",
+      "colours": [
+        {
+          "name": "Indigo Print",
+          "slug": "indigo-print",
+          "hex": "#2E3A6B"
+        },
+        {
+          "name": "Rust Print",
+          "slug": "rust-print",
+          "hex": "#A4532E"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Indigo Print",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Indigo Print",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Indigo Print",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Indigo Print",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Rust Print",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Rust Print",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Rust Print",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Rust Print",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["printed", "everyday", "kurta"],
+      "featured": false,
+      "newArrival": false,
+      "imageDirection": "Lifestyle portrait; natural daylight; restrained print palette"
+    },
+    {
+      "sku": "SP-DEMO-014",
+      "slug": "nazakat-light-layer-set",
+      "name": "Nazakat Light Layer Set",
+      "category": "light-occasion-wear",
+      "collection": "occasion-dressing",
+      "pricePaise": 699000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece light occasion set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A light, graceful outfit concept with delicate-looking accents and a coordinated layered finish.",
+      "colours": [
+        {
+          "name": "Blush",
+          "slug": "blush",
+          "hex": "#E8C4BE"
+        },
+        {
+          "name": "Sage",
+          "slug": "sage",
+          "hex": "#A9B8A0"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Blush",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Blush",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Blush",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Blush",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Sage",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Sage",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Sage",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Sage",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["light occasion", "graceful", "layered"],
+      "featured": false,
+      "newArrival": true,
+      "imageDirection": "Airy portrait photography; ivory wall; gentle movement in dupatta"
+    },
+    {
+      "sku": "SP-DEMO-015",
+      "slug": "dilruba-evening-edit",
+      "name": "Dilruba Evening Edit",
+      "category": "formal-wear",
+      "collection": "occasion-dressing",
+      "pricePaise": 1099000,
+      "compareAtPricePaise": null,
+      "garmentType": "3-piece evening ensemble",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A refined eveningwear concept with a confident silhouette, tonal decorative details, and a fluid finish.",
+      "colours": [
+        {
+          "name": "Aubergine",
+          "slug": "aubergine",
+          "hex": "#4E2A3A"
+        },
+        {
+          "name": "Midnight",
+          "slug": "midnight",
+          "hex": "#1C2233"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Aubergine",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Aubergine",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Aubergine",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Aubergine",
+          "size": "XL",
+          "onHand": 2
+        },
+        {
+          "colour": "Midnight",
+          "size": "S",
+          "onHand": 5
+        },
+        {
+          "colour": "Midnight",
+          "size": "M",
+          "onHand": 1
+        },
+        {
+          "colour": "Midnight",
+          "size": "L",
+          "onHand": 2
+        },
+        {
+          "colour": "Midnight",
+          "size": "XL",
+          "onHand": 3
+        }
+      ],
+      "tags": ["evening", "formal", "premium"],
+      "featured": false,
+      "newArrival": false,
+      "imageDirection": "Evening editorial; rich dark background; full outfit and close detail"
+    },
+    {
+      "sku": "SP-DEMO-016",
+      "slug": "zoya-minimal-kurta-set",
+      "name": "Zoya Minimal Kurta Set",
+      "category": "everyday-elegance",
+      "collection": "everyday-elegance",
+      "pricePaise": 359000,
+      "compareAtPricePaise": null,
+      "garmentType": "2-piece kurta set",
+      "fabric": "Demo attribute — verify before publishing",
+      "description": "A clean, minimal set designed in the demo catalogue around simple lines and understated styling.",
+      "colours": [
+        {
+          "name": "Taupe",
+          "slug": "taupe",
+          "hex": "#8E7F72"
+        },
+        {
+          "name": "Soft White",
+          "slug": "soft-white",
+          "hex": "#F7F5EF"
+        },
+        {
+          "name": "Olive",
+          "slug": "olive",
+          "hex": "#6E7148"
+        }
+      ],
+      "variants": [
+        {
+          "colour": "Taupe",
+          "size": "S",
+          "onHand": 2
+        },
+        {
+          "colour": "Taupe",
+          "size": "M",
+          "onHand": 3
+        },
+        {
+          "colour": "Taupe",
+          "size": "L",
+          "onHand": 4
+        },
+        {
+          "colour": "Taupe",
+          "size": "XL",
+          "onHand": 5
+        },
+        {
+          "colour": "Soft White",
+          "size": "S",
+          "onHand": 3
+        },
+        {
+          "colour": "Soft White",
+          "size": "M",
+          "onHand": 4
+        },
+        {
+          "colour": "Soft White",
+          "size": "L",
+          "onHand": 5
+        },
+        {
+          "colour": "Soft White",
+          "size": "XL",
+          "onHand": 1
+        },
+        {
+          "colour": "Olive",
+          "size": "S",
+          "onHand": 4
+        },
+        {
+          "colour": "Olive",
+          "size": "M",
+          "onHand": 5
+        },
+        {
+          "colour": "Olive",
+          "size": "L",
+          "onHand": 1
+        },
+        {
+          "colour": "Olive",
+          "size": "XL",
+          "onHand": 2
+        }
+      ],
+      "tags": ["minimal", "everyday", "versatile"],
+      "featured": false,
+      "newArrival": true,
+      "imageDirection": "Minimal studio portrait; clean silhouette; close-up of fabric texture"
+    }
+  ]
+}

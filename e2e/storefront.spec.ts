@@ -92,7 +92,7 @@ test("shell: the logo, announcement, pills and footer come from published conten
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: "Sanéa Pret, Effortless Elegance" }),
+    page.getByRole("contentinfo").getByRole("img", { name: "Sanéa Pret" }),
   ).toBeVisible();
   await review(page, "storefront-home");
   // The skip link is the first stop.

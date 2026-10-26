@@ -79,8 +79,10 @@
 
 /* About 112 px wide on a phone, 144 px on desktop: within the raster's
    sharp range at 2x (phase-11-plan.md §3.1). */
+/* "SANÉA PRET" is long and low (6.4:1): sized by width so its letters stay
+   as tall as the old wordmark's. */
 .wordmark {
-  width: 7rem;
+  width: 9.5rem;
   height: auto;
 }
 
@@ -135,7 +137,7 @@
   }
 
   .wordmark {
-    width: 9rem;
+    width: 12rem;
   }
 
   .menuButton {
@@ -255,23 +257,21 @@
   }
 }
 
-/* The black logo on the aubergine field (§3.4): inverted, so the ink becomes
-   white, 8.22:1 on deep aubergine. Kept modest: 12rem on a phone, 15rem on
-   desktop, below the raster's native width (B-04). */
+/* The ivory and champagne lockup on the aubergine field (§3.4). Kept
+   modest: 10rem on a phone, 13rem on desktop, below its native width. */
 .footerBrand {
-  width: min(100%, 12rem);
+  width: min(100%, 10rem);
 }
 
 @media (min-width: 64rem) {
   .footerBrand {
-    width: min(100%, 15rem);
+    width: min(100%, 13rem);
   }
 }
 
 .lockup {
   width: 100%;
   height: auto;
-  filter: invert(1);
 }
 
 .footerCols {
@@ -324,5 +324,4 @@
   display: block;
   width: 100%;
   height: auto;
-  filter: invert(1);
 }

@@ -72,7 +72,11 @@ describe("shell", () => {
     // Menus with no public links are not drawn.
     expect(screen.queryByRole("navigation", { name: "Shop links" })).toBeNull();
     expect(screen.getByRole("link", { name: /Instagram/ })).toBeTruthy();
-    expect(screen.getByRole("img", { name: "Sanéa Pret" })).toBeTruthy();
+    expect(
+      within(screen.getByRole("contentinfo")).getByRole("img", {
+        name: "Sanéa Pret",
+      }),
+    ).toBeTruthy();
   });
 
   it("draws no announcement, pills or footer links when nothing is published", async () => {
