@@ -195,7 +195,7 @@ Customer, Address and WishlistItem are **deferred to a later release (D-034).** 
 
 **OrderItem**: id, orderId, variantId, productName, variantLabel ("Ivory / M"), sku, unitPricePaise, quantity, lineTotalPaise, gstRateBps?, hsnCode?. Snapshots keep the order correct even if the product changes later.
 
-**OrderStatusEvent**: id, orderId, fromStatus?, toStatus, actorType (`SYSTEM/ADMIN/CUSTOMER/PROVIDER`), actorId?, note?, createdAt.
+**OrderStatusEvent**: id, orderId, fromStatus?, toStatus, actorType (`SYSTEM/ADMIN/CUSTOMER/PROVIDER`), actorId?, note?, reason? (cancellation code, required exactly for `CANCELLED`; `OTHER` needs a note, D-181), createdAt.
 
 **Shipment**: id, orderId, courierName, trackingNumber, trackingUrl?, shippedAt, deliveredAt?.
 
@@ -214,6 +214,10 @@ Customer, Address and WishlistItem are **deferred to a later release (D-034).** 
 **PaymentEvent**: id, paymentId?, provider, providerEventId (unique with provider), type, rawPayload (jsonb), receivedAt, processedAt?.
 
 **Refund**: id, paymentId, amountPaise, reason, status, providerRefundId?, createdByAdminId, createdAt.
+
+**OrderNote** (Phase 16): id, orderId, adminId, body (1 to 2,000 characters), createdAt. Internal staff notes, append-only (D-057).
+
+**Notification** (Phase 16): id, orderId?, template (`order.placed_cod`, `order.confirmed`, `order.shipped`, `order.cancelled`), recipient, provider (`log` until OD-19), status `SENT/FAILED`, error (exactly when failed), createdAt. The email body is not stored.
 
 ### 3.5 Content, enquiries, media
 
@@ -280,6 +284,7 @@ Staff invites, password-reset tokens and MFA recovery codes are designed with ad
 | 11 | Cart, CartItem (migration `20261023180000_guest_cart`; `token_hash` BYTEA of 32 bytes; no customer column until accounts, D-034; `phase-11-plan.md` §14.1). Approved (D-100) |
 | 13 | Enquiry, WhatsAppClick |
 | 15 | Order, OrderItem, OrderStatusEvent, Shipment, Payment, PaymentEvent, Refund; `StockReservation.orderId`; the GST rules model (D-033) |
+| 16 | OrderNote, Notification; `OrderStatusEvent.reason` (migration `20261027090000_admin_operations`) |
 | Deferred (D-034) | Customer, Address, WishlistItem, customer sessions |
 
 Unit tests run without a database. Integration tests run with `npm run test:integration` against a fresh database cloned per test file from a migrated template, in a separate CI job with a PostgreSQL 18 service (D-059).

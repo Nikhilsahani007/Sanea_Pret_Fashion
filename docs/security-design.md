@@ -68,6 +68,7 @@ Role-based access control enforced in the API by middleware that reads the role 
 | View orders and customer details | ✔ | ✔ | | ✔ |
 | Fulfilment transitions | ✔ | ✔ | | ✔ |
 | Cancel orders, issue refunds | ✔ | ✔ | | |
+| Decline unconfirmed COD orders | ✔ | ✔ | | ✔ |
 | Edit homepage and pages | ✔ | ✔ | ✔ | |
 | Publish Rehma Foundation page | ✔ | | | |
 | Enquiries | ✔ | ✔ | | |
@@ -75,6 +76,8 @@ Role-based access control enforced in the API by middleware that reads the role 
 | Payment settings | ✔ | | | |
 | Staff management | ✔ | | | |
 | Audit log | ✔ | | | |
+
+Cancellation rules (D-181): Fulfilment, Manager and Owner may decline a COD order that is still waiting for confirmation; only Owner and Manager may cancel a confirmed or packed order; no order is cancelled after dispatch (return to origin or a return instead). Every cancellation needs a reason code, and the code `OTHER` needs a note. The API checks the permission and the allowed-transitions table; the reason is kept in the order history and the audit entry, the note only in the order history.
 
 Object-level checks: customers can read only their own orders, addresses and wishlist (applies once accounts exist; deferred, D-034). Guest order status requires an unguessable order access token, not just the order number.
 

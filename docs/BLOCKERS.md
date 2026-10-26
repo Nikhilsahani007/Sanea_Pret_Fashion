@@ -13,7 +13,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | B-14 | Accountant verification of GST rates, thresholds, HSN classifications, seller GSTIN and state, and invoice compliance (D-030, D-033). | Live sales (Phase 19 launch). Not the schema. | You and your accountant | No rates are entered for production until verified. |
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |
-| B-08 | Email provider and sender domain (OD-19). | Phase 16 gate | You | Log-only provider in development. |
+| B-08 | Email provider and sender domain (OD-19), deferred to hosting (D-190). | Phase 19 launch (no longer the Phase 16 gate) | You | Log-only provider in development and in Phase 16. |
 | B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
 | B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
