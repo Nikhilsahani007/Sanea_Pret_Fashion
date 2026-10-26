@@ -179,7 +179,7 @@ describe("CORS", () => {
     expect(res.status).toBe(204);
     expect(res.headers["access-control-allow-origin"]).toBe(STOREFRONT);
     expect(res.headers["access-control-allow-headers"]).toBe(
-      "Content-Type,X-CSRF-Token,Idempotency-Key",
+      "Content-Type,X-CSRF-Token,Idempotency-Key,X-Order-Token",
     );
     expect(res.headers["access-control-allow-methods"]).toBe(
       "GET,POST,PUT,PATCH,DELETE",

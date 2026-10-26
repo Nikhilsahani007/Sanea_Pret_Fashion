@@ -70,14 +70,19 @@ function csrfToken(): Promise<string> {
   return csrf;
 }
 
-type Options = { body?: unknown; signal?: AbortSignal | undefined };
+type Options = {
+  body?: unknown;
+  signal?: AbortSignal | undefined;
+  /** Extra request headers (checkout: Idempotency-Key, X-Order-Token). */
+  headers?: Record<string, string>;
+};
 
 export async function request<T>(
   method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
-  { body, signal }: Options = {},
+  { body, signal, headers: extra = {} }: Options = {},
 ): Promise<T> {
-  const headers = new Headers({ Accept: "application/json" });
+  const headers = new Headers({ ...extra, Accept: "application/json" });
   let response: Response;
   try {
     if (method !== "GET") headers.set("X-CSRF-Token", await csrfToken());
@@ -103,9 +108,13 @@ export async function request<T>(
 }
 
 export const api = {
-  get: <T>(path: string, signal?: AbortSignal) =>
-    request<T>("GET", path, { signal }),
-  post: <T>(path: string, body: unknown) => request<T>("POST", path, { body }),
+  get: <T>(
+    path: string,
+    signal?: AbortSignal,
+    headers?: Record<string, string>,
+  ) => request<T>("GET", path, { signal, ...(headers ? { headers } : {}) }),
+  post: <T>(path: string, body: unknown, headers?: Record<string, string>) =>
+    request<T>("POST", path, { body, ...(headers ? { headers } : {}) }),
   patch: <T>(path: string, body: unknown) =>
     request<T>("PATCH", path, { body }),
   delete: <T>(path: string) => request<T>("DELETE", path),

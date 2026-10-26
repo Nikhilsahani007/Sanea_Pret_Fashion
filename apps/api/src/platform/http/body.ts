@@ -23,9 +23,17 @@ export const requireJson: RequestHandler = (req, _res, next) => {
   next();
 };
 
+/** Payment webhooks: the exact bytes are kept for the signature check (Phase 15). */
+export const WEBHOOK_PATH_PREFIX = "/api/v1/webhooks/";
+
 /** JSON parser limited to 100 KB; parse and size errors map to documented codes. */
 export const jsonBody: RequestHandler = express.json({
   limit: JSON_LIMIT,
   type: "application/json",
   strict: true,
+  verify: (req, _res, buf) => {
+    const url = (req as { url?: string }).url ?? "";
+    if (url.toLowerCase().startsWith(WEBHOOK_PATH_PREFIX))
+      (req as { rawBody?: Buffer }).rawBody = Buffer.from(buf);
+  },
 });

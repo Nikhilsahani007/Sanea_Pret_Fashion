@@ -91,9 +91,39 @@ const schema = z
           .optional(),
       )
       .transform((v) => (v === undefined ? 10 : Number(v))),
+    // Phase 15 payments (system-design.md §6.1, D-107). `mock` simulates a
+    // gateway in development and tests and is refused in production; `none`
+    // offers no online payment. Live providers arrive in Phase 18 (OD-06).
+    PAYMENT_PROVIDER: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z
+        .enum(["none", "mock"], {
+          error: "PAYMENT_PROVIDER must be none or mock",
+        })
+        .optional(),
+    ),
+    // Signs mock webhooks. Optional: a random per-process secret is used
+    // when absent, which is enough because the mock signs and verifies in
+    // the same process.
+    MOCK_PAYMENT_SECRET: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z
+        .string()
+        .min(32, {
+          error: "MOCK_PAYMENT_SECRET must be at least 32 characters",
+        })
+        .optional(),
+    ),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
+    if (env.PAYMENT_PROVIDER === "mock") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["PAYMENT_PROVIDER"],
+        message: "PAYMENT_PROVIDER mock is not allowed in production",
+      });
+    }
     for (const key of ["STOREFRONT_ORIGIN", "ADMIN_ORIGIN"] as const) {
       if (!env[key].startsWith("https://")) {
         ctx.addIssue({
@@ -123,6 +153,8 @@ export type Config = {
   readonly mediaUploadQueueWaiting: number;
   readonly reservationTtlMinutes: number;
   readonly cartMaxLineQuantity: number;
+  readonly paymentProvider: "none" | "mock";
+  readonly mockPaymentSecret: string | null;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -171,5 +203,8 @@ export function loadConfig(
     mediaUploadQueueWaiting: e.MEDIA_UPLOAD_QUEUE_WAITING,
     reservationTtlMinutes: e.RESERVATION_TTL_MINUTES,
     cartMaxLineQuantity: e.CART_MAX_LINE_QUANTITY,
+    paymentProvider:
+      e.PAYMENT_PROVIDER ?? (e.NODE_ENV === "production" ? "none" : "mock"),
+    mockPaymentSecret: e.MOCK_PAYMENT_SECRET ?? null,
   };
 }

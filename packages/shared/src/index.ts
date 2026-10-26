@@ -110,6 +110,31 @@ export {
 } from "./enquiry/enquiry.ts";
 export type { EnquiryInput, PublicSettings } from "./enquiry/enquiry.ts";
 
+// Checkout (system-design.md §4; D-186)
+export {
+  DeliveryMethod,
+  checkoutContactSchema,
+  checkoutQuoteSchema,
+  codSettingsSchema,
+  deliveryMethodSchema,
+  placeOrderSchema,
+  shippingSettingsSchema,
+} from "./checkout/checkout.ts";
+export type {
+  CodIneligibleReason,
+  CodSettings,
+  PlaceOrderInput,
+  ShippingSettings,
+} from "./checkout/checkout.ts";
+
+// Orders (system-design.md §5)
+export {
+  ORDER_NUMBER_PATTERN,
+  ORDER_TRANSITIONS,
+  canTransition,
+  nextStatuses,
+} from "./orders/transitions.ts";
+
 // Validation
 export {
   VALIDATION_CODES,

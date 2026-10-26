@@ -19,12 +19,19 @@ import { CART_WRITE_LIMIT, cartRouter } from "../../modules/cart/router.ts";
 import { catalogueAdminRouter } from "../../modules/catalogue/admin-router.ts";
 import { cataloguePublicRouter } from "../../modules/catalogue/public-router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
+import {
+  CHECKOUT_LIMITS,
+  checkoutRouter,
+} from "../../modules/checkout/router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
 import {
   CLICK_LIMIT,
   ENQUIRY_LIMIT,
   enquiriesRouter,
 } from "../../modules/enquiries/router.ts";
+import { paymentProviderFor } from "../../modules/payments/mock.ts";
+import type { PaymentProvider } from "../../modules/payments/provider.ts";
+import { webhooksRouter } from "../../modules/payments/router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { inventoryRouter } from "../../modules/inventory/router.ts";
 import {
@@ -67,6 +74,10 @@ export type AppOptions = {
     enquiries: { windowMs: number; limit: number };
     clicks: { windowMs: number; limit: number };
   };
+  /** The payment provider (main.ts shares it with the order jobs; tests); else from PAYMENT_PROVIDER. */
+  readonly payments?: PaymentProvider | null;
+  /** Test seam: the checkout write (20 per minute) and read (120 per minute) limits. */
+  readonly checkoutLimits?: typeof CHECKOUT_LIMITS;
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -82,6 +93,8 @@ export function createApp({
   searchLimit = SEARCH_LIMIT,
   cartLimit = CART_WRITE_LIMIT,
   enquiryLimits = { enquiries: ENQUIRY_LIMIT, clicks: CLICK_LIMIT },
+  payments,
+  checkoutLimits = CHECKOUT_LIMITS,
 }: AppOptions): Express {
   const deps: AuthDeps | undefined = db
     ? { db, config, logger, now, argon2 }
@@ -122,6 +135,14 @@ export function createApp({
       app.use(searchRouter(deps, media.storage, searchLimit));
       app.use(cartRouter(deps, media.storage, cartLimit));
       app.use(enquiriesRouter(deps, enquiryLimits));
+      const checkout = {
+        ...deps,
+        storage: media.storage,
+        payments:
+          payments === undefined ? paymentProviderFor(config) : payments,
+      };
+      app.use(checkoutRouter(checkout, checkoutLimits));
+      app.use(webhooksRouter(checkout));
     }
   }
   for (const router of routers) app.use(router);

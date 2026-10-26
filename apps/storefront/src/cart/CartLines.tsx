@@ -1,6 +1,7 @@
 // The cart's lines, subtotal and notices, shared by the drawer and the /cart
 // page (phase-11-plan.md §4.6). Prices and totals are the server's. Notices
-// are always words, never colour alone. Checkout opens in Phase 15.
+// are always words, never colour alone. Checkout (Phase 15) opens once every
+// line is on sale; the server checks stock again when the order is placed.
 import { CartWarning, type CartLine } from "@sanea/shared";
 import { Link } from "react-router";
 
@@ -126,9 +127,19 @@ export function CartLines({
         <p className={s.muted}>
           Prices include GST. Shipping is shown at checkout.
         </p>
-        <button type="button" className={s.checkout} disabled>
-          Checkout opens soon
-        </button>
+        {cart.lines.every((l) => l.available) &&
+        !cart.warnings.some((w) => w.code === "EXCEEDS_AVAILABLE") ? (
+          <Link to="/checkout" className={s.checkout} onClick={onNavigate}>
+            Checkout
+          </Link>
+        ) : (
+          <>
+            <button type="button" className={s.checkout} disabled>
+              Checkout
+            </button>
+            <p className={s.muted}>Fix the items marked above to check out.</p>
+          </>
+        )}
       </div>
     </div>
   );

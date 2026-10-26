@@ -83,6 +83,23 @@ Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 | `sitePathSchema` | schema | A same-site path starting with `/`, at most 300 characters |
 | `whatsAppLink(number, details)`, `PublicSettings` | function, type | `https://wa.me/<digits>?text=…` with the product, colour, size, SKU and page URL (UF-4) |
 
+### Checkout (Phase 15)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `shippingSettingsSchema`, `ShippingSettings` | schema, type | Settings group `shipping` (OD-08, D-186): flat fee, optional free-shipping threshold, delivery estimate text; all off by default |
+| `codSettingsSchema`, `CodSettings` | schema, type | Settings group `cod` (OD-07, D-186): on/off, maximum order value (₹15,000), fee (₹0), excluded PIN prefixes, refusal limit (off), confirmation window (48 hours) |
+| `checkoutContactSchema`, `checkoutQuoteSchema`, `placeOrderSchema`, `PlaceOrderInput` | schemas, type | Bodies of `POST /checkout/quote` and `POST /checkout/orders`; addresses use `addressSchema` |
+| `DeliveryMethod`, `deliveryMethodSchema` | constant, schema | `STANDARD` only in release one |
+| `CodIneligibleReason` | type | `COD_DISABLED`, `OVER_LIMIT`, `PIN_CODE_EXCLUDED`, `REFUSAL_LIMIT` |
+
+### Orders (Phase 15)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `ORDER_TRANSITIONS`, `canTransition(from, to, actor)`, `nextStatuses(from, actor)` | constant, functions | The allowed-transitions table of `system-design.md` §5 with the staff roles for each move; `SYSTEM` may make every listed move |
+| `ORDER_NUMBER_PATTERN` | constant | `SP-YYMM-NNNNNN` (D-115) |
+
 ### Validation
 
 | Export | Kind | Description |
@@ -143,4 +160,4 @@ Each app imports `fonts.css`, `brand.css` and its own layer once, from its globa
 Literal colours and font families in `apps/storefront/src` and `apps/admin/src` fail `npm run check:tokens`, which runs as part of `npm run lint`. Exceptions are registered in `docs/design-token-exceptions.md`.
 
 ## Not in this package (later phases)
-API routes, database schemas, GST and invoicing, catalogue route bodies, inventory, checkout, payments, UI components, infrastructure.
+API routes, database schemas, GST rates and invoicing, catalogue route bodies, inventory, payment providers, UI components, infrastructure.

@@ -41,6 +41,35 @@ export const API_ERROR_CODES = {
     message: "Some items are no longer available in the quantity requested.",
   },
   // Guest cart (D-099): a 31st distinct line.
+  // Phase 15 checkout, orders and payments.
+  PRICE_CHANGED: {
+    status: 409,
+    message: "The total has changed. Check the new total and try again.",
+  },
+  CART_NOT_READY: {
+    status: 409,
+    message: "Your bag has changed. Check it and try again.",
+  },
+  INVALID_TRANSITION: {
+    status: 409,
+    message: "The order cannot move to that status from its current status.",
+  },
+  IDEMPOTENCY_CONFLICT: {
+    status: 409,
+    message: "This request key was already used for a different request.",
+  },
+  COD_NOT_AVAILABLE: {
+    status: 422,
+    message: "Cash on delivery is not available for this order.",
+  },
+  PAYMENT_METHOD_UNAVAILABLE: {
+    status: 422,
+    message: "This payment method is not available.",
+  },
+  WEBHOOK_INVALID: {
+    status: 400,
+    message: "The webhook could not be verified.",
+  },
   CART_FULL: {
     status: 409,
     message: "Your bag is full. Remove an item to add another.",

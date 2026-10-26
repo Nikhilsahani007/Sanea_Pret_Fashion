@@ -344,7 +344,7 @@ describe("cart drawer", () => {
     expect(
       (
         within(bag).getByRole("button", {
-          name: "Checkout opens soon",
+          name: "Checkout",
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(true);

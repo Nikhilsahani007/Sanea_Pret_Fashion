@@ -55,6 +55,8 @@ export async function adminHarness(
     searchLimit?: { windowMs: number; limit: number };
     cartLimit?: { windowMs: number; limit: number };
     enquiryLimits?: AppOptions["enquiryLimits"];
+    payments?: AppOptions["payments"];
+    checkoutLimits?: AppOptions["checkoutLimits"];
   } = {},
 ) {
   const { db, drop, name: dbName } = await createTestDatabase();
@@ -71,6 +73,10 @@ export async function adminHarness(
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
     ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
     ...(options.enquiryLimits ? { enquiryLimits: options.enquiryLimits } : {}),
+    ...(options.payments !== undefined ? { payments: options.payments } : {}),
+    ...(options.checkoutLimits
+      ? { checkoutLimits: options.checkoutLimits }
+      : {}),
     db,
     now: clock.now,
     argon2: FAST_ARGON2,

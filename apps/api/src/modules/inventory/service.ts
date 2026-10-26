@@ -110,81 +110,171 @@ export async function availabilityOf(
   return new Map(rows.map((r) => [r.id, Number(r.available)]));
 }
 
-class Short extends Error {}
+/** A line could not be held; the transaction rolls back (SR-4). */
+export class OutOfStock extends Error {
+  constructor() {
+    super("OUT_OF_STOCK");
+    this.name = "OutOfStock";
+  }
+}
 
 /**
- * Reserves every line or none (SR-3, SR-4, SR-14). Returns one held
- * reservation per variant; on failure throws 409 OUT_OF_STOCK listing each
- * line's real availability (system-design.md §2.2).
+ * Reserves every line or none, inside the caller's transaction (SR-3, SR-4,
+ * SR-14), so checkout can hold stock and create the order atomically. Throws
+ * OutOfStock when a line is short; the caller rolls back and reports with
+ * `outOfStock`. `orderId` ties the holds to an order (Phase 15).
+ */
+export async function reserveIn(
+  tx: Tx,
+  lines: readonly Line[],
+  { ttlMinutes, orderId }: { ttlMinutes: number; orderId?: string },
+): Promise<ReservationHeld[]> {
+  const merged = mergeLines(lines);
+  if (merged.length === 0) return [];
+  const ids = merged.map((l) => l.variantId);
+  await expireDueFor(tx, ids);
+  const reservable = new Set(
+    (
+      await tx.$queryRaw<{ id: string }[]>(sql`
+        SELECT v."id"::text AS "id" FROM "product_variant" v JOIN "product" p ON p."id" = v."product_id"
+        WHERE v."id" = ANY(${ids}::uuid[]) AND v."is_active" AND p."status" = 'PUBLISHED'`)
+    ).map((r) => r.id),
+  );
+  for (const line of merged) {
+    if (!reservable.has(line.variantId)) throw new OutOfStock();
+    // The conditional update (system-design.md §2.2): it takes the row lock
+    // and re-checks availability under it, so the last unit goes once.
+    const updated = await tx.$executeRaw(sql`
+      UPDATE "inventory_level"
+      SET "reserved" = "reserved" + ${line.quantity}, "version" = "version" + 1, "updated_at" = now()
+      WHERE "variant_id" = ${line.variantId}::uuid AND "on_hand" - "reserved" >= ${line.quantity}`);
+    if (updated === 0) throw new OutOfStock();
+  }
+  const held: ReservationHeld[] = [];
+  for (const line of merged) {
+    const [row] = await tx.$queryRaw<{ id: string; expires_at: Date }[]>(sql`
+      INSERT INTO "stock_reservation" ("variant_id", "quantity", "status", "expires_at", "order_id", "updated_at")
+      VALUES (${line.variantId}::uuid, ${line.quantity}, 'ACTIVE', now() + make_interval(mins => ${ttlMinutes}), ${orderId ?? null}::uuid, now())
+      RETURNING "id"::text AS "id", "expires_at"`);
+    held.push({
+      id: row!.id,
+      variantId: line.variantId,
+      quantity: line.quantity,
+      expiresAt: row!.expires_at,
+    });
+  }
+  await tx.stockMovement.createMany({
+    data: held.map((h) => ({
+      variantId: h.variantId,
+      type: "RESERVED" as const,
+      onHandDelta: 0,
+      reservedDelta: h.quantity,
+      referenceType: "RESERVATION" as const,
+      referenceId: h.id,
+    })),
+  });
+  return held;
+}
+
+/** `409 OUT_OF_STOCK` listing each line's real availability now (after rollback). */
+export async function outOfStock(
+  db: Db,
+  lines: readonly Line[],
+): Promise<AppError> {
+  const merged = mergeLines(lines);
+  const available = await availabilityOf(
+    db,
+    merged.map((l) => l.variantId),
+  );
+  return new AppError(
+    "OUT_OF_STOCK",
+    merged.map((l) => ({
+      variantId: l.variantId,
+      requested: l.quantity,
+      available: available.get(l.variantId) ?? 0,
+    })),
+  );
+}
+
+/**
+ * Reserves every line or none in its own transaction (system-design.md
+ * §2.2). Returns one held reservation per variant; on failure throws 409
+ * OUT_OF_STOCK listing each line's real availability.
  */
 export async function reserve(
   db: Db,
   lines: readonly Line[],
   { ttlMinutes }: { ttlMinutes: number },
 ): Promise<ReservationHeld[]> {
-  const merged = mergeLines(lines);
-  if (merged.length === 0) return [];
-  const ids = merged.map((l) => l.variantId);
   try {
-    return await db.$transaction(async (tx) => {
-      await expireDueFor(tx, ids);
-      const reservable = new Set(
-        (
-          await tx.$queryRaw<{ id: string }[]>(sql`
-            SELECT v."id"::text AS "id" FROM "product_variant" v JOIN "product" p ON p."id" = v."product_id"
-            WHERE v."id" = ANY(${ids}::uuid[]) AND v."is_active" AND p."status" = 'PUBLISHED'`)
-        ).map((r) => r.id),
-      );
-      for (const line of merged) {
-        if (!reservable.has(line.variantId)) throw new Short();
-        // The conditional update (system-design.md §2.2): it takes the row lock
-        // and re-checks availability under it, so the last unit goes once.
-        const updated = await tx.$executeRaw(sql`
-          UPDATE "inventory_level"
-          SET "reserved" = "reserved" + ${line.quantity}, "version" = "version" + 1, "updated_at" = now()
-          WHERE "variant_id" = ${line.variantId}::uuid AND "on_hand" - "reserved" >= ${line.quantity}`);
-        if (updated === 0) throw new Short();
-      }
-      const held: ReservationHeld[] = [];
-      for (const line of merged) {
-        const [row] = await tx.$queryRaw<
-          { id: string; expires_at: Date }[]
-        >(sql`
-          INSERT INTO "stock_reservation" ("variant_id", "quantity", "status", "expires_at", "updated_at")
-          VALUES (${line.variantId}::uuid, ${line.quantity}, 'ACTIVE', now() + make_interval(mins => ${ttlMinutes}), now())
-          RETURNING "id"::text AS "id", "expires_at"`);
-        held.push({
-          id: row!.id,
-          variantId: line.variantId,
-          quantity: line.quantity,
-          expiresAt: row!.expires_at,
-        });
-      }
-      await tx.stockMovement.createMany({
-        data: held.map((h) => ({
-          variantId: h.variantId,
-          type: "RESERVED" as const,
-          onHandDelta: 0,
-          reservedDelta: h.quantity,
-          referenceType: "RESERVATION" as const,
-          referenceId: h.id,
-        })),
-      });
-      return held;
-    }, TX);
-  } catch (error) {
-    if (!(error instanceof Short)) throw error;
-    // Rolled back: report every line's real availability now.
-    const available = await availabilityOf(db, ids);
-    throw new AppError(
-      "OUT_OF_STOCK",
-      merged.map((l) => ({
-        variantId: l.variantId,
-        requested: l.quantity,
-        available: available.get(l.variantId) ?? 0,
-      })),
+    return await db.$transaction(
+      (tx) => reserveIn(tx, lines, { ttlMinutes }),
+      TX,
     );
+  } catch (error) {
+    if (!(error instanceof OutOfStock)) throw error;
+    throw await outOfStock(db, lines);
   }
+}
+
+/**
+ * An order's holds become allocations (SR-5, SR-6): they stop expiring and
+ * `reserved` stays until dispatch or cancellation.
+ */
+export async function convert(tx: Tx, orderId: string): Promise<number> {
+  return tx.$executeRaw(sql`
+    UPDATE "stock_reservation" SET "status" = 'CONVERTED', "expires_at" = NULL, "updated_at" = now()
+    WHERE "order_id" = ${orderId}::uuid AND "status" = 'ACTIVE'`);
+}
+
+/** Cancellation before dispatch (SR-8): every hold and allocation of the order goes back to stock. */
+export async function releaseOrder(tx: Tx, orderId: string): Promise<number> {
+  const rows = await tx.$queryRaw<Held[]>(sql`
+    SELECT "id", "variant_id"::text AS "variant_id", "quantity" FROM "stock_reservation"
+    WHERE "order_id" = ${orderId}::uuid AND "status" IN ('ACTIVE', 'CONVERTED')
+    ORDER BY "variant_id", "id"
+    FOR UPDATE`);
+  await settle(tx, rows, "RELEASED");
+  return rows.length;
+}
+
+/**
+ * Dispatch (SR-7): on hand and reserved both fall by each allocation, which
+ * is then closed (RELEASED) so a later cancel cannot release it again. One
+ * SHIPPED movement per variant records why.
+ */
+export async function shipOrder(
+  tx: Tx,
+  orderId: string,
+  actorAdminId?: string,
+): Promise<number> {
+  const rows = await tx.$queryRaw<Held[]>(sql`
+    SELECT "id", "variant_id"::text AS "variant_id", "quantity" FROM "stock_reservation"
+    WHERE "order_id" = ${orderId}::uuid AND "status" = 'CONVERTED'
+    ORDER BY "variant_id", "id"
+    FOR UPDATE`);
+  for (const r of rows) {
+    await tx.$executeRaw(sql`
+      UPDATE "inventory_level"
+      SET "on_hand" = "on_hand" - ${r.quantity}, "reserved" = "reserved" - ${r.quantity}, "version" = "version" + 1, "updated_at" = now()
+      WHERE "variant_id" = ${r.variant_id}::uuid`);
+  }
+  if (rows.length === 0) return 0;
+  await tx.$executeRaw(sql`
+    UPDATE "stock_reservation" SET "status" = 'RELEASED', "updated_at" = now()
+    WHERE "id" = ANY(${rows.map((r) => r.id)}::uuid[])`);
+  await tx.stockMovement.createMany({
+    data: rows.map((r) => ({
+      variantId: r.variant_id,
+      type: "SHIPPED" as const,
+      onHandDelta: -r.quantity,
+      reservedDelta: -r.quantity,
+      referenceType: "ORDER" as const,
+      referenceId: orderId,
+      actorAdminId: actorAdminId ?? null,
+    })),
+  });
+  return rows.length;
 }
 
 /** Releases active reservations (checkout abandoned, order cancelled). Idempotent. */

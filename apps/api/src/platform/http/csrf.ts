@@ -4,6 +4,7 @@ import { Router, type CookieOptions, type RequestHandler } from "express";
 
 import type { Config } from "../config.ts";
 import { adminContext } from "./admin-context.ts";
+import { WEBHOOK_PATH_PREFIX } from "./body.ts";
 import { AppError } from "./errors.ts";
 import { allowedOriginFor, isAdminPath } from "./origins.ts";
 
@@ -95,6 +96,9 @@ export function csrfRouter(config: Config): Router {
 export function csrfProtection(config: Config): RequestHandler {
   return (req, res, next) => {
     if (SAFE_METHODS.has(req.method)) return next();
+    // Provider webhooks carry no cookies or Origin; their signature is
+    // verified by the payments module instead (Phase 15).
+    if (req.path.toLowerCase().startsWith(WEBHOOK_PATH_PREFIX)) return next();
     const origin = req.get("origin");
     const header = req.get(CSRF_HEADER);
     const session = isAdminPath(req.path) ? adminContext(res) : undefined;

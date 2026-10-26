@@ -12,6 +12,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
   HANDWRITTEN_VIEWS,
   SEARCH_TRIGGERS,
@@ -59,6 +60,10 @@ describe("migration SQL contains every handwritten object", () => {
     expect(sql).toMatch(
       new RegExp(`ALTER TABLE "${table}" ADD CONSTRAINT "${name}"\\s+CHECK`),
     );
+  });
+
+  it.each(HANDWRITTEN_SEQUENCES)("sequence %s", (name) => {
+    expect(sql).toContain(`CREATE SEQUENCE "${name}"`);
   });
 
   it.each(HANDWRITTEN_TRIGGERS)(
@@ -146,10 +151,18 @@ describe("Phase 6 scope and conventions", () => {
         "colour",
         "content_block",
         "enquiry",
+        "gst_rule",
         "inventory_level",
         "media_asset",
         "navigation_item",
+        "order",
+        "order_item",
+        "order_status_event",
         "page",
+        "payment",
+        "payment_event",
+        "refund",
+        "shipment",
         "product",
         "product_image",
         "product_variant",
@@ -163,8 +176,15 @@ describe("Phase 6 scope and conventions", () => {
     );
   });
 
-  it("stores no GST rate or order link (D-033, D-054)", () => {
-    expect(sql).not.toMatch(/gst|order_id/i);
+  it("adds order links and the GST rules table only in Phase 15, with no rates (D-033, D-054, B-14)", () => {
+    const beforeOrders = dirs
+      .filter((d) => d < "20261026180000")
+      .map((d) =>
+        readFileSync(new URL(`${d}/migration.sql`, migrations), "utf8"),
+      )
+      .join("\n");
+    expect(beforeOrders).not.toMatch(/gst|order_id/i);
+    expect(sql).not.toMatch(/INSERT INTO "gst_rule"/);
   });
 
   it("adds search fields only in the Phase 8 search migration (D-054, D-081)", () => {
@@ -201,8 +221,19 @@ describe("Phase 6 scope and conventions", () => {
   it("stores money as 32-bit integer paise", () => {
     const money = [...sql.matchAll(/^\s+"([a-z_]*paise)" ([A-Z]+)/gm)];
     expect(money.map((m) => m[1]).sort()).toEqual([
+      "amount_paise", // payment
+      "amount_paise", // refund
+      "cod_fee_paise",
       "compare_at_price_paise",
+      "discount_paise",
+      "line_total_paise",
       "price_paise",
+      "shipping_paise",
+      "subtotal_paise",
+      "tax_paise",
+      "threshold_paise",
+      "total_paise",
+      "unit_price_paise",
     ]);
     for (const m of money) expect(m[2]).toBe("INTEGER");
   });

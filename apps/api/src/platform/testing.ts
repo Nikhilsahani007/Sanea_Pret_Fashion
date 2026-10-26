@@ -48,6 +48,8 @@ export function testApp(
     | "searchLimit"
     | "cartLimit"
     | "enquiryLimits"
+    | "payments"
+    | "checkoutLimits"
   > = {},
 ) {
   const lines: string[] = [];
@@ -71,6 +73,10 @@ export function testApp(
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
     ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
     ...(options.enquiryLimits ? { enquiryLimits: options.enquiryLimits } : {}),
+    ...(options.payments !== undefined ? { payments: options.payments } : {}),
+    ...(options.checkoutLimits
+      ? { checkoutLimits: options.checkoutLimits }
+      : {}),
   });
   return { app, lines, config };
 }

@@ -22,8 +22,16 @@ export const HANDWRITTEN_FUNCTIONS = [
   "product_search_on_colour",
 ] as const;
 
+/** Sequences Prisma cannot model (Phase 15 order numbers, D-115). */
+export const HANDWRITTEN_SEQUENCES = ["order_number_seq"] as const;
+
 /** Append-only tables (D-057): UPDATE/DELETE row trigger plus TRUNCATE trigger. */
-export const APPEND_ONLY_TABLES = ["stock_movement", "audit_log"] as const;
+export const APPEND_ONLY_TABLES = [
+  "stock_movement",
+  "audit_log",
+  // Phase 15: order status history.
+  "order_status_event",
+] as const;
 
 export const HANDWRITTEN_TRIGGERS = APPEND_ONLY_TABLES.flatMap((table) => [
   { table, name: `${table}_append_only` },
@@ -117,6 +125,26 @@ export const HANDWRITTEN_CHECKS = [
   { table: "enquiry", name: "enquiry_text_check" },
   { table: "enquiry", name: "enquiry_source_check" },
   { table: "whatsapp_click", name: "whatsapp_click_page_path_check" },
+  // Phase 15 (orders, payments, GST rules)
+  { table: "order", name: "order_number_check" },
+  { table: "order", name: "order_amounts_check" },
+  { table: "order", name: "order_total_check" },
+  { table: "order", name: "order_currency_check" },
+  { table: "order", name: "order_phone_check" },
+  { table: "order", name: "order_cod_fee_check" },
+  { table: "order", name: "order_access_token_hash_check" },
+  { table: "order", name: "order_attention_check" },
+  { table: "order_item", name: "order_item_quantity_check" },
+  { table: "order_item", name: "order_item_amounts_check" },
+  { table: "order_item", name: "order_item_gst_rate_check" },
+  { table: "payment", name: "payment_amount_check" },
+  { table: "payment", name: "payment_method_status_check" },
+  { table: "refund", name: "refund_amount_check" },
+  { table: "refund", name: "refund_reason_check" },
+  { table: "shipment", name: "shipment_text_check" },
+  { table: "gst_rule", name: "gst_rule_rates_check" },
+  { table: "gst_rule", name: "gst_rule_effective_check" },
+  { table: "gst_rule", name: "gst_rule_hsn_prefix_check" },
 ] as const;
 
 /** Views (Phase 9, Q9-1): read with $queryRaw; Prisma does not model them. */

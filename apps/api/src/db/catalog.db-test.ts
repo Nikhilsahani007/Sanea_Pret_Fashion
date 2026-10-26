@@ -13,6 +13,7 @@ import {
   HANDWRITTEN_CHECKS,
   HANDWRITTEN_EXTENSIONS,
   HANDWRITTEN_FUNCTIONS,
+  HANDWRITTEN_SEQUENCES,
   HANDWRITTEN_TRIGGERS,
   HANDWRITTEN_VIEWS,
   SEARCH_TRIGGERS,
@@ -89,13 +90,21 @@ describe("tables and scope", () => {
       "colour",
       "content_block",
       "enquiry",
+      "gst_rule",
       "inventory_level",
       "media_asset",
       "navigation_item",
+      "order",
+      "order_item",
+      "order_status_event",
       "page",
+      "payment",
+      "payment_event",
       "product",
       "product_image",
       "product_variant",
+      "refund",
+      "shipment",
       "size",
       "size_chart",
       "stock_movement",
@@ -105,13 +114,22 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("has no GST, order-link or customer column", async () => {
+  it("has GST and order-link columns only on Phase 15 tables, and no customer column", async () => {
     const rows = await q<{ c: string }>(
       `SELECT table_name || '.' || column_name AS c FROM information_schema.columns
        WHERE table_schema = 'public'
-         AND column_name ~ '(gst|tax|order_id|customer)'`,
+         AND column_name ~ '(gst|tax|order_id|customer)'
+       ORDER BY 1`,
     );
-    expect(rows).toEqual([]);
+    expect(rows.map((r) => r.c)).toEqual([
+      "order.tax_paise",
+      "order_item.gst_rate_bps",
+      "order_item.order_id",
+      "order_status_event.order_id",
+      "payment.order_id",
+      "shipment.order_id",
+      "stock_reservation.order_id",
+    ]);
   });
 
   it("has exactly one search column: product.search_vector (D-081)", async () => {
@@ -151,8 +169,8 @@ describe("tables and scope", () => {
         unverified: true,
       },
     ]);
-    // 26 tables, less `size` and `page`, which are checked above.
-    expect(counts).toHaveLength(24);
+    // 34 tables, less `size` and `page`, which are checked above.
+    expect(counts).toHaveLength(32);
   });
 });
 
@@ -160,6 +178,14 @@ describe("handwritten objects exist in the live catalogue", () => {
   it.each(HANDWRITTEN_EXTENSIONS)("extension %s", async (name) => {
     expect(
       await q(`SELECT 1 FROM pg_extension WHERE extname = '${name}'`),
+    ).toHaveLength(1);
+  });
+
+  it.each(HANDWRITTEN_SEQUENCES)("sequence %s", async (name) => {
+    expect(
+      await q(
+        `SELECT 1 FROM pg_class WHERE relkind = 'S' AND relname = '${name}' AND relnamespace = 'public'::regnamespace`,
+      ),
     ).toHaveLength(1);
   });
 
@@ -248,8 +274,9 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    // 27 up to Phase 11; Phase 13 adds 3 for enquiries and 2 for clicks.
-    expect(expected).toHaveLength(32);
+    // 27 up to Phase 11; Phase 13 adds 3 for enquiries and 2 for clicks;
+    // Phase 15 adds 10 for orders, payments, refunds and GST rules.
+    expect(expected).toHaveLength(42);
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -284,7 +311,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(22);
+    expect(rows).toHaveLength(30);
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 
@@ -316,7 +343,8 @@ describe("conventions", () => {
       `SELECT column_name AS c, data_type AS type FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name LIKE '%paise'`,
     );
-    expect(rows.map((r) => r.type)).toEqual(["integer", "integer"]);
+    expect(rows.length).toBeGreaterThan(10);
+    expect(rows.filter((r) => r.type !== "integer")).toEqual([]);
   });
 
   it("admin_role enum values match the shared role list", async () => {

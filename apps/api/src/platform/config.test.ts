@@ -44,6 +44,8 @@ describe("loadConfig()", () => {
       mediaUploadQueueWaiting: 2,
       reservationTtlMinutes: 15,
       cartMaxLineQuantity: 10,
+      paymentProvider: "mock",
+      mockPaymentSecret: null,
     });
   });
 
@@ -162,6 +164,25 @@ describe("loadConfig()", () => {
     expect(
       loadConfig({ ...valid, CART_MAX_LINE_QUANTITY: "" }).cartMaxLineQuantity,
     ).toBe(10);
+  });
+
+  it("refuses the mock payment provider in production and defaults to none there", () => {
+    const prod = {
+      ...valid,
+      NODE_ENV: "production",
+      STOREFRONT_ORIGIN: "https://saneapret.example",
+      ADMIN_ORIGIN: "https://admin.saneapret.example",
+    };
+    expect(problems({ ...prod, PAYMENT_PROVIDER: "mock" })).toEqual([
+      "PAYMENT_PROVIDER mock is not allowed in production",
+    ]);
+    expect(loadConfig(prod).paymentProvider).toBe("none");
+    expect(problems({ ...valid, PAYMENT_PROVIDER: "razorpay" })).toHaveLength(
+      1,
+    );
+    expect(problems({ ...valid, MOCK_PAYMENT_SECRET: "short" })).toHaveLength(
+      1,
+    );
   });
 
   it("requires https origins in production", () => {
