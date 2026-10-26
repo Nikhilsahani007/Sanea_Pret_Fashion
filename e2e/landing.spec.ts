@@ -81,6 +81,15 @@ test("L-1, L-2, L-4, L-6, L-7: the composition at every viewport, with screensho
       timeout: 15_000,
     });
     await page.waitForLoadState("networkidle");
+    // New Ins holds only the seeded placeholders, newest first: no products
+    // left by earlier specs in the shared database reach the screenshots.
+    await expect(
+      page
+        .getByRole("list", { name: "New Ins" })
+        .getByRole("heading", { level: 3 }),
+    ).toHaveText(
+      Array.from({ length: 8 }, (_, i) => `TEST Landing Kurta ${i + 1}`),
+    );
     const carousel = page.locator("[aria-roledescription='carousel']");
     const box = (await carousel.boundingBox())!;
     // L-1: the hero fills the viewport below its top edge; on a phone a
@@ -194,9 +203,15 @@ test("L-5: pills, search and bag by keyboard; the size picker from New Ins", asy
   await axe(page, "size picker from New Ins at 390");
   await page.screenshot({ path: `${SHOTS}/landing-size-picker-390.png` });
   await page.keyboard.press("Escape");
+  // The sheet returns focus to its opener as it closes; wait for that, or the
+  // typing below can land on the button instead of the search box.
+  await expect(sheet).toBeHidden();
+  await expect(first).toBeFocused();
   // Search from the header by keyboard.
-  await page.getByRole("combobox", { name: "Search the shop" }).focus();
+  const search = page.getByRole("combobox", { name: "Search the shop" });
+  await search.focus();
   await page.keyboard.type("Landing");
+  await expect(search).toHaveValue("Landing");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/search\?q=Landing/);
 });

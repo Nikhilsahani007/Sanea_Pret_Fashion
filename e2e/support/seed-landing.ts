@@ -95,7 +95,9 @@ try {
         shortDescription: "TEST",
         description: EMPTY,
         status: "PUBLISHED",
-        publishedAt: new Date(Date.now() - i * 60_000),
+        // Seconds, not minutes: newer than anything earlier specs published in
+        // the shared database, so New Ins (NEWEST) shows only these.
+        publishedAt: new Date(Date.now() - i * 1_000),
         labels: i <= 3 ? ["NEW"] : [],
       },
     });
