@@ -62,7 +62,7 @@ export async function publicHrefs(
           WHERE pg."id" = ANY(${ids("PAGE")}::uuid[]) AND ${PUBLIC_PAGE}`)
       : [],
   ]);
-  add("CATEGORY", categories, "categories");
+  add("CATEGORY", categories, "shop"); // D-179
   add("COLLECTION", collections, "collections");
   add("PRODUCT", products, "products");
   add("PAGE", pages, "pages");

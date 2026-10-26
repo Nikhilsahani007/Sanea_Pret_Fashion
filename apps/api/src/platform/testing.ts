@@ -41,7 +41,13 @@ export function testApp(
     db?: Db;
   } & Pick<
     AppOptions,
-    "now" | "argon2" | "authLimits" | "media" | "searchLimit" | "cartLimit"
+    | "now"
+    | "argon2"
+    | "authLimits"
+    | "media"
+    | "searchLimit"
+    | "cartLimit"
+    | "enquiryLimits"
   > = {},
 ) {
   const lines: string[] = [];
@@ -64,6 +70,7 @@ export function testApp(
     ...(options.media ? { media: options.media } : {}),
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
     ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
+    ...(options.enquiryLimits ? { enquiryLimits: options.enquiryLimits } : {}),
   });
   return { app, lines, config };
 }

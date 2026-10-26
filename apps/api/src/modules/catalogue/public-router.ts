@@ -339,6 +339,7 @@ export function cataloguePublicRouter(
             v.colour.id,
             {
               id: v.colour.id,
+              slug: v.colour.slug,
               name: v.colour.name,
               swatchHex: v.colour.swatchHex,
             },

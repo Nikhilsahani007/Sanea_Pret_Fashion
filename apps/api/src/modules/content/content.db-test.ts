@@ -691,7 +691,7 @@ describe("blocks", () => {
     const home = await pub(`${P}/home`);
     expect(home.body.hero.slides).toHaveLength(1);
     expect(home.body.hero.slides[0]).toMatchObject({
-      href: `/categories/${c.category.slug}`,
+      href: `/shop/${c.category.slug}`,
       ctaLabel: "Shop",
     });
     expect(home.body.hero.slides[0].desktopImage.url).toMatch(/\/1440\.webp$/);

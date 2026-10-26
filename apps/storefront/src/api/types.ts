@@ -1,6 +1,10 @@
 // Response shapes of the public API used by the storefront
 // (api-specification.md §3, §6). The cart types come from @sanea/shared.
-import type { PageRichText, VariantAvailability } from "@sanea/shared";
+import type {
+  PageRichText,
+  RichText,
+  VariantAvailability,
+} from "@sanea/shared";
 
 export type MenuLink = { label: string; href: string };
 
@@ -66,9 +70,34 @@ export type ProductSummary = {
   primaryImage: Image | null;
 };
 
+export type Facets = {
+  sizes: { label: string; count: number }[];
+  colours: { slug: string; name: string; swatchHex: string; count: number }[];
+  categories: { slug: string; name: string; count: number }[];
+  priceBands: { minPaise: number; maxPaise: number | null; count: number }[];
+};
+
 export type Listing = {
   items: ProductSummary[];
+  facets?: Facets;
   nextCursor: string | null;
+};
+
+export type CategoryNode = {
+  name: string;
+  slug: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  children: CategoryNode[];
+};
+
+export type Collection = {
+  name: string;
+  slug: string;
+  description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  heroImage: Image | null;
 };
 
 export type Suggestions = {
@@ -76,17 +105,42 @@ export type Suggestions = {
   products: { slug: string; name: string }[];
 };
 
+export type ProductImage = Image & {
+  colourId: string | null;
+  role: string;
+  position: number;
+};
+
+export type SizeChart = {
+  name: string;
+  unit: "CM" | "IN";
+  rows: { size: string; measurements: Record<string, number> }[];
+};
+
 export type ProductDetail = {
   id: string;
   slug: string;
   name: string;
-  colours: { id: string; name: string; swatchHex: string }[];
+  shortDescription?: string;
+  description?: RichText;
+  fabric?: string | null;
+  care?: string | null;
+  fit?: string | null;
+  category?: { name: string; slug: string };
+  sizeChart?: SizeChart | null;
+  labels?: string[];
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  images?: ProductImage[];
+  colours: { id: string; slug?: string; name: string; swatchHex: string }[];
   sizes: { id: string; label: string }[];
   variants: ({
     id: string;
     colourId: string;
     sizeId: string;
+    sku?: string;
     pricePaise: number;
+    compareAtPricePaise?: number | null;
   } & VariantAvailability)[];
 };
 

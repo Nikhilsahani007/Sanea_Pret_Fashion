@@ -110,6 +110,13 @@ export const HANDWRITTEN_CHECKS = [
   { table: "cart", name: "cart_token_hash_check" },
   { table: "cart", name: "cart_expiry_check" },
   { table: "cart_item", name: "cart_item_quantity_check" },
+  // Phase 13 (enquiries, D-054)
+  { table: "enquiry", name: "enquiry_consent_check" },
+  { table: "enquiry", name: "enquiry_contact_check" },
+  { table: "enquiry", name: "enquiry_phone_check" },
+  { table: "enquiry", name: "enquiry_text_check" },
+  { table: "enquiry", name: "enquiry_source_check" },
+  { table: "whatsapp_click", name: "whatsapp_click_page_path_check" },
 ] as const;
 
 /** Views (Phase 9, Q9-1): read with $queryRaw; Prisma does not model them. */

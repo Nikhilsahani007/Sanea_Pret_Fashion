@@ -5,8 +5,9 @@
 // does not notice if it is removed (phase-6-plan.md). Every handwritten object
 // is listed in apps/api/src/db/handwritten.ts and checked by tests.
 //
-// Phase 6 tables plus the Phase 7 admin-auth tables and the Phase 8 search
-// column and indexes (database-design.md §6).
+// Phase 6 tables plus the Phase 7 admin-auth tables, the Phase 8 search
+// column and indexes, the Phase 11 guest cart and the Phase 13 enquiries
+// (database-design.md §6).
 
 generator client {
   provider               = "prisma-client"
@@ -87,6 +88,14 @@ enum ReservationStatus {
 }
 
 /// The seven block types in system-design.md §7.
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  CLOSED
+
+  @@map("enquiry_status")
+}
+
 enum ContentBlockType {
   ANNOUNCEMENT_BAR
   HERO_SLIDE
@@ -200,6 +209,8 @@ model Product {
   variants    ProductVariant[]
   images      ProductImage[]
   collections CollectionProduct[]
+  enquiries   Enquiry[]
+  waClicks    WhatsAppClick[]
 
   @@index([categoryId])
   @@index([sizeChartId])
@@ -270,6 +281,8 @@ model ProductVariant {
   movements    StockMovement[]
   reservations StockReservation[]
   cartItems    CartItem[]
+  enquiries    Enquiry[]
+  waClicks     WhatsAppClick[]
 
   @@unique([productId, colourId, sizeId])
   @@index([colourId])
@@ -412,6 +425,58 @@ model CartItem {
   @@map("cart_item")
 }
 
+// ─── Enquiries (Phase 13) ────────────────────────────────────────────────────
+
+/// Website enquiry (database-design.md §3.5, D-054). Consent is required and
+/// at least one of email or phone (CHECKs). The IP is stored as a keyed hash.
+model Enquiry {
+  id               String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  source           String        @default("WEBSITE")
+  productId        String?       @map("product_id") @db.Uuid
+  variantId        String?       @map("variant_id") @db.Uuid
+  name             String
+  email            String?       @db.Citext
+  /// E.164, +91 mobile.
+  phone            String?
+  message          String
+  consentToContact Boolean       @map("consent_to_contact")
+  sourcePath       String        @map("source_path")
+  status           EnquiryStatus @default(NEW)
+  assignedAdminId  String?       @map("assigned_admin_id") @db.Uuid
+  ipHash           String?       @map("ip_hash")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product       Product?        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  assignedAdmin AdminUser?      @relation(fields: [assignedAdminId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([productId])
+  @@index([variantId])
+  @@index([assignedAdminId])
+  @@map("enquiry")
+}
+
+/// Anonymous WhatsApp click-to-chat log (system-design.md §9): no personal data.
+model WhatsAppClick {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  productId String?  @map("product_id") @db.Uuid
+  variantId String?  @map("variant_id") @db.Uuid
+  pagePath  String   @map("page_path")
+  /// Random per-browser-session ID, not linked to any person.
+  sessionId String   @map("session_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  product Product?        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([productId, createdAt])
+  @@index([variantId])
+  @@index([createdAt])
+  @@map("whatsapp_click")
+}
+
 // ─── Admin and security ─────────────────────────────────────────────────────
 
 model AdminUser {
@@ -445,6 +510,7 @@ model AdminUser {
   settingUpdates  StoreSetting[]
   recoveryCodes   AdminRecoveryCode[]
   invitesSent     AdminInvite[]       @relation("InviteSentBy")
+  enquiries       Enquiry[]
   resetInvites    AdminInvite[]       @relation("InviteForAdmin")
 
   @@map("admin_user")

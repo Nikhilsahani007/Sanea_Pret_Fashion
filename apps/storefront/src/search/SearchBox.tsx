@@ -15,7 +15,7 @@ type Option = { kind: "category" | "product"; slug: string; name: string };
 export const SUGGEST_DELAY_MS = 200;
 
 const hrefOf = (o: Option) =>
-  o.kind === "category" ? `/categories/${o.slug}` : `/products/${o.slug}`;
+  o.kind === "category" ? `/shop/${o.slug}` : `/products/${o.slug}`;
 
 export function SearchBox({
   id,

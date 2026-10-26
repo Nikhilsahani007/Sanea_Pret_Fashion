@@ -66,6 +66,11 @@ function block(b: Block, i: number): ReactNode {
   }
 }
 
+/** Structured rich text, node by node (also product descriptions, Phase 13). */
+export function RichContent({ blocks }: { blocks: readonly Block[] }) {
+  return <>{blocks.map(block)}</>;
+}
+
 export function ContentPage() {
   const { slug = "" } = useParams();
   const page = useResource<PublicPage>(
@@ -92,7 +97,7 @@ export function ContentPage() {
   return (
     <article className={s.article} aria-labelledby="page-title">
       <h1 id="page-title">{page.data.title}</h1>
-      {page.data.body.content.map(block)}
+      <RichContent blocks={page.data.body.content} />
     </article>
   );
 }

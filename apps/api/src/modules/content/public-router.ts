@@ -6,12 +6,15 @@
 // verifies and publishes it) is a 404 identical to an unknown slug, never cached.
 import {
   CONTENT_BLOCKS,
+  indianMobileSchema,
   pageRichTextSchema,
+  plainTextSchema,
   slugSchema,
   type ContentTarget,
   type ProductSource,
 } from "@sanea/shared";
 import { Router, type RequestHandler } from "express";
+import { z } from "zod";
 
 import { Prisma } from "../../generated/prisma/client.ts";
 import { AppError } from "../../platform/http/errors.ts";
@@ -39,6 +42,16 @@ const HOME_KEYS = [
   "home.row2",
   "home.tabbedGrid",
 ] as const;
+
+/**
+ * The store setting behind the WhatsApp button (OD-16). Until the Owner sets
+ * a valid number it is null and the storefront shows no WhatsApp link.
+ */
+export const WHATSAPP_SETTING = "contact.whatsapp";
+const whatsAppSetting = z.object({
+  number: indianMobileSchema,
+  hours: plainTextSchema(0, 120).optional(),
+});
 
 const notFound: RequestHandler = (_req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
@@ -175,6 +188,23 @@ export function contentPublicRouter(
         newIns: await row("home.newIns"),
         row2: await row("home.row2"),
         tabbedGrid: tabs.length ? { tabs } : null,
+      });
+    }),
+  );
+
+  router.get(
+    `${BASE}/settings/public`,
+    publicCache,
+    handle(async (_req, res) => {
+      const row = await deps.db.storeSetting.findUnique({
+        where: { key: WHATSAPP_SETTING },
+        select: { value: true },
+      });
+      const whatsApp = whatsAppSetting.safeParse(row?.value);
+      res.json({
+        whatsApp: whatsApp.success
+          ? { number: whatsApp.data.number, hours: whatsApp.data.hours || null }
+          : null,
       });
     }),
   );

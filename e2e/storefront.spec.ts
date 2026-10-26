@@ -240,7 +240,7 @@ test("keyboard only: search, choose a size, add, and close the bag", async ({
   await expect(add).toBeFocused();
 });
 
-test("pages: a published page renders; the unpublished Rehma page and unknown pages are not found; Phase 13 links are coming soon", async ({
+test("pages: a published page renders; the unpublished Rehma page and unknown pages are not found; old category links reach /shop", async ({
   page,
 }) => {
   await page.goto(`${SHOP}/pages/test-storefront-help`);
@@ -251,9 +251,10 @@ test("pages: a published page renders; the unpublished Rehma page and unknown pa
   await expect(
     page.getByRole("heading", { name: "Page not found" }),
   ).toBeVisible();
+  // D-179: the Phase 11 address redirects to the category listing.
   await page.goto(`${SHOP}/categories/test-storefront-kurtas`);
+  await expect(page).toHaveURL(`${SHOP}/shop/test-storefront-kurtas`);
   await expect(
-    page.getByRole("heading", { name: "This page is coming soon" }),
+    page.getByRole("heading", { name: "TEST Storefront Kurtas", level: 1 }),
   ).toBeVisible();
-  await review(page, "storefront-coming-soon");
 });

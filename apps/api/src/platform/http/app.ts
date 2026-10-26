@@ -20,6 +20,11 @@ import { catalogueAdminRouter } from "../../modules/catalogue/admin-router.ts";
 import { cataloguePublicRouter } from "../../modules/catalogue/public-router.ts";
 import { contentAdminRouter } from "../../modules/content/admin-router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
+import {
+  CLICK_LIMIT,
+  ENQUIRY_LIMIT,
+  enquiriesRouter,
+} from "../../modules/enquiries/router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { inventoryRouter } from "../../modules/inventory/router.ts";
 import {
@@ -57,6 +62,11 @@ export type AppOptions = {
   readonly searchLimit?: { windowMs: number; limit: number };
   /** Test seam: the cart write limit (default 60 per minute per IP). */
   readonly cartLimit?: { windowMs: number; limit: number };
+  /** Test seam: the enquiry (5 per hour) and WhatsApp click (60 per minute) limits. */
+  readonly enquiryLimits?: {
+    enquiries: { windowMs: number; limit: number };
+    clicks: { windowMs: number; limit: number };
+  };
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -71,6 +81,7 @@ export function createApp({
   media: mediaOptions = {},
   searchLimit = SEARCH_LIMIT,
   cartLimit = CART_WRITE_LIMIT,
+  enquiryLimits = { enquiries: ENQUIRY_LIMIT, clicks: CLICK_LIMIT },
 }: AppOptions): Express {
   const deps: AuthDeps | undefined = db
     ? { db, config, logger, now, argon2 }
@@ -110,6 +121,7 @@ export function createApp({
       app.use(cataloguePublicRouter(deps, media.storage));
       app.use(searchRouter(deps, media.storage, searchLimit));
       app.use(cartRouter(deps, media.storage, cartLimit));
+      app.use(enquiriesRouter(deps, enquiryLimits));
     }
   }
   for (const router of routers) app.use(router);

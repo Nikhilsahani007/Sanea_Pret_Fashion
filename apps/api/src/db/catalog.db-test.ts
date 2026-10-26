@@ -88,6 +88,7 @@ describe("tables and scope", () => {
       "collection_product",
       "colour",
       "content_block",
+      "enquiry",
       "inventory_level",
       "media_asset",
       "navigation_item",
@@ -100,6 +101,7 @@ describe("tables and scope", () => {
       "stock_movement",
       "stock_reservation",
       "store_setting",
+      "whatsapp_click",
     ]);
   });
 
@@ -149,8 +151,8 @@ describe("tables and scope", () => {
         unverified: true,
       },
     ]);
-    // 24 tables, less `size` and `page`, which are checked above.
-    expect(counts).toHaveLength(22);
+    // 26 tables, less `size` and `page`, which are checked above.
+    expect(counts).toHaveLength(24);
   });
 });
 
@@ -246,7 +248,8 @@ describe("handwritten objects exist in the live catalogue", () => {
         /ALTER TABLE "([a-z_]+)" ADD CONSTRAINT "([a-z_]+)" FOREIGN KEY \("([a-z_]+)"\)/g,
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
-    expect(expected).toHaveLength(27);
+    // 27 up to Phase 11; Phase 13 adds 3 for enquiries and 2 for clicks.
+    expect(expected).toHaveLength(32);
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -281,7 +284,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(20);
+    expect(rows).toHaveLength(22);
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

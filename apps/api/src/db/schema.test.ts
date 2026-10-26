@@ -145,6 +145,7 @@ describe("Phase 6 scope and conventions", () => {
         "collection_product",
         "colour",
         "content_block",
+        "enquiry",
         "inventory_level",
         "media_asset",
         "navigation_item",
@@ -157,6 +158,7 @@ describe("Phase 6 scope and conventions", () => {
         "stock_movement",
         "stock_reservation",
         "store_setting",
+        "whatsapp_click",
       ].sort(),
     );
   });

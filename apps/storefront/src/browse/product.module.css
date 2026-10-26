@@ -1,0 +1,383 @@
+/* The product page and the enquiry form (phase-13-plan.md §2; design-system.md
+   §6). The picture leads; choices are plain, square and labelled; text
+   controls carry a full 44 px target. */
+.product {
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.crumbs ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+  font-size: var(--sp-step-small);
+}
+
+.crumbs li + li::before {
+  content: "/";
+  margin-inline-end: var(--sp-space-2);
+  color: var(--sp-muted);
+}
+
+.crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+}
+
+.layout {
+  display: grid;
+  gap: var(--sp-space-8);
+}
+
+@media (min-width: 64rem) {
+  .layout {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--sp-space-12);
+    align-items: start;
+  }
+
+  .info {
+    position: sticky;
+    inset-block-start: var(--sp-space-6);
+  }
+}
+
+.gallery {
+  display: grid;
+  gap: var(--sp-space-3);
+}
+
+.mainImage {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--sp-surface);
+}
+
+.mainImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+}
+
+.thumb {
+  display: block;
+  width: 4.5rem;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+  border: var(--sp-border-width) solid transparent;
+  background: var(--sp-surface);
+  overflow: hidden;
+  transition: opacity var(--sp-duration-fast) var(--sp-ease-out);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb[aria-current="true"] {
+  border-color: var(--sp-ink);
+}
+
+.thumb:hover {
+  opacity: 0.85;
+}
+
+.info {
+  display: grid;
+  gap: var(--sp-space-6);
+  align-content: start;
+}
+
+.name {
+  font-size: var(--sp-step-head);
+  line-height: var(--sp-leading-tight);
+}
+
+.price {
+  font-size: var(--sp-step-lead);
+}
+
+.from,
+.was,
+.hint,
+.chosen {
+  color: var(--sp-muted);
+}
+
+.hint {
+  font-size: var(--sp-step-small);
+}
+
+.short {
+  max-width: var(--sp-measure);
+}
+
+.choose {
+  display: grid;
+  gap: var(--sp-space-6);
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--sp-space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldset legend {
+  margin-block-end: var(--sp-space-3);
+  font-weight: var(--sp-weight-medium);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-2);
+  min-height: var(--sp-target-min);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-line);
+  cursor: pointer;
+}
+
+.swatch:has(input:checked) {
+  border-color: var(--sp-ink);
+  border-width: calc(var(--sp-border-width) * 2);
+  padding-inline: calc(var(--sp-space-3) - var(--sp-border-width));
+}
+
+.swatch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.swatch:has(input:focus-visible) {
+  outline: var(--sp-focus-width) solid var(--sp-focus);
+  outline-offset: var(--sp-focus-offset);
+}
+
+.chip {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--sp-border-width) solid var(--sp-line);
+}
+
+.size {
+  min-width: var(--sp-control-height);
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-line);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+  transition: transform var(--sp-duration-instant) var(--sp-ease-out);
+}
+
+.size:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.size[aria-pressed="true"] {
+  background: var(--sp-ink);
+  color: var(--sp-bg);
+  border-color: var(--sp-ink);
+}
+
+.size:disabled {
+  color: var(--sp-muted);
+  text-decoration: line-through;
+  background: transparent;
+}
+
+.textButton {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sp-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: opacity var(--sp-duration-fast) var(--sp-ease-out);
+}
+
+.textButton:hover {
+  text-decoration-thickness: 2px;
+}
+
+.textButton:active {
+  opacity: 0.7;
+}
+
+.ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-space-1) var(--sp-space-6);
+}
+
+.ask .hint {
+  flex-basis: 100%;
+}
+
+.details {
+  display: grid;
+  gap: var(--sp-space-4);
+  padding-block-start: var(--sp-space-6);
+  border-block-start: var(--sp-border-width) solid var(--sp-line);
+}
+
+.detailsTitle {
+  font-size: var(--sp-step-body);
+  font-weight: var(--sp-weight-medium);
+}
+
+.description {
+  display: grid;
+  gap: var(--sp-space-3);
+  max-width: var(--sp-measure);
+}
+
+.description ul,
+.description ol {
+  padding-inline-start: var(--sp-space-6);
+}
+
+.facts {
+  display: grid;
+  gap: var(--sp-space-3);
+}
+
+.facts dt {
+  font-weight: var(--sp-weight-medium);
+}
+
+.chart {
+  overflow-x: auto;
+}
+
+.chart table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.chart caption {
+  margin-block-end: var(--sp-space-3);
+  text-align: start;
+  color: var(--sp-muted);
+}
+
+.chart th,
+.chart td {
+  padding: var(--sp-space-2) var(--sp-space-3);
+  border-block-end: var(--sp-border-width) solid var(--sp-line);
+  text-align: start;
+}
+
+.loading {
+  min-height: 150svh;
+}
+
+.problem {
+  display: grid;
+  gap: var(--sp-space-4);
+  justify-items: start;
+  padding: var(--sp-space-4);
+  background: var(--sp-danger-surface);
+  color: var(--sp-danger);
+}
+
+/* The enquiry form. */
+.form {
+  display: grid;
+  gap: var(--sp-space-4);
+}
+
+.summary:focus {
+  outline: none;
+}
+
+.summary [role="alert"] {
+  padding: var(--sp-space-4);
+  background: var(--sp-danger-surface);
+  color: var(--sp-danger);
+}
+
+.summary ul {
+  padding-inline-start: var(--sp-space-6);
+}
+
+.field {
+  display: grid;
+  gap: var(--sp-space-2);
+}
+
+.field input,
+.field textarea {
+  min-height: var(--sp-control-height);
+  padding: var(--sp-space-2) var(--sp-space-3);
+  border: var(--sp-border-width) solid var(--sp-field-border);
+  border-radius: var(--sp-radius-none);
+  background: var(--sp-paper);
+  font: inherit;
+}
+
+.field [aria-invalid="true"],
+.consent [aria-invalid="true"] {
+  border-color: var(--sp-danger);
+  border-width: calc(var(--sp-border-width) * 2);
+}
+
+.fieldError {
+  color: var(--sp-danger);
+  font-size: var(--sp-step-small);
+}
+
+.consent label {
+  display: flex;
+  gap: var(--sp-space-3);
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.consent input {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-block-start: 0.2em;
+  accent-color: var(--sp-ink);
+}
+
+/* Honeypot: off screen, not merely invisible, so people never reach it. */
+.trap {
+  position: absolute;
+  inset-inline-start: -10000px;
+  width: 1px;
+  height: 1px; /* taste-skill-ignore: a hidden honeypot, not a divider */
+  overflow: hidden;
+}
+
+.sent {
+  display: grid;
+  gap: var(--sp-space-4);
+  justify-items: start;
+}

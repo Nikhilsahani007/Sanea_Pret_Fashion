@@ -17,7 +17,7 @@ import { unknownFieldError } from "../validation/schema-helpers.ts";
  * cannot match.
  */
 export const INTERNAL_LINK_PATTERN =
-  /^\/(?:(?:products|collections|categories|pages)\/[a-z0-9]+(?:-[a-z0-9]+)*|search(?:\?q=[a-z0-9+%-]{1,100})?)?$/;
+  /^\/(?:(?:products|collections|categories|shop|pages)\/[a-z0-9]+(?:-[a-z0-9]+)*|shop|new-in|search(?:\?q=[a-z0-9+%-]{1,100})?)?$/;
 
 export const RICH_TEXT_LIMITS = {
   /** Characters in one text node. */

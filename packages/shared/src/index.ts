@@ -100,6 +100,16 @@ export {
 } from "./cart/cart.ts";
 export type { CartImage, CartLine, CartView } from "./cart/cart.ts";
 
+// Enquiries and WhatsApp (Phase 13)
+export {
+  ENQUIRY_LIMITS,
+  enquirySchema,
+  sitePathSchema,
+  whatsAppClickSchema,
+  whatsAppLink,
+} from "./enquiry/enquiry.ts";
+export type { EnquiryInput, PublicSettings } from "./enquiry/enquiry.ts";
+
 // Validation
 export {
   VALIDATION_CODES,

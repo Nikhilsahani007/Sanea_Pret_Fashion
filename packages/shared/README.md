@@ -72,7 +72,16 @@ Each name is both a value (`OrderStatus.SHIPPED`) and a type (`OrderStatus`).
 | `ProductLabel`, `productLabelSchema` | const object, schema | Admin-set labels; release one allows only `NEW` (Q8-8) |
 | `Availability`, `availabilityOf(stock)`, `VariantAvailability` | const object, function, type | `IN_STOCK`, `LOW_STOCK` with `remaining` (0 < available ≤ threshold), `SOLD_OUT` (D-082, Q8-2) |
 | `richTextSchema`, `RichText`, `EMPTY_RICH_TEXT`, `RICH_TEXT_LIMITS` | schema, type, constants | Structured rich text (Q8-10): `doc` of paragraphs, headings (2, 3) and lists; inline `text` (with `bold`/`italic`) and `link`. Words live under `text` (R2). No HTML |
-| `isInternalLink(href)`, `INTERNAL_LINK_PATTERN` | function, constant | Internal links only (safeguard 2): `/`, `/products/<slug>`, `/collections/<slug>`, `/categories/<slug>`, `/pages/<slug>`, `/search?q=…` (`LINK_NOT_INTERNAL`) |
+| `isInternalLink(href)`, `INTERNAL_LINK_PATTERN` | function, constant | Internal links only (safeguard 2): `/`, `/products/<slug>`, `/collections/<slug>`, `/categories/<slug>` (redirects to `/shop/<slug>`, D-179), `/shop`, `/shop/<slug>`, `/new-in`, `/pages/<slug>`, `/search?q=…` (`LINK_NOT_INTERNAL`) |
+
+### Enquiries and WhatsApp (Phase 13)
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `enquirySchema`, `EnquiryInput`, `ENQUIRY_LIMITS` | schema, type, constants | `POST /enquiries`: name, email and/or Indian mobile, message (10 to 2,000 characters, line breaks allowed), `consentToContact: true`, `sourcePath`; optional product and variant; honeypot `website` and `elapsedMs`. Strict |
+| `whatsAppClickSchema` | schema | `POST /events/whatsapp-click`: optional product and variant, `pagePath`, anonymous `sessionId`. No personal data |
+| `sitePathSchema` | schema | A same-site path starting with `/`, at most 300 characters |
+| `whatsAppLink(number, details)`, `PublicSettings` | function, type | `https://wa.me/<digits>?text=…` with the product, colour, size, SKU and page URL (UF-4) |
 
 ### Validation
 

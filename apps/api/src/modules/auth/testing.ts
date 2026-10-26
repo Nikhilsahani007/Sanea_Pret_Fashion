@@ -14,6 +14,7 @@ import {
   testApp,
   testConfig,
 } from "../../platform/testing.ts";
+import type { AppOptions } from "../../platform/http/app.ts";
 import type { MediaOptions } from "../media/router.ts";
 import { CSRF_COOKIE } from "../../platform/http/csrf.ts";
 import { hashPassword, type Argon2Params } from "./password.ts";
@@ -53,6 +54,7 @@ export async function adminHarness(
     media?: MediaOptions;
     searchLimit?: { windowMs: number; limit: number };
     cartLimit?: { windowMs: number; limit: number };
+    enquiryLimits?: AppOptions["enquiryLimits"];
   } = {},
 ) {
   const { db, drop, name: dbName } = await createTestDatabase();
@@ -68,6 +70,7 @@ export async function adminHarness(
     ...(options.media ? { media: options.media } : {}),
     ...(options.searchLimit ? { searchLimit: options.searchLimit } : {}),
     ...(options.cartLimit ? { cartLimit: options.cartLimit } : {}),
+    ...(options.enquiryLimits ? { enquiryLimits: options.enquiryLimits } : {}),
     db,
     now: clock.now,
     argon2: FAST_ARGON2,

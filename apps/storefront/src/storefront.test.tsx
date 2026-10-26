@@ -84,11 +84,11 @@ describe("shell", () => {
     expect(screen.queryByRole("navigation", { name: /links$/ })).toBeNull();
   });
 
-  it("says when a Phase 13 page is coming, and when an address is unknown", async () => {
+  it("shows not found for a product that is not public and for an unknown address", async () => {
     stubApi({});
     renderAt("/products/sample");
     expect(
-      await screen.findByRole("heading", { name: "This page is coming soon" }),
+      await screen.findByRole("heading", { name: "Page not found" }),
     ).toBeTruthy();
   });
 });
@@ -101,6 +101,24 @@ describe("search", () => {
         body: {
           categories: [{ slug: "kurtas", name: "Kurtas" }],
           products: [{ slug: "sample-kurta", name: "Sample Kurta" }],
+        },
+      },
+      "GET /catalogue/products/sample-kurta": {
+        body: {
+          id: "p1",
+          slug: "sample-kurta",
+          name: "Sample Kurta",
+          colours: [],
+          sizes: [],
+          variants: [
+            {
+              id: "v1",
+              colourId: "c1",
+              sizeId: "s1",
+              pricePaise: 100_000,
+              availability: "IN_STOCK",
+            },
+          ],
         },
       },
     });
@@ -127,7 +145,7 @@ describe("search", () => {
     expect(header.getAttribute("aria-activedescendant")).toBe(options[1]?.id);
     await user.keyboard("{Enter}");
     expect(
-      await screen.findByRole("heading", { name: "This page is coming soon" }),
+      await screen.findByRole("heading", { name: "Sample Kurta", level: 1 }),
     ).toBeTruthy();
   });
 
