@@ -114,3 +114,47 @@ Implementation starts only after:
 2. you approve this plan, with or without changes;
 3. D-179 is decided;
 4. the migration is approved before it is applied anywhere but a disposable database.
+
+## 10. Built and verified (2026-10-26)
+
+**Gate status: pending your review** (index Phase 13: you review the tests and screenshots). Nothing here is a gate approval.
+
+**What was built:**
+- **Database:** migration `20261026120000_enquiries`: tables `enquiry` and `whatsapp_click`, enum `enquiry_status`, six CHECKs (consent, contact, `+91` phone, text lengths, source, page path) registered in `handwritten.ts`. Applied to disposable databases only.
+- **Shared contract (`@sanea/shared`):** `enquirySchema`, `whatsAppClickSchema`, `sitePathSchema`, `whatsAppLink`, `PublicSettings`; internal links also allow `/shop`, `/shop/<slug>` and `/new-in` (D-179).
+- **API:**
+  - `POST /api/v1/enquiries` and `POST /api/v1/events/whatsapp-click` (`modules/enquiries/router.ts`), with the honeypot, the 2-second timing check, 5 enquiries per hour per IP, 60 clicks per minute per IP, the IP stored as an HMAC, and no personal data in clicks;
+  - `GET /api/v1/content/settings/public` (the WhatsApp number from the store setting `contact.whatsapp`, or null);
+  - category links resolve to `/shop/<slug>` (D-179); product detail colours carry their slug.
+- **Storefront:**
+  - listings at `/shop`, `/shop/:slug`, `/new-in` and `/collections/:slug`, with size, colour, price-band and in-stock filters and the sort in the URL, "Load more", a filter panel beside the grid on wide screens and in a sheet on phones, and a polite result count;
+  - `/categories/:slug` redirects to `/shop/:slug`;
+  - the product page at `/products/:slug`: gallery by colour, colour and size choice kept in `?colour=<slug>&size=<label>`, sold-out sizes disabled, low-stock note, size guide from the size chart, add to bag, rich-text details, fabric, fit and care;
+  - the enquiry form in a sheet (product and variant prefilled, consent required, errors listed and tied to fields);
+  - "Ask on WhatsApp" only when a number is set, with the product, colour, size, SKU and page URL, and an anonymous click log;
+  - the "coming soon" page is gone: anything not public is "Page not found".
+
+**Evidence (commands run in the `phase-12-landing` worktree, Node 24.11.0):**
+
+| Check | Result |
+|-------|--------|
+| `npm run format:check`, `npm run lint` (ESLint and the token check), `npm run typecheck` | Pass |
+| Taste lint on `apps/storefront/src` | 0 FAIL, 0 WARN |
+| `npm test` | 42 files, 746 tests pass (new: shared enquiry tests, `browse/browse.test.tsx`) |
+| `npm run test:integration` (disposable PostgreSQL 18) | 20 files, 412 tests pass; `[P13-GATE]` E13-1 to E13-9 |
+| `npm run audit` | 0 vulnerabilities |
+| Storefront and admin production builds | Pass |
+| End-to-end, full suite, twice (installed Chromium in place of Edge; validation-only config) | 23 of 23 pass each run, including `e2e/browse-and-enquire.spec.ts` (E2E-1 browsing steps on desktop, E2E-4 on a phone) with axe at 1440, 768 and 390 px and no horizontal scroll |
+| Lighthouse 13.5.0, listing and product page | Mobile: performance 95 and 94, accessibility 100, CLS 0. Desktop: performance 100, accessibility 100 |
+
+Screenshots: `docs/reviews/browsing/2026-10-26/` (listing, collection, product, filter sheet, enquiry errors and confirmation).
+
+**Limits and open items:**
+- All data is synthetic; no product photographs exist (B-06), so the gallery shows empty wells and the gallery-by-colour switch was not exercised with pictures.
+- The brand fonts could not be fetched here; screenshots use fallback fonts.
+- The WhatsApp number has no admin screen yet: until Phase 16 it is set as the store setting `contact.whatsapp`. OD-16 (the real number) is open.
+- Delivery and returns text is not shown: it waits for OD-08 and OD-09.
+- The enquiry consent wording needs your lawyer's view (OD-12).
+- Enquiries are stored but there is no admin inbox until Phase 16.
+- Lighthouse SEO is 83 (no meta description or `robots.txt`): Phase 17.
+- The design choices in §8 (filter panel layout, cards per row, the colour-led "live thing") are built in their simplest form for your review.

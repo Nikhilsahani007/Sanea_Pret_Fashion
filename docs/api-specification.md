@@ -62,7 +62,7 @@ Public catalogue and search responses carry `Cache-Control: public, max-age=60` 
 | GET | `/catalogue/collections` | Published collections inside their schedule (`startsAt` ≤ now < `endsAt`, each optional), with the hero image's derivatives. |
 | GET | `/catalogue/collections/:slug` | Collection detail; `404` when not published or outside its schedule. Its products: `/catalogue/products?collection=<slug>`. |
 | GET | `/catalogue/products` | Listing. Query: `category` (slug; includes published sub-categories), `collection` (slug), `size` or `size[]` (size labels, repeatable), `colour` or `colour[]` (colour slugs), `priceMin`, `priceMax` (paise), `inStock` (`true`), `sort` (`newest` default, `price_asc`, `price_desc`), `limit` (1 to 48, default 24), `cursor` (opaque). Size, colour, price and stock filters must all hold for the **same active variant**. Returns `{ items, facets, nextCursor }`: items are summaries (`slug`, `name`, `fromPricePaise`, `currency`, `labels`, `colours`, `soldOut`, `primaryImage`); facets (`sizes`, `colours`, `categories`, `priceBands`) count visible products before the variant filters. Price bands are fixed: under ₹1,000; ₹1,000 to ₹2,000; ₹2,000 to ₹3,000; ₹3,000 to ₹5,000; ₹5,000 and over. Unknown parameters, bad ranges and tampered cursors give `400`. |
-| GET | `/catalogue/products/:slug` | Product detail (§6): active variants with availability, colours, sizes, images by colour (derivatives only), size chart, rich-text description. `404` unless the product is published, its category is published and it has an active variant. |
+| GET | `/catalogue/products/:slug` | Product detail (§6): active variants with availability, colours (`id`, `slug`, `name`, `swatchHex`; the slug since Phase 13, for `?colour=` deep links), sizes, images by colour (derivatives only), size chart, rich-text description. `404` unless the product is published, its category is published and it has an active variant. |
 | GET | `/search` | `q` (2 to 100 characters), plus the listing filters. `sort` is `relevance` (default; full-text rank plus trigram similarity) or a listing sort. Typo-tolerant (`pg_trgm`). Published, visible products only. 60 requests per minute per IP, shared with suggestions. |
 | GET | `/search/suggest` | `q` (2 to 100 characters). Up to 6 suggestions: up to 2 published categories, then products (`{ categories, products }`, each `slug` and `name`). |
 
@@ -72,7 +72,7 @@ Public catalogue and search responses carry `Cache-Control: public, max-age=60` 
 | GET | `/content/home` | **Published** blocks only (D-093):<br>• `announcement` (`{ text, href }`, inside its active window, or null);<br>• `hero.slides` (derivative images; a slide whose target is not public is omitted);<br>• `newIns`, `row2` (`{ title, items }`, items as catalogue summaries of **visible** products only);<br>• `tabbedGrid.tabs`.<br>Dates use the database clock. The editorial band is not served until OD-23. Category pills are a navigation menu. `public, max-age=60` |
 | GET | `/content/navigation` | `{ menus: { HEADER, CATEGORY_PILLS, FOOTER_SHOP, FOOTER_HELP, FOOTER_ABOUT: [{ label, href }] }, footer: { contact, social } | null }`. A link appears only while its target is public: a published category, a scheduled published collection, a visible product, or a published (and, if required, verified) page. `public, max-age=60` |
 | GET | `/content/pages/:slug` | `{ slug, title, seoTitle, seoDescription, body }` for a `PUBLISHED` page; a page that requires verification must also be verified. Image nodes become `{ type: "image", image: { url, width, height, alt, sources }, caption }`. Otherwise **404, identical to an unknown slug, with `no-store`**; this includes `rehma-foundation` until the Owner verifies and publishes it. `public, max-age=60` |
-| GET | `/content/settings/public` | WhatsApp number, contact details, COD availability flag. |
+| GET | `/content/settings/public` | Phase 13: `{ whatsApp: { number, hours } | null }` from the store setting `contact.whatsapp` (`number` normalised to `+91…`; null until the Owner sets a valid one, OD-16). Contact details and the COD flag are added with their phases. `public, max-age=60` |
 
 ### Cart
 | Method | Path | Description |
@@ -100,8 +100,8 @@ Cart rules (D-099, `system-design.md` §3):
 ### Enquiries and events
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/enquiries` | `{ productId?, variantId?, name, email?, phone?, message, consentToContact: true }`. Rate-limited. Honeypot field. |
-| POST | `/events/whatsapp-click` | `{ productId?, variantId?, pagePath }`. Fire-and-forget, rate-limited. |
+| POST | `/enquiries` | `{ productId?, variantId?, name, email?, phone?, message, consentToContact: true, sourcePath, website?, elapsedMs? }` (strict; `enquirySchema` in `@sanea/shared`). An email or an Indian mobile is required; the message is 10 to 2,000 characters. `website` is a honeypot and `elapsedMs` the time the form was open: a filled honeypot or under 2 s gets the same `201 { received: true }` and nothing is stored. A product or variant is linked only if it exists, is published and belongs together. The IP is stored as an HMAC. CSRF required. 5 per hour per IP (`429 RATE_LIMITED`). `no-store` |
+| POST | `/events/whatsapp-click` | `{ productId?, variantId?, pagePath, sessionId }` (strict; `sessionId` is a random per-browser-session UUID). No personal data is accepted or stored. `204`. CSRF required. 60 per minute per IP. `no-store` |
 
 ### Customer auth and account
 
