@@ -1,0 +1,134 @@
+/* Order operations (phase-16-plan.md). Status chips always carry text; colour
+   is never the only signal. The packing slip prints without the shell. */
+.attention {
+  border-color: var(--sp-danger);
+  color: var(--sp-danger);
+  background: var(--sp-danger-surface);
+}
+
+.done {
+  border-color: var(--sp-success);
+  color: var(--sp-success);
+  background: var(--sp-success-surface);
+}
+
+.closed {
+  color: var(--sp-muted);
+  background: var(--sp-surface-alt);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--sp-space-4);
+  align-items: end;
+}
+
+/* minmax(0, …) lets wide tables scroll in their region instead of widening
+   the page. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-space-6);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .columns {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+/* Item tables in a panel fit its width and wrap the item name, so the
+   quantity and prices stay in view. */
+table.fit {
+  width: 100%;
+}
+
+.address {
+  font-style: normal;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--sp-space-4);
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  gap: var(--sp-space-1) var(--sp-space-6);
+  margin-top: var(--sp-space-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.totals dd {
+  text-align: right;
+}
+
+.timeline {
+  display: grid;
+  gap: var(--sp-space-3);
+  padding-left: var(--sp-space-5);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--sp-space-4);
+}
+
+.tile {
+  display: grid;
+  gap: var(--sp-space-1);
+  padding: var(--sp-space-5);
+  border: var(--sp-border-width) solid var(--sp-line);
+  background: var(--sp-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.tile:hover {
+  border-color: var(--sp-ink);
+}
+
+.tileValue {
+  font-size: var(--sp-step-head);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--sp-leading-tight);
+}
+
+.message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 60ch;
+}
+
+/* Packing slip: a plain sheet; the shell and the controls do not print. */
+.slip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-space-6);
+  max-width: 48rem;
+}
+
+.slipHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+}
+
+.collect {
+  padding: var(--sp-space-4);
+  border: calc(var(--sp-border-width) * 2) solid var(--sp-ink);
+  font-size: var(--sp-step-lead);
+}
+
+@media print {
+  .noPrint {
+    display: none;
+  }
+}

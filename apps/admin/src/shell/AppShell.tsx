@@ -65,7 +65,7 @@ function AppShell() {
         Skip to content
       </a>
       <header className={s.header}>
-        <Link to="/products" className={s.brand}>
+        <Link to="/" className={s.brand}>
           Sanéa Pret <span className="visually-hidden">admin home</span>
         </Link>
         <div className={s.account}>

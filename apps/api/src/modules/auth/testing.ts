@@ -121,6 +121,23 @@ export async function adminHarness(
       .send(body);
   }
 
+  async function put(path: string, body: object, session: Session) {
+    return request(app)
+      .put(path)
+      .set("Origin", ADMIN)
+      .set("Cookie", session.cookie)
+      .set("X-CSRF-Token", session.csrfToken)
+      .send(body);
+  }
+
+  async function del(path: string, session: Session) {
+    return request(app)
+      .delete(path)
+      .set("Origin", ADMIN)
+      .set("Cookie", session.cookie)
+      .set("X-CSRF-Token", session.csrfToken);
+  }
+
   function get(path: string, session?: Session) {
     const req = request(app).get(path).set("Origin", ADMIN);
     return session ? req.set("Cookie", session.cookie) : req;
@@ -190,6 +207,8 @@ export async function adminHarness(
     csrf,
     post,
     patch,
+    put,
+    del,
     get,
     createAdmin,
     signIn,

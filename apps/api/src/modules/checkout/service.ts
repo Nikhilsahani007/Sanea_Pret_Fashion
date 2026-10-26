@@ -15,6 +15,7 @@ import {
   outOfStock,
   reserveIn,
 } from "../inventory/service.ts";
+import { notify } from "../notifications/service.ts";
 import type { CheckoutDeps } from "./deps.ts";
 import { orderNumber, priceOrder, type PricedLine } from "./pricing.ts";
 import { readSettings } from "./settings.ts";
@@ -247,6 +248,7 @@ export async function placeOrder(
   }
   if (body.paymentMethod === "PREPAID")
     await startPayment(deps, created.paymentId, created.orderNumber);
+  else await notify(deps, created.id, "order.placed_cod");
   return describePlacement(deps, created.id, 201);
 }
 
@@ -309,9 +311,11 @@ export async function orderSummary(deps: CheckoutDeps, orderId: string) {
         select: { expiresAt: true },
         take: 1,
       },
+      shipments: { orderBy: { shippedAt: "desc" }, take: 1 },
     },
   });
   const payment = o.payments[0];
+  const shipment = o.shipments[0];
   const address = o.shippingAddress as Address;
   return {
     order: {
@@ -344,6 +348,16 @@ export async function orderSummary(deps: CheckoutDeps, orderId: string) {
         o.status === "PENDING_PAYMENT"
           ? (o.reservations[0]?.expiresAt?.toISOString() ?? null)
           : null,
+      /** Once dispatched (Phase 16): the courier and tracking, as staff entered them. */
+      shipment: shipment
+        ? {
+            courierName: shipment.courierName,
+            trackingNumber: shipment.trackingNumber,
+            trackingUrl: shipment.trackingUrl,
+            shippedAt: shipment.shippedAt.toISOString(),
+            deliveredAt: shipment.deliveredAt?.toISOString() ?? null,
+          }
+        : null,
     },
     payment: payment
       ? {

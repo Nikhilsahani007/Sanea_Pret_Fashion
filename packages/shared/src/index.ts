@@ -129,11 +129,14 @@ export type {
 
 // Orders (system-design.md §5)
 export {
+  CANCEL_REASONS,
   ORDER_NUMBER_PATTERN,
   ORDER_TRANSITIONS,
+  STAFF_CANCEL_REASONS,
   canTransition,
   nextStatuses,
 } from "./orders/transitions.ts";
+export type { CancelReason } from "./orders/transitions.ts";
 
 // Validation
 export {

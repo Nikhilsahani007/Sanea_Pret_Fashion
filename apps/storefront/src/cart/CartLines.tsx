@@ -97,7 +97,11 @@ export function CartLines({
               ) : null}
               {(notices.get(line.variantId) ?? []).map((code) => (
                 <p key={code} className={s.notice}>
-                  {NOTICES[code]}
+                  {/* None left: lowering the quantity cannot help. */}
+                  {code === "EXCEEDS_AVAILABLE" &&
+                  line.stock?.availability === "SOLD_OUT"
+                    ? "Sold out. Remove it to check out."
+                    : NOTICES[code]}
                 </p>
               ))}
               <div className={s.controls}>

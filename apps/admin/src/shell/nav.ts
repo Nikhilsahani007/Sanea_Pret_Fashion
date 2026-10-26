@@ -13,6 +13,10 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: readonly NavItem[] = [
+  // Everyone has a dashboard; its tiles follow the role (Phase 16).
+  { to: "/", label: "Today", permission: "products.view", end: true },
+  { to: "/orders", label: "Orders", permission: "orders.view" },
+  { to: "/enquiries", label: "Enquiries", permission: "enquiries.manage" },
   { to: "/products", label: "Products", permission: "products.view" },
   {
     to: "/inventory",
@@ -43,6 +47,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     permission: "products.editContent",
   },
   { to: "/media", label: "Media library", permission: "products.editContent" },
+  { to: "/settings", label: "Store settings", permission: "settings.store" },
 ];
 
 export function navFor(role: AdminRole): NavItem[] {

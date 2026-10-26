@@ -138,3 +138,21 @@
     border-left-color: Highlight;
   }
 }
+
+/* The packing slip prints as a plain sheet (Phase 16). */
+@media print {
+  .skip,
+  .header,
+  .nav,
+  .nav[data-open="false"] {
+    display: none;
+  }
+
+  .layout {
+    display: block;
+  }
+
+  .main {
+    padding: 0;
+  }
+}

@@ -48,7 +48,8 @@ const HOME_KEYS = [
  * a valid number it is null and the storefront shows no WhatsApp link.
  */
 export const WHATSAPP_SETTING = "contact.whatsapp";
-const whatsAppSetting = z.object({
+/** Also the admin settings screen's schema (Phase 16). */
+export const whatsAppSetting = z.object({
   number: indianMobileSchema,
   hours: plainTextSchema(0, 120).optional(),
 });

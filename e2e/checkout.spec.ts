@@ -210,6 +210,12 @@ test("checkout: field errors are shown and focused; nothing is placed", async ({
   await page.goto(`${SHOP}/products/test-checkout-kurta`);
   await page.getByRole("button", { name: "M", exact: true }).click();
   await page.getByRole("button", { name: /^Add to bag/ }).click();
+  // Wait for the bag to hold the line before leaving the page.
+  await expect(
+    page
+      .getByRole("dialog", { name: "Your bag" })
+      .getByText("TEST Checkout Kurta"),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
   await page.goto(`${SHOP}/checkout`);
   await page.getByLabel("Email").fill("not-an-email");

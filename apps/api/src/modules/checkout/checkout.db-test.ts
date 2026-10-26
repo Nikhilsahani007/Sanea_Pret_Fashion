@@ -17,6 +17,7 @@ import { STOREFRONT, cookiePair } from "../../platform/testing.ts";
 import { adminHarness, type Harness } from "../auth/testing.ts";
 import { CART_COOKIE } from "../cart/token.ts";
 import { expireDue } from "../inventory/service.ts";
+import { logEmailProvider } from "../notifications/provider.ts";
 import {
   expireUnconfirmedCod,
   expireUnpaidOrders,
@@ -198,6 +199,7 @@ beforeAll(async () => {
     logger: pino({ level: "silent" }),
     now: h.clock.now,
     payments: mock,
+    email: logEmailProvider(pino({ level: "silent" })),
   };
 });
 afterAll(() => h.drop());
@@ -661,11 +663,11 @@ describe("reconciliation", () => {
     const { no } = await placed("PREPAID");
     const pay = (await order(no)).payments[0]!;
     mock.simulate(pay.providerPaymentId!, "success"); // the webhook is lost
-    expect(await reconcile(h.db, mock, h.clock.now(), HOLD)).toBe(0); // not stuck long enough
+    expect(await reconcile(h.db, mock, h.clock.now(), HOLD)).toEqual([]); // not stuck long enough
     // The API clock moves on; the hold, kept by the database clock, is still live.
     h.clock.advance(31 * 60_000);
     expect(
-      await reconcile(h.db, mock, h.clock.now(), HOLD),
+      (await reconcile(h.db, mock, h.clock.now(), HOLD)).length,
     ).toBeGreaterThanOrEqual(1);
     expect((await order(no)).status).toBe("CONFIRMED");
   });
@@ -769,10 +771,13 @@ describe("order lifecycle", () => {
         code: "INVALID_TRANSITION",
       });
     await move(o.id, "CONFIRMED");
+    // D-181: Fulfilment may not cancel a confirmed order (permission, 403).
     await expect(
-      move(o.id, "CANCELLED", staff("FULFILMENT")),
+      move(o.id, "CANCELLED", staff("FULFILMENT"), {
+        reason: "CUSTOMER_REQUESTED",
+      }),
     ).rejects.toMatchObject({
-      code: "INVALID_TRANSITION",
+      code: "FORBIDDEN",
     });
     await expect(
       move(o.id, "PACKED", staff("CATALOGUE_EDITOR")),
@@ -787,9 +792,13 @@ describe("order lifecycle", () => {
     const o = await order(no);
     await move(o.id, "CONFIRMED");
     await move(o.id, "PACKED");
-    await move(o.id, "CANCELLED", staff("MANAGER"));
+    await move(o.id, "CANCELLED", staff("MANAGER"), {
+      reason: "CUSTOMER_REQUESTED",
+    });
     expect(await level(v)).toMatchObject({ onHand: 5, reserved: 0 });
-    await expect(move(o.id, "CANCELLED")).rejects.toMatchObject({
+    await expect(
+      move(o.id, "CANCELLED", staff("OWNER"), { reason: "CUSTOMER_REQUESTED" }),
+    ).rejects.toMatchObject({
       code: "INVALID_TRANSITION",
     });
     expect((await order(no)).cancelledAt).not.toBeNull();

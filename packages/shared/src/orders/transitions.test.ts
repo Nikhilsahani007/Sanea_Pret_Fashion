@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { AdminRole } from "../enums/admin-role.ts";
 import { OrderStatus } from "../enums/order-status.ts";
+import { PERMISSIONS } from "../enums/permissions.ts";
 import {
+  CANCEL_REASONS,
   ORDER_NUMBER_PATTERN,
   ORDER_TRANSITIONS,
+  STAFF_CANCEL_REASONS,
   canTransition,
   nextStatuses,
 } from "./transitions.ts";
@@ -56,5 +59,43 @@ describe("order transitions (system-design.md §5)", () => {
   it("matches order numbers", () => {
     expect(ORDER_NUMBER_PATTERN.test("SP-2610-000123")).toBe(true);
     expect(ORDER_NUMBER_PATTERN.test("SP-261-000123")).toBe(false);
+  });
+});
+
+describe("cancellation (D-181)", () => {
+  it("Fulfilment may decline only an unconfirmed COD order; Owner and Manager may cancel until dispatch", () => {
+    expect(
+      canTransition("PENDING_CONFIRMATION", "CANCELLED", "FULFILMENT"),
+    ).toBe(true);
+    for (const from of ["CONFIRMED", "PACKED"] as const) {
+      expect(canTransition(from, "CANCELLED", "FULFILMENT")).toBe(false);
+      expect(canTransition(from, "CANCELLED", "OWNER")).toBe(true);
+      expect(canTransition(from, "CANCELLED", "MANAGER")).toBe(true);
+    }
+    for (const from of ["SHIPPED", "DELIVERED", "RETURN_TO_ORIGIN"] as const)
+      expect(canTransition(from, "CANCELLED", "SYSTEM")).toBe(false);
+    expect(
+      canTransition("PENDING_CONFIRMATION", "CANCELLED", "CATALOGUE_EDITOR"),
+    ).toBe(false);
+  });
+
+  it("cancellation moves carry the permission the API checks, and roles follow it", () => {
+    const cancels = ORDER_TRANSITIONS.filter(
+      (t) => t.to === "CANCELLED" && t.roles.length,
+    );
+    expect(cancels.map((t) => [t.from, t.permission])).toEqual([
+      ["PENDING_CONFIRMATION", "orders.declineCod"],
+      ["CONFIRMED", "orders.cancelRefund"],
+      ["PACKED", "orders.cancelRefund"],
+    ]);
+    for (const t of cancels)
+      expect(t.roles).toEqual(PERMISSIONS[t.permission!]);
+  });
+
+  it("staff reasons are a subset of all reasons and include OTHER", () => {
+    for (const r of STAFF_CANCEL_REASONS)
+      expect(CANCEL_REASONS[r]).toBeTruthy();
+    expect(STAFF_CANCEL_REASONS).toContain("OTHER");
+    expect(STAFF_CANCEL_REASONS).not.toContain("PAID_NO_STOCK");
   });
 });

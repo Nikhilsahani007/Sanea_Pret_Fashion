@@ -16,10 +16,13 @@ import { RequireSession } from "./AppShell.tsx";
 import { navFor } from "./nav.ts";
 
 describe("navigation by role", () => {
-  it("shows catalogue screens to O M C and only products to F", () => {
+  it("shows catalogue screens to O M C, orders to O M F, enquiries and settings to O M", () => {
     const labels = (role: keyof typeof ADMINS) =>
       navFor(ADMINS[role].role).map((i) => i.label);
     const full = [
+      "Today",
+      "Orders",
+      "Enquiries",
       "Products",
       "Inventory",
       "Stock movements",
@@ -29,14 +32,26 @@ describe("navigation by role", () => {
       "Colours",
       "Size charts",
       "Media library",
+      "Store settings",
     ];
     expect(labels("OWNER")).toEqual(full);
     expect(labels("MANAGER")).toEqual(full);
-    // Catalogue editors view stock but cannot adjust it or read movements.
+    // Catalogue editors view stock but cannot adjust it or read movements,
+    // and see no orders, enquiries or settings.
     expect(labels("CATALOGUE_EDITOR")).toEqual(
-      full.filter((l) => l !== "Stock movements"),
+      full.filter(
+        (l) =>
+          ![
+            "Orders",
+            "Enquiries",
+            "Stock movements",
+            "Store settings",
+          ].includes(l),
+      ),
     );
     expect(labels("FULFILMENT")).toEqual([
+      "Today",
+      "Orders",
       "Products",
       "Inventory",
       "Stock movements",
@@ -51,6 +66,8 @@ describe("navigation by role", () => {
     ).toBeTruthy();
     const nav = screen.getByRole("navigation", { name: "Admin" });
     expect([...nav.querySelectorAll("a")].map((a) => a.textContent)).toEqual([
+      "Today",
+      "Orders",
       "Products",
       "Inventory",
       "Stock movements",

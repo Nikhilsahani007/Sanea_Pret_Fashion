@@ -6,6 +6,7 @@ import { checkDb, createDb } from "./platform/db.ts";
 import { createApp } from "./platform/http/app.ts";
 import { startCartCleanupJob } from "./modules/cart/job.ts";
 import { startExpiryJob } from "./modules/inventory/job.ts";
+import { logEmailProvider } from "./modules/notifications/provider.ts";
 import { startOrderJobs } from "./modules/orders/jobs.ts";
 import { paymentProviderFor } from "./modules/payments/mock.ts";
 import { createLogger } from "./platform/logger.ts";
@@ -37,7 +38,9 @@ await rm(join(config.mediaStorageDir, "tmp"), { recursive: true, force: true });
 // One provider instance for the routes and the order jobs (the mock keeps
 // its payments in memory).
 const payments = paymentProviderFor(config);
-const app = createApp({ config, logger, db, payments });
+// The log provider until an email provider is chosen (OD-19, D-190).
+const email = logEmailProvider(logger);
+const app = createApp({ config, logger, db, payments, email });
 const server = app.listen(config.port, config.host, () => {
   logger.info({ host: config.host, port: config.port }, "api listening");
 });
@@ -47,7 +50,7 @@ const expiryJob = startExpiryJob(db, logger);
 const cartJob = startCartCleanupJob(db, logger);
 // Cancels unpaid and unconfirmed orders and reconciles payments, every minute (Phase 15).
 const orderJobs = startOrderJobs(
-  { db, config, logger, now: () => new Date(), payments },
+  { db, config, logger, now: () => new Date(), payments, email },
   logger,
 );
 

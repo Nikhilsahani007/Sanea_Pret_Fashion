@@ -215,6 +215,13 @@ export type OrderView = {
     totalPaise: number;
     currency: "INR";
     payBy: string | null;
+    shipment?: {
+      courierName: string;
+      trackingNumber: string;
+      trackingUrl: string | null;
+      shippedAt: string;
+      deliveredAt: string | null;
+    } | null;
   };
   payment: {
     method: "PREPAID" | "COD";

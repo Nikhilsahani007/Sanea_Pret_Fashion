@@ -133,7 +133,35 @@ export function OrderStatus() {
       title: "This order was cancelled.",
       text: "Nothing was charged for it, or any payment will be refunded.",
     },
+    PACKED: {
+      title: "Your order is packed.",
+      text: "It leaves with the courier soon. We email you the tracking details when it ships.",
+    },
+    SHIPPED: {
+      title: "Your order is on its way.",
+      text:
+        order.paymentMethod === "COD"
+          ? "Keep the amount ready in cash for the courier."
+          : "",
+    },
+    DELIVERED: {
+      title: "Your order was delivered.",
+      text: "Thank you for shopping with Sanéa Pret.",
+    },
+    RETURN_TO_ORIGIN: {
+      title: "The courier is returning this order to us.",
+      text: "We will contact you about it.",
+    },
+    RETURN_REQUESTED: {
+      title: "We have your return request.",
+      text: "We will contact you about the next steps.",
+    },
+    RETURNED: {
+      title: "This order was returned.",
+      text: "",
+    },
   };
+  const shipment = order.shipment ?? null;
   const shown = waitingForPayment
     ? {
         title: "Waiting for your payment.",
@@ -190,9 +218,32 @@ export function OrderStatus() {
               Check again
             </button>
           ) : null}
+          {shipment ? (
+            <dl className={s.section} aria-label="Delivery">
+              <div className={s.row}>
+                <dt>Courier</dt>
+                <dd>{shipment.courierName}</dd>
+              </div>
+              <div className={s.row}>
+                <dt>Tracking number</dt>
+                <dd className="tabular">{shipment.trackingNumber}</dd>
+              </div>
+              {shipment.trackingUrl ? (
+                <p>
+                  <a
+                    href={shipment.trackingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Track your parcel
+                  </a>
+                </p>
+              ) : null}
+            </dl>
+          ) : null}
           <p>
-            Delivering to {order.shipTo.fullName}, {order.shipTo.city}{" "}
-            {order.shipTo.pinCode}.
+            {order.status === "DELIVERED" ? "Delivered to" : "Delivering to"}{" "}
+            {order.shipTo.fullName}, {order.shipTo.city} {order.shipTo.pinCode}.
           </p>
           <p>
             <Link to="/shop">Continue shopping</Link>

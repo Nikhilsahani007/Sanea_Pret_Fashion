@@ -41,8 +41,8 @@ const cases = ROLES.flatMap((role) =>
 );
 
 describe("permission matrix", () => {
-  it("covers 15 permissions for 4 roles", () => {
-    expect(cases).toHaveLength(60);
+  it("covers 16 permissions for 4 roles", () => {
+    expect(cases).toHaveLength(64);
   });
 
   it.each(cases)(

@@ -2,7 +2,7 @@
 // Database-level checks of the same objects run in the integration tests.
 import { readdirSync, readFileSync } from "node:fs";
 
-import { AdminRole as SharedAdminRole } from "@sanea/shared";
+import { CANCEL_REASONS, AdminRole as SharedAdminRole } from "@sanea/shared";
 import { describe, expect, it } from "vitest";
 
 import { AdminRole as DbAdminRole } from "../generated/prisma/enums.ts";
@@ -134,6 +134,18 @@ describe("reference data", () => {
   });
 });
 
+describe("cancellation reasons (D-181)", () => {
+  it("the database CHECK lists exactly the shared reason codes", () => {
+    const check = sql.match(
+      /"order_status_event_reason_check"[\s\S]*?IN \(([^)]+)\)/,
+    );
+    const codes = [...(check?.[1] ?? "").matchAll(/'([A-Z_]+)'/g)].map(
+      (m) => m[1],
+    );
+    expect(codes.sort()).toEqual(Object.keys(CANCEL_REASONS).sort());
+  });
+});
+
 describe("Phase 6 scope and conventions", () => {
   it("creates exactly the approved tables (database-design.md §6)", () => {
     expect(tables.sort()).toEqual(
@@ -158,6 +170,8 @@ describe("Phase 6 scope and conventions", () => {
         "order",
         "order_item",
         "order_status_event",
+        "order_note",
+        "notification",
         "page",
         "payment",
         "payment_event",

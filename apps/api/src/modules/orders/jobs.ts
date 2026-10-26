@@ -7,6 +7,7 @@ import type { Logger } from "pino";
 import { Prisma } from "../../generated/prisma/client.ts";
 import type { CheckoutDeps } from "../checkout/deps.ts";
 import { readSettings } from "../checkout/settings.ts";
+import { emailForOutcome, notify } from "../notifications/service.ts";
 import { reconcile } from "../payments/service.ts";
 import { lockOrder, transition } from "./service.ts";
 
@@ -15,7 +16,7 @@ const { sql } = Prisma;
 /** What the jobs need: no media, no request context. */
 export type OrderJobDeps = Pick<
   CheckoutDeps,
-  "db" | "config" | "logger" | "now" | "payments"
+  "db" | "config" | "logger" | "now" | "payments" | "email"
 >;
 
 /** A live hold, by the database clock like the reservation expiry job. */
@@ -50,12 +51,16 @@ export async function expireUnpaidOrders(deps: OrderJobDeps): Promise<number> {
         { type: "SYSTEM" },
         {
           note: "Payment not completed before the hold expired",
+          reason: "PAYMENT_NOT_COMPLETED",
           now,
         },
       );
       return true;
     });
-    if (done) n++;
+    if (done) {
+      n++;
+      await notify(deps, id, "order.cancelled");
+    }
   }
   return n;
 }
@@ -84,12 +89,16 @@ export async function expireUnconfirmedCod(
         { type: "SYSTEM" },
         {
           note: `Not confirmed within ${confirmWithinHours} hours`,
+          reason: "NOT_CONFIRMED_IN_WINDOW",
           now,
         },
       );
       return true;
     });
-    if (done) n++;
+    if (done) {
+      n++;
+      await notify(deps, id, "order.cancelled");
+    }
   }
   return n;
 }
@@ -97,12 +106,14 @@ export async function expireUnconfirmedCod(
 export async function runOrderJobs(deps: OrderJobDeps) {
   const unpaid = await expireUnpaidOrders(deps);
   const cod = await expireUnconfirmedCod(deps);
-  const reconciled = deps.payments
+  const changed = deps.payments
     ? await reconcile(deps.db, deps.payments, deps.now(), {
         ttlMinutes: deps.config.reservationTtlMinutes,
       })
-    : 0;
-  return { unpaid, cod, reconciled };
+    : [];
+  for (const c of changed)
+    await notify(deps, c.orderId, emailForOutcome(c.outcome));
+  return { unpaid, cod, reconciled: changed.length };
 }
 
 export type OrderJobs = { stop: () => Promise<void> };

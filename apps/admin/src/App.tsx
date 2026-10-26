@@ -1,6 +1,6 @@
 // Routes (phase-8-ui-plan.md §3). Screens a role cannot use show the API's
 // forbidden state; navigation hides them as a convenience.
-import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Link, Route, Routes } from "react-router";
 
 import { AcceptInvite } from "./auth/AcceptInvite.tsx";
 import { SessionProvider } from "./auth/session.tsx";
@@ -19,6 +19,12 @@ import { NavigationEditor } from "./content/NavigationEditor.tsx";
 import { PageEditor } from "./content/PageEditor.tsx";
 import { Inventory } from "./inventory/Inventory.tsx";
 import { Movements } from "./inventory/Movements.tsx";
+import { Dashboard } from "./orders/Dashboard.tsx";
+import { Enquiries } from "./orders/Enquiries.tsx";
+import { OrderDetail } from "./orders/OrderDetail.tsx";
+import { Orders } from "./orders/Orders.tsx";
+import { PackingSlip } from "./orders/PackingSlip.tsx";
+import { Settings } from "./orders/Settings.tsx";
 import { RequireSession } from "./shell/AppShell.tsx";
 import { Notice, PageHeader, Stack } from "./ui/feedback.tsx";
 
@@ -29,7 +35,7 @@ function NotFound() {
       <Notice>
         <p>
           This address does not match a screen.{" "}
-          <Link to="/products">Go to products</Link>.
+          <Link to="/">Go to today&apos;s overview</Link>.
         </p>
       </Notice>
     </Stack>
@@ -42,7 +48,15 @@ export function AppRoutes() {
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route element={<RequireSession />}>
-        <Route index element={<Navigate to="/products" replace />} />
+        <Route index element={<Dashboard />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:orderNumber" element={<OrderDetail />} />
+        <Route
+          path="/orders/:orderNumber/packing-slip"
+          element={<PackingSlip />}
+        />
+        <Route path="/enquiries" element={<Enquiries />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/products" element={<ProductsList />} />
         <Route path="/products/new" element={<ProductNew />} />
         <Route path="/products/:id" element={<ProductEditor />} />

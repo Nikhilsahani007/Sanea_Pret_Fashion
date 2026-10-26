@@ -169,6 +169,7 @@ async function apply(
         { type: "SYSTEM" },
         {
           note: "Paid after the hold expired and stock was gone; refund recorded",
+          reason: "PAID_NO_STOCK",
           now,
         },
       );
@@ -219,7 +220,7 @@ export async function reconcile(
   provider: PaymentProvider,
   now: Date,
   hold: HoldOptions,
-): Promise<number> {
+): Promise<{ orderId: string; outcome: Outcome }[]> {
   const stuck = await db.payment.findMany({
     where: {
       provider: provider.name,
@@ -229,7 +230,7 @@ export async function reconcile(
     },
     take: 100,
   });
-  let changed = 0;
+  const changed: { orderId: string; outcome: Outcome }[] = [];
   for (const p of stuck) {
     const status = await provider.fetchStatus(p.providerPaymentId!);
     if (status !== "CAPTURED" && status !== "FAILED") continue;
@@ -247,7 +248,8 @@ export async function reconcile(
         hold,
       ),
     );
-    if (outcome !== "ALREADY_APPLIED") changed++;
+    if (outcome !== "ALREADY_APPLIED")
+      changed.push({ orderId: p.orderId, outcome });
   }
   return changed;
 }

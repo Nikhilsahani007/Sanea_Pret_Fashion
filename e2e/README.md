@@ -18,6 +18,15 @@ Playwright tests for full admin and, later, shopper journeys (`docs/testing-stra
 - **Pages:** a published page, the unpublished Rehma page as not found, Phase 13 links as coming soon.
 - **Accessibility and layout:** axe and horizontal scroll at 1440, 768 and 390 px (screenshots to `docs/reviews/storefront/<date>/`), plus 1024 and 375 px.
 
+`operations.spec.ts` (Phase 16, `docs/phase-16-plan.md`) runs after `admin.spec.ts` (staff accounts) and `checkout.spec.ts` (synthetic product) and covers:
+- **E2E-2, admin part:** a storefront COD order confirmed, packed, shipped with tracking and delivered by Fulfilment from the dashboard; the packing slip; the guest's order page follows.
+- **Cancellation (D-181):** Fulfilment declines an unconfirmed COD order; a reason is required and `OTHER` needs a note.
+- **Role limits:** catalogue editors see no orders, enquiries or settings.
+- **Enquiries and settings:** the inbox, and a WhatsApp number that reaches the storefront.
+- **E2E-5:** a hero slide edited and published, shown on the storefront.
+- **E2E-6:** stock set to zero; the size is sold out and the bag cannot check out.
+- **Accessibility and layout:** axe and horizontal scroll at 1440, 768 and 390 px; screenshots to `docs/reviews/operations/<date>/`.
+
 ## How to run
 
 1. Start a disposable PostgreSQL 18 on loopback, for example:

@@ -33,7 +33,8 @@ export function SignIn() {
   const { state, signedIn } = useSession();
   const location = useLocation();
   const navigate = useNavigate();
-  const from = (location.state as From)?.from ?? "/products";
+  // Without a page asked for, staff start at the dashboard (Phase 16).
+  const from = (location.state as From)?.from ?? "/";
   const expired =
     (location.state as From)?.expired ||
     (state.status === "signed-out" && state.expired);

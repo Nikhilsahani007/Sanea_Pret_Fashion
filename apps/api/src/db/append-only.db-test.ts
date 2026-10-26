@@ -34,7 +34,12 @@ beforeAll(async () => {
     `INSERT INTO "order_status_event" ("order_id", "to_status", "actor_type", "note")
      VALUES ('${order}', 'PENDING_CONFIRMATION', 'SYSTEM', 'TEST placed') RETURNING "id"`,
   );
+  const [n] = await db.$queryRawUnsafe<{ id: string }[]>(
+    `INSERT INTO "order_note" ("order_id", "admin_id", "body")
+     VALUES ('${order}', '${actor}', 'TEST note') RETURNING "id"`,
+  );
   ids.stock_movement = m!.id;
+  ids.order_note = n!.id;
   ids.audit_log = a!.id;
   ids.order_status_event = e!.id;
 });
@@ -50,6 +55,7 @@ describe.each(APPEND_ONLY_TABLES)("%s", (table) => {
       audit_log: `"action" = 'tampered'`,
       stock_movement: `"reason" = 'tampered'`,
       order_status_event: `"note" = 'tampered'`,
+      order_note: `"body" = 'tampered'`,
     }[table];
     await expectCode(
       db,
@@ -83,6 +89,7 @@ describe.each(APPEND_ONLY_TABLES)("%s", (table) => {
       audit_log: `INSERT INTO "audit_log" ("actor_admin_id", "action", "entity_type") VALUES ('${actor!.id}', 'settings.update', 'store_setting')`,
       stock_movement: `INSERT INTO "stock_movement" ("variant_id", "type", "on_hand_delta") SELECT "variant_id", 'RECEIVED', 1 FROM "stock_movement" LIMIT 1`,
       order_status_event: `INSERT INTO "order_status_event" ("order_id", "from_status", "to_status", "actor_type") SELECT "order_id", 'PENDING_CONFIRMATION', 'CONFIRMED', 'ADMIN' FROM "order_status_event" LIMIT 1`,
+      order_note: `INSERT INTO "order_note" ("order_id", "admin_id", "body") SELECT "order_id", "admin_id", 'TEST second' FROM "order_note" LIMIT 1`,
     }[table];
     await db.$executeRawUnsafe(sql);
     expect((await snapshot(table)).length).toBe(before + 1);

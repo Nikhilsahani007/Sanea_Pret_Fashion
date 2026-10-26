@@ -524,11 +524,13 @@ model Order {
   cancelledAt     DateTime?     @map("cancelled_at") @db.Timestamptz(3)
   updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  items        OrderItem[]
-  events       OrderStatusEvent[]
-  payments     Payment[]
-  shipments    Shipment[]
-  reservations StockReservation[]
+  items         OrderItem[]
+  events        OrderStatusEvent[]
+  payments      Payment[]
+  shipments     Shipment[]
+  reservations  StockReservation[]
+  staffNotes    OrderNote[]
+  notifications Notification[]
 
   @@index([status, placedAt])
   @@index([needsAttention])
@@ -568,6 +570,9 @@ model OrderStatusEvent {
   actorType  ActorType    @map("actor_type")
   actorId    String?      @map("actor_id")
   note       String?
+  /// Cancellation reason code (D-181): required exactly when the order is
+  /// cancelled; CANCEL_REASONS in @sanea/shared lists the codes.
+  reason     String?
   createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
@@ -679,6 +684,50 @@ model GstRule {
   @@map("gst_rule")
 }
 
+// ─── Admin operations (Phase 16) ─────────────────────────────────────────────
+
+/// Internal staff note on an order; append-only (D-057).
+model OrderNote {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  adminId   String   @map("admin_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  admin AdminUser @relation(fields: [adminId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+  @@index([adminId])
+  @@map("order_note")
+}
+
+enum NotificationStatus {
+  SENT
+  FAILED
+
+  @@map("notification_status")
+}
+
+/// One row per transactional email attempted (system-design.md §11). The
+/// body is not stored; the template and order say what was sent.
+model Notification {
+  id        String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  orderId   String?            @map("order_id") @db.Uuid
+  template  String
+  recipient String             @db.Citext
+  provider  String
+  status    NotificationStatus
+  error     String?
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("notification")
+}
+
 // ─── Enquiries (Phase 13) ────────────────────────────────────────────────────
 
 /// Website enquiry (database-design.md §3.5, D-054). Consent is required and
@@ -766,6 +815,7 @@ model AdminUser {
   invitesSent     AdminInvite[]       @relation("InviteSentBy")
   enquiries       Enquiry[]
   refunds         Refund[]
+  orderNotes      OrderNote[]
   gstRules        GstRule[]
   resetInvites    AdminInvite[]       @relation("InviteForAdmin")
 

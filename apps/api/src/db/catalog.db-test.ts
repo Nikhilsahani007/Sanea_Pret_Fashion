@@ -94,8 +94,10 @@ describe("tables and scope", () => {
       "inventory_level",
       "media_asset",
       "navigation_item",
+      "notification",
       "order",
       "order_item",
+      "order_note",
       "order_status_event",
       "page",
       "payment",
@@ -114,7 +116,7 @@ describe("tables and scope", () => {
     ]);
   });
 
-  it("has GST and order-link columns only on Phase 15 tables, and no customer column", async () => {
+  it("has GST and order-link columns only on Phase 15 and 16 tables, and no customer column", async () => {
     const rows = await q<{ c: string }>(
       `SELECT table_name || '.' || column_name AS c FROM information_schema.columns
        WHERE table_schema = 'public'
@@ -122,9 +124,11 @@ describe("tables and scope", () => {
        ORDER BY 1`,
     );
     expect(rows.map((r) => r.c)).toEqual([
+      "notification.order_id",
       "order.tax_paise",
       "order_item.gst_rate_bps",
       "order_item.order_id",
+      "order_note.order_id",
       "order_status_event.order_id",
       "payment.order_id",
       "shipment.order_id",
@@ -169,8 +173,8 @@ describe("tables and scope", () => {
         unverified: true,
       },
     ]);
-    // 34 tables, less `size` and `page`, which are checked above.
-    expect(counts).toHaveLength(32);
+    // 36 tables, less `size` and `page`, which are checked above.
+    expect(counts).toHaveLength(34);
   });
 });
 
@@ -275,8 +279,9 @@ describe("handwritten objects exist in the live catalogue", () => {
       ),
     ].map((m) => ({ table: m[1], name: m[2], column: m[3] }));
     // 27 up to Phase 11; Phase 13 adds 3 for enquiries and 2 for clicks;
-    // Phase 15 adds 10 for orders, payments, refunds and GST rules.
-    expect(expected).toHaveLength(42);
+    // Phase 15 adds 10 for orders, payments, refunds and GST rules; Phase 16
+    // adds 3 for order notes and notifications.
+    expect(expected).toHaveLength(45);
     const rows = await q<{ name: string; t: string; del: string }>(
       `SELECT conname AS name, conrelid::regclass::text AS t, confdeltype::text AS del
        FROM pg_constraint WHERE contype = 'f' AND connamespace = 'public'::regnamespace`,
@@ -311,7 +316,7 @@ describe("conventions", () => {
       `SELECT table_name AS t, column_default AS d FROM information_schema.columns
        WHERE table_schema = 'public' AND column_name = 'id' AND data_type = 'uuid'`,
     );
-    expect(rows).toHaveLength(30);
+    expect(rows).toHaveLength(32);
     for (const r of rows) expect(r.d, r.t).toBe("uuidv7()");
   });
 

@@ -15,6 +15,9 @@ export const PERMISSIONS = {
   "orders.view": [O, M, F],
   "orders.fulfil": [O, M, F],
   "orders.cancelRefund": [O, M],
+  // D-181: Fulfilment may decline an unconfirmed COD order, with a reason;
+  // cancelling confirmed or packed orders stays Owner and Manager.
+  "orders.declineCod": [O, M, F],
   "content.edit": [O, M, C],
   "content.publishRehma": [O],
   "enquiries.manage": [O, M],

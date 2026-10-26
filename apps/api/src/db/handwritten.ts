@@ -31,6 +31,8 @@ export const APPEND_ONLY_TABLES = [
   "audit_log",
   // Phase 15: order status history.
   "order_status_event",
+  // Phase 16: internal order notes.
+  "order_note",
 ] as const;
 
 export const HANDWRITTEN_TRIGGERS = APPEND_ONLY_TABLES.flatMap((table) => [
@@ -145,6 +147,12 @@ export const HANDWRITTEN_CHECKS = [
   { table: "gst_rule", name: "gst_rule_rates_check" },
   { table: "gst_rule", name: "gst_rule_effective_check" },
   { table: "gst_rule", name: "gst_rule_hsn_prefix_check" },
+  // Phase 16 (admin operations, cancellation reasons D-181)
+  { table: "order_note", name: "order_note_body_check" },
+  { table: "notification", name: "notification_template_check" },
+  { table: "notification", name: "notification_error_check" },
+  { table: "order_status_event", name: "order_status_event_reason_check" },
+  { table: "order_status_event", name: "order_status_event_other_note_check" },
 ] as const;
 
 /** Views (Phase 9, Q9-1): read with $queryRaw; Prisma does not model them. */

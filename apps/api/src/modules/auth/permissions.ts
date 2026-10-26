@@ -17,6 +17,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "orders.view": "View orders and customer details",
   "orders.fulfil": "Fulfilment transitions",
   "orders.cancelRefund": "Cancel orders, issue refunds",
+  "orders.declineCod": "Decline unconfirmed COD orders",
   "content.edit": "Edit homepage and pages",
   "content.publishRehma": "Publish Rehma Foundation page",
   "enquiries.manage": "Enquiries",

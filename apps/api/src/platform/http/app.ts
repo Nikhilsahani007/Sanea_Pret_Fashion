@@ -23,17 +23,25 @@ import {
   CHECKOUT_LIMITS,
   checkoutRouter,
 } from "../../modules/checkout/router.ts";
+import { settingsAdminRouter } from "../../modules/checkout/settings-router.ts";
 import { contentPublicRouter } from "../../modules/content/public-router.ts";
+import { enquiriesAdminRouter } from "../../modules/enquiries/admin-router.ts";
 import {
   CLICK_LIMIT,
   ENQUIRY_LIMIT,
   enquiriesRouter,
 } from "../../modules/enquiries/router.ts";
+import {
+  logEmailProvider,
+  type EmailProvider,
+} from "../../modules/notifications/provider.ts";
 import { paymentProviderFor } from "../../modules/payments/mock.ts";
 import type { PaymentProvider } from "../../modules/payments/provider.ts";
 import { webhooksRouter } from "../../modules/payments/router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
 import { inventoryRouter } from "../../modules/inventory/router.ts";
+import { ordersAdminRouter } from "../../modules/orders/admin-router.ts";
+import { dashboardRouter } from "../../modules/orders/dashboard.ts";
 import {
   createMediaService,
   mediaRouter,
@@ -78,6 +86,8 @@ export type AppOptions = {
   readonly payments?: PaymentProvider | null;
   /** Test seam: the checkout write (20 per minute) and read (120 per minute) limits. */
   readonly checkoutLimits?: typeof CHECKOUT_LIMITS;
+  /** The email provider (main.ts shares it with the order jobs; tests); else the log provider. */
+  readonly email?: EmailProvider;
 };
 
 /** Builds the Express app. Middleware order matters; see each step. */
@@ -95,6 +105,7 @@ export function createApp({
   enquiryLimits = { enquiries: ENQUIRY_LIMIT, clicks: CLICK_LIMIT },
   payments,
   checkoutLimits = CHECKOUT_LIMITS,
+  email,
 }: AppOptions): Express {
   const deps: AuthDeps | undefined = db
     ? { db, config, logger, now, argon2 }
@@ -140,9 +151,15 @@ export function createApp({
         storage: media.storage,
         payments:
           payments === undefined ? paymentProviderFor(config) : payments,
+        email: email ?? logEmailProvider(logger),
       };
       app.use(checkoutRouter(checkout, checkoutLimits));
       app.use(webhooksRouter(checkout));
+      // Phase 16: admin operations.
+      app.use(ordersAdminRouter(checkout));
+      app.use(enquiriesAdminRouter(deps));
+      app.use(dashboardRouter(deps));
+      app.use(settingsAdminRouter(deps));
     }
   }
   for (const router of routers) app.use(router);

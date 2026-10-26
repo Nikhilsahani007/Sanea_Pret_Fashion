@@ -11,6 +11,7 @@ import { SignIn } from "./SignIn.tsx";
 
 const routes = [
   { path: "/sign-in", element: <SignIn /> },
+  { path: "/", element: <p>Dashboard screen</p> },
   { path: "/products", element: <p>Products screen</p> },
 ];
 
@@ -51,7 +52,7 @@ describe("sign-in", () => {
     expect((code as HTMLInputElement).value).toBe("123456");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect(await screen.findByText("Products screen")).toBeTruthy();
+    expect(await screen.findByText("Dashboard screen")).toBeTruthy();
     expect(calls.find((c) => c.path === "/admin/auth/sign-in")?.body).toEqual({
       email: "manager@example.test",
       password: "a long passphrase",
@@ -115,7 +116,7 @@ describe("sign-in", () => {
     expect(await screen.findByRole("alert")).toBeTruthy();
     await user.type(screen.getByLabelText("Recovery code"), "ABCDE-FGHJK");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByText("Products screen")).toBeTruthy();
+    expect(await screen.findByText("Dashboard screen")).toBeTruthy();
     const mfa = calls
       .filter((c) => c.path === "/admin/auth/mfa")
       .map((c) => c.body);

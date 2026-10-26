@@ -153,8 +153,9 @@ async function signInByKeyboard(page: Page, email: string, role: Role) {
   // also accepted (window of one), as an authenticator would show it shortly.
   await page.keyboard.type(totp(secrets.get(role)!, 1));
   await page.keyboard.press("Enter");
+  // Staff start at the dashboard (Phase 16).
   await expect(
-    page.getByRole("heading", { name: "Products", level: 1 }),
+    page.getByRole("heading", { name: "Today", level: 1 }),
   ).toBeVisible();
   await expect(
     page.getByText(ROLE_NAMES[role], { exact: false }).first(),
@@ -209,6 +210,9 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
   await setUpAccount(page, url!, "OWNER", "Olivia Owner");
   await signInByKeyboard(page, "owner@e2e.example.test", "OWNER");
   expect(await navLabels(page)).toEqual([
+    "Today",
+    "Orders",
+    "Enquiries",
     "Products",
     "Inventory",
     "Stock movements",
@@ -218,7 +222,9 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
     "Colours",
     "Size charts",
     "Media library",
+    "Store settings",
   ]);
+  await page.goto("/products");
   await expect(page.getByText("No products yet.")).toBeVisible();
   await context.storageState({ path: state("OWNER") });
 
@@ -239,9 +245,9 @@ test("Owner: invite link to first sign-in, with QR enrolment and keyboard-only s
 });
 
 for (const [role, email, name, nav] of [
-  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 9],
-  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 8],
-  ["FULFILMENT", "fulfilment@e2e.example.test", "Farid Fulfilment", 3],
+  ["MANAGER", "manager@e2e.example.test", "Manav Manager", 13],
+  ["CATALOGUE_EDITOR", "editor@e2e.example.test", "Esha Editor", 9],
+  ["FULFILMENT", "fulfilment@e2e.example.test", "Farid Fulfilment", 5],
 ] as const) {
   test(`${role}: invite set-up and sign-in through the shell`, async ({
     browser,

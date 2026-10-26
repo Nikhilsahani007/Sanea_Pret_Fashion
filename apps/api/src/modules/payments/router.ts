@@ -8,6 +8,7 @@ import { WEBHOOK_PATH_PREFIX } from "../../platform/http/body.ts";
 import { AppError } from "../../platform/http/errors.ts";
 import { handle } from "../catalogue/common.ts";
 import type { CheckoutDeps } from "../checkout/deps.ts";
+import { emailForOutcome, notify } from "../notifications/service.ts";
 import { InvalidWebhook, type PaymentProvider } from "./provider.ts";
 import { processEvent, storeEvent } from "./service.ts";
 
@@ -29,12 +30,23 @@ export async function ingest(
   const rowId = await storeEvent(deps.db, provider.name, event, now);
   if (!rowId) return { duplicate: true as const };
   try {
-    return {
-      duplicate: false as const,
-      outcome: await processEvent(deps.db, provider, rowId, event, now, {
-        ttlMinutes: deps.config.reservationTtlMinutes,
-      }),
-    };
+    const outcome = await processEvent(deps.db, provider, rowId, event, now, {
+      ttlMinutes: deps.config.reservationTtlMinutes,
+    });
+    const template = emailForOutcome(outcome);
+    if (template) {
+      const p = await deps.db.payment.findUnique({
+        where: {
+          provider_providerPaymentId: {
+            provider: provider.name,
+            providerPaymentId: event.providerPaymentId,
+          },
+        },
+        select: { orderId: true },
+      });
+      if (p) await notify(deps, p.orderId, template);
+    }
+    return { duplicate: false as const, outcome };
   } catch (err) {
     // Stored but not applied: reconciliation and staff pick it up.
     deps.logger.error({ err, eventId: rowId }, "payment event not applied");
