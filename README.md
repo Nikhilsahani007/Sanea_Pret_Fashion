@@ -51,6 +51,18 @@ The API must run with `ADMIN_ORIGIN=http://localhost:5174`. The first Owner's se
 
 **Fonts:** the brand fonts are licensed for self-hosting but may not be placed in a public repository ([font licences](docs/font-licences.md)). Each environment runs `npm run fonts:fetch`; without it, the fallback fonts render.
 
+**Demo store** (D-187): the owner's fictional demo catalogue (16 products in four edits, `apps/api/src/db/demo/catalogue.json`, from `sanea_pret_demo_products.xlsx`) with labelled demo images, the home page, menus and the About page. Development and demo databases only: the seed refuses `NODE_ENV=production` and any database not on this machine.
+
+```
+npx prisma migrate deploy                          # a local database in DATABASE_URL
+DATABASE_URL=… MEDIA_STORAGE_DIR=… npm run demo:seed
+npm run media:serve                                # serves MEDIA_STORAGE_DIR (development only)
+npm run start -w @sanea/api                        # the API on http://127.0.0.1:4000
+npm run dev -w @sanea/storefront                   # http://localhost:5173
+```
+
+The images are drawn from the logo's arch in each product's colour and say "Demo image"; replace them with real photographs before launch (B-06).
+
 **End-to-end tests** (Playwright with the installed Microsoft Edge, no browser download): `TEST_DATABASE_URL=… npx playwright test`. See [e2e/README.md](e2e/README.md).
 
 Instructions for Claude Code are in [CLAUDE.md](CLAUDE.md).
