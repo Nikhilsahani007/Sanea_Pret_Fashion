@@ -7,6 +7,10 @@ export const REDACT_PATHS = [
   'req.headers["x-csrf-token"]',
   // Original image filenames are never logged (phase-8-plan.md §5.7.4).
   'req.headers["x-upload-filename"]',
+  // Phase 17 review: the guest order token opens an order; the mock
+  // provider's signature authenticates a webhook.
+  'req.headers["x-order-token"]',
+  'req.headers["x-mock-signature"]',
   'res.headers["set-cookie"]',
   "*.password",
   "*.token",

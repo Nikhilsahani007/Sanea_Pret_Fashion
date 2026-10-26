@@ -4,7 +4,10 @@
 .page {
   display: grid;
   gap: var(--sp-space-8);
-  min-height: 60svh;
+  /* A screen tall while the bag loads, so the footer never shifts up and
+     back (Lighthouse layout shift, Phase 17). */
+  min-height: 100svh;
+  align-content: start;
 }
 
 .layout {

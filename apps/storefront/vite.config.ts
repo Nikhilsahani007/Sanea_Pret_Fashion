@@ -10,7 +10,19 @@ const apiTarget = process.env.STOREFRONT_API_URL ?? "http://127.0.0.1:4000";
 
 // The Origin header is kept as sent by the browser (no changeOrigin), which the
 // API checks against STOREFRONT_ORIGIN on every state-changing request.
-const proxy = { "/api": { target: apiTarget } };
+// robots.txt and the sitemap come from the API (Phase 17); the hosting layer
+// does the same in production (Phase 19).
+const proxy = {
+  "/api": { target: apiTarget },
+  "/robots.txt": {
+    target: apiTarget,
+    rewrite: () => "/api/v1/seo/robots.txt",
+  },
+  "/sitemap.xml": {
+    target: apiTarget,
+    rewrite: () => "/api/v1/seo/sitemap.xml",
+  },
+};
 
 export default defineConfig({
   plugins: [react()],

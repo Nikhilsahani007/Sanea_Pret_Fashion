@@ -100,16 +100,19 @@ export default async function globalSetup() {
     stdio: "pipe",
   });
   // The production build of the admin, then `vite preview` with the /api proxy.
+  // NODE_ENV=production for the builds only: with the API's `test` value Vite
+  // would bundle React's development build (found by Lighthouse, Phase 17).
   const vite = join(root, "node_modules", "vite", "bin", "vite.js");
+  const build = { ...env, NODE_ENV: "production" };
   execFileSync(node, [vite, "build", "--logLevel", "warn"], {
     cwd: join(root, "apps", "admin"),
-    env,
+    env: build,
     stdio: "pipe",
   });
   // The storefront's production build too (Phase 11), served the same way.
   execFileSync(node, [vite, "build", "--logLevel", "warn"], {
     cwd: join(root, "apps", "storefront"),
-    env,
+    env: build,
     stdio: "pipe",
   });
 

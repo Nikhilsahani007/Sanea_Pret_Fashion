@@ -65,6 +65,16 @@ describe("demo store seed", () => {
     const about = await db.page.findUniqueOrThrow({ where: { slug: "about" } });
     expect(about.status).toBe("PUBLISHED");
     expect(JSON.stringify(about.publishedBody)).toContain("Saniya Abbadi");
+    // Policy pages are placeholders: they say the text is being prepared.
+    for (const slug of ["returns", "shipping", "privacy", "terms"]) {
+      const policy = await db.page.findUniqueOrThrow({ where: { slug } });
+      expect(JSON.stringify(policy.publishedBody), slug).toContain(
+        "is being prepared",
+      );
+    }
+    expect(
+      await db.navigationItem.count({ where: { menu: "FOOTER_HELP" } }),
+    ).toBe(4);
 
     const again = await seedDemo(db, media);
     expect(again.created).toBe(false);

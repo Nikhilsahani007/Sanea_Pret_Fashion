@@ -32,7 +32,40 @@ const key = z.uuid();
 export const CHECKOUT_LIMITS = {
   writes: { windowMs: 60_000, limit: 20 },
   reads: { windowMs: 60_000, limit: 120 },
+  /** New orders per cart (security-design.md §3); replays do not count. */
+  ordersPerCart: { windowMs: 60 * 60_000, limit: 10 },
 };
+
+/**
+ * Counts new orders per cart in a sliding window. In memory, like the other
+ * limits: one API instance only (D-047).
+ */
+export function cartOrderLimit(
+  options: { windowMs: number; limit: number },
+  now: () => Date,
+) {
+  const placed = new Map<string, number[]>();
+  const recent = (cartId: string) => {
+    const since = now().getTime() - options.windowMs;
+    const times = (placed.get(cartId) ?? []).filter((t) => t > since);
+    if (times.length) placed.set(cartId, times);
+    else placed.delete(cartId);
+    return times;
+  };
+  return {
+    /** Throws 429 RATE_LIMITED when the cart has used its allowance. */
+    check(cartId: string | null) {
+      if (cartId && recent(cartId).length >= options.limit)
+        throw new AppError("RATE_LIMITED");
+    },
+    record(cartId: string | null) {
+      if (!cartId) return;
+      placed.set(cartId, [...recent(cartId), now().getTime()]);
+      // Forget carts with nothing recent, so the map stays small.
+      if (placed.size > 10_000) for (const id of [...placed.keys()]) recent(id);
+    },
+  };
+}
 
 export function checkoutRouter(
   deps: CheckoutDeps,
@@ -41,6 +74,7 @@ export function checkoutRouter(
   const router = Router();
   const writes = createRateLimiter(limits.writes);
   const reads = createRateLimiter(limits.reads);
+  const perCart = cartOrderLimit(limits.ordersPerCart, deps.now);
   router.use(BASE, (_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
     next();
@@ -120,11 +154,14 @@ export function checkoutRouter(
     handle(async (req, res) => {
       const idem = idempotencyKey(req);
       const { body } = input<PlaceOrderBody>(res);
+      const cart = await cartId(req);
+      perCart.check(cart);
       const result = await placeOrder(deps, {
-        cartId: await cartId(req),
+        cartId: cart,
         idempotencyKey: idem,
         body,
       });
+      if (result.status === 201) perCart.record(cart);
       res.status(result.status).json(result.body);
     }),
   );

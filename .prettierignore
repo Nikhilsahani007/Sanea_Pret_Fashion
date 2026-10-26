@@ -18,3 +18,4 @@ skills-lock.json
 
 # Generated reports (Lighthouse output, kept as evidence)
 docs/reviews/**/lighthouse-*
+docs/reviews/lighthouse/

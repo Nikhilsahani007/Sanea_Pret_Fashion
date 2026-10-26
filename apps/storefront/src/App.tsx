@@ -26,6 +26,7 @@ import { Landing } from "./landing/Landing.tsx";
 import { SearchPage } from "./search/SearchPage.tsx";
 import { Layout } from "./shell/Layout.tsx";
 import { NotFound } from "./shell/NotFound.tsx";
+import shell from "./shell/shell.module.css";
 
 // Checkout pages load on demand: they carry the shared validation schemas.
 const Checkout = lazy(() =>
@@ -39,12 +40,16 @@ const OrderStatus = lazy(() =>
     default: m.OrderStatus,
   })),
 );
+// The fallback holds a screen's height, so the footer does not jump into view
+// and back while the page's code loads (Lighthouse layout shift, Phase 17).
 const later = (page: ReactNode) => (
   <Suspense
     fallback={
-      <p role="status" className="visually-hidden">
-        Loading
-      </p>
+      <div className={shell.pending}>
+        <p role="status" className="visually-hidden">
+          Loading
+        </p>
+      </div>
     }
   >
     {page}

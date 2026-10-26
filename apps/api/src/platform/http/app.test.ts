@@ -228,7 +228,9 @@ describe("logging", () => {
       .get("/api/v1/health")
       .set("Authorization", "Bearer super-secret-token")
       .set("Cookie", "__Host-sp_csrf=secret-cookie-value")
-      .set("X-CSRF-Token", "secret-header-value");
+      .set("X-CSRF-Token", "secret-header-value")
+      .set("X-Order-Token", "secret-order-token")
+      .set("X-Mock-Signature", "secret-signature");
     const log = lines
       .map((l) => JSON.parse(l) as { req?: { id?: string } })
       .find((l) => l.req);
@@ -239,6 +241,8 @@ describe("logging", () => {
       "super-secret-token",
       "secret-cookie-value",
       "secret-header-value",
+      "secret-order-token",
+      "secret-signature",
     ]) {
       expect(all).not.toContain(secret);
     }

@@ -27,6 +27,10 @@ Playwright tests for full admin and, later, shopper journeys (`docs/testing-stra
 - **E2E-6:** stock set to zero; the size is sold out and the bag cannot check out.
 - **Accessibility and layout:** axe and horizontal scroll at 1440, 768 and 390 px; screenshots to `docs/reviews/operations/<date>/`.
 
+`hardening.spec.ts` (Phase 17, `docs/phase-17-plan.md`) covers page meta and link-preview tags in the browser, `noindex` on the bag, checkout and unknown pages, `robots.txt` and the sitemap at the storefront's address, and a structure check (one `h1`, one `main`, the language, image alt text, axe, no horizontal scroll) on home, shop, category, product and bag at 1440 and 390 px.
+
+Lighthouse is separate: `CHROME_PATH=… npm run lighthouse` uses the same stack and the demo catalogue (`scripts/lighthouse.ts`).
+
 ## How to run
 
 1. Start a disposable PostgreSQL 18 on loopback, for example:

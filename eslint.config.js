@@ -37,6 +37,24 @@ export default defineConfig(
     ],
     rules: {
       "no-restricted-imports": ["error", prismaBan],
+      // No raw HTML rendering (CLAUDE.md, security-design.md §3): content is
+      // structured JSON rendered as React elements.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message: "No raw HTML: render structured content as elements.",
+        },
+        {
+          selector:
+            "AssignmentExpression > MemberExpression.left[property.name=/^(innerHTML|outerHTML)$/]",
+          message: "No raw HTML: build elements or set textContent.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='insertAdjacentHTML']",
+          message: "No raw HTML: build elements or set textContent.",
+        },
+      ],
     },
   },
   {

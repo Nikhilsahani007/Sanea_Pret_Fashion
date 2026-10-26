@@ -10,6 +10,7 @@ import type { Home, MenuLink, Navigation } from "../api/types.ts";
 import { CartDrawer } from "../cart/CartDrawer.tsx";
 import { useCart } from "../cart/CartProvider.tsx";
 import { items } from "../lib/format.ts";
+import { usePageMeta } from "../lib/meta.ts";
 import { useResource } from "../lib/resource.ts";
 import { SearchBox } from "../search/SearchBox.tsx";
 import { Sheet } from "../ui/Sheet.tsx";
@@ -62,6 +63,8 @@ function BagButton() {
 }
 
 export function Layout() {
+  // Description, canonical URL and link-preview tags for every page (Phase 17).
+  usePageMeta();
   const nav = useResource<Navigation>(
     (signal) => api.get("/content/navigation", signal),
     [],

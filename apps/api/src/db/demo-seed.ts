@@ -175,11 +175,10 @@ export async function seedDemo(
     return { created: false, products: 0, variants: 0 };
 
   // An inactive admin row, only to own the demo images (uploadedByAdminId).
-  const [admin] = await db.$queryRawUnsafe<{ id: string }[]>(
-    `INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "mfa_secret_encrypted", "mfa_key_version", "mfa_enabled_at", "is_active", "updated_at")
-     VALUES ('demo-seed@example.test', 'Demo seed', 'DEMO-no-sign-in', 'OWNER', '\\x00'::bytea, 1, now(), false, now())
-     ON CONFLICT ("email") DO UPDATE SET "updated_at" = now() RETURNING "id"::text AS "id"`,
-  );
+  const [admin] = await db.$queryRaw<{ id: string }[]>`
+    INSERT INTO "admin_user" ("email", "name", "password_hash", "role", "mfa_secret_encrypted", "mfa_key_version", "mfa_enabled_at", "is_active", "updated_at")
+    VALUES ('demo-seed@example.test', 'Demo seed', 'DEMO-no-sign-in', 'OWNER', '\\x00'::bytea, 1, now(), false, now())
+    ON CONFLICT ("email") DO UPDATE SET "updated_at" = now() RETURNING "id"::text AS "id"`;
   const owner = admin!.id;
 
   const categories = new Map<string, string>();
@@ -361,6 +360,34 @@ export async function seedDemo(
     update: { draftBody: about, publishedBody: about, status: "PUBLISHED" },
   });
 
+  // Policy pages: placeholders only. No policy or legal text is written by
+  // engineering; the Owner and a lawyer supply it (OD-09, OD-12, D-186).
+  const policies: { slug: string; title: string }[] = [
+    { slug: "returns", title: "Returns and exchanges" },
+    { slug: "shipping", title: "Shipping and delivery" },
+    { slug: "privacy", title: "Privacy policy" },
+    { slug: "terms", title: "Terms of use" },
+  ];
+  const help: { label: string; kind: string; id: string }[] = [];
+  for (const policy of policies) {
+    const body = doc(
+      "This page is being prepared and will be published before the store opens.",
+      "Questions in the meantime: message Sanéa Pret on Instagram at @saneapret.",
+    );
+    const row = await db.page.upsert({
+      where: { slug: policy.slug },
+      create: {
+        slug: policy.slug,
+        title: policy.title,
+        draftBody: body,
+        publishedBody: body,
+        status: "PUBLISHED",
+      },
+      update: { draftBody: body, publishedBody: body, status: "PUBLISHED" },
+    });
+    help.push({ label: policy.title, kind: "PAGE", id: row.id });
+  }
+
   // Menus, replaced whole as the admin does.
   const menus: [
     string,
@@ -394,6 +421,7 @@ export async function seedDemo(
         id: collections.get(c.slug)!,
       })),
     ],
+    ["FOOTER_HELP", help],
     [
       "FOOTER_ABOUT",
       [{ label: "About Sanéa Pret", kind: "PAGE", id: page.id }],

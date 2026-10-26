@@ -49,6 +49,7 @@ import {
   type MediaOptions,
 } from "../../modules/media/router.ts";
 import { SEARCH_LIMIT, searchRouter } from "../../modules/search/router.ts";
+import { seoRouter } from "../../modules/seo/router.ts";
 import { staffRouter } from "../../modules/staff/router.ts";
 import type { Config } from "../config.ts";
 import type { Db } from "../db.ts";
@@ -160,6 +161,8 @@ export function createApp({
       app.use(enquiriesAdminRouter(deps));
       app.use(dashboardRouter(deps));
       app.use(settingsAdminRouter(deps));
+      // Phase 17: page meta, link previews, sitemap and robots.txt.
+      app.use(seoRouter(deps, media.storage));
     }
   }
   for (const router of routers) app.use(router);
