@@ -1,10 +1,14 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-23 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-26 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
-**Phase 12 — Landing page: plan written and the landing built with labelled placeholders (`phase-12-plan.md` §9), on `phase-12-landing`.** 20 end-to-end tests pass (L-1 to L-8 at five viewports); Lighthouse accessibility 100, performance 90 with placeholders. **The visual gate needs real assets (B-03, B-04, B-06) and your approval.**
+**Phase 13 — Browsing, product detail and enquiries: started 2026-10-26** on `phase-12-landing`, after your approval (`phase-13-plan.md`). Route `/shop/:slug` confirmed (D-179).
+
+**Branch reconciliation, stage 1 (2026-10-26):** `phase-12-landing` is canonical (D-174). `claude/amazing-faraday-21s6uc` is a preserved reference; its work is used only as candidates. Decisions D-174 to D-184; mapping and conflicts in `RECONCILIATION.md`. Dependency audit clean after the lockfile fix (D-184).
+
+**Phase 12 — Landing page: plan written and the landing built with labelled placeholders (`phase-12-plan.md` §9), on `phase-12-landing`.** 20 end-to-end tests pass (L-1 to L-8 at five viewports); Lighthouse accessibility 100, performance 90 with placeholders. **Gate passed provisionally (D-183, 2026-10-26)** so Phase 13 can start; the visual review must be repeated with real assets (B-03, B-04, B-06) and the brand fonts before launch.
 
 **Phase 11 — Storefront shell, search and cart: gate passed (D-136, 2026-10-24).**
 - **Evidence:** commits `728816b`, `17cc2ea`, `3497ea0`, `408e032`, `5e94807`; CI run 40013302382 on draft PR #9, all green; re-check 22 of 22 cart tests (`phase-11-plan.md` §14).
