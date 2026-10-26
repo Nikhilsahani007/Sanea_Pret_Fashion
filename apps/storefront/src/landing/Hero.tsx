@@ -3,8 +3,11 @@
 // the campaign line is the headline, with one quiet CTA, bottom left; the
 // wordmark (the supplied logo, never retyped or enlarged past its raster
 // size) sits above as a masthead, at about a quarter of the width; the slide
-// indicators and pause sit bottom right. WAI-ARIA carousel pattern. With no
-// published slide, the masthead stands on the deep aubergine field (P12-3).
+// indicators and pause sit bottom right. WAI-ARIA carousel pattern: arrow
+// keys, Home and End on the indicators choose a slide and take focus with
+// it. With no published slide, the masthead stands on the deep aubergine
+// field (P12-3); a slide whose image is missing shows that field too, never
+// a broken image.
 import {
   useLayoutEffect,
   useRef,
@@ -28,6 +31,11 @@ const srcset = (sources: readonly Source[], format: string) =>
 
 function SlidePicture({ slide, first }: { slide: HeroSlide; first: boolean }) {
   const { desktopImage: d, mobileImage: m } = slide;
+  if (!d.url) return null;
+  const mobileAvif = srcset(m.sources, "avif");
+  const mobileWebp = srcset(m.sources, "webp");
+  const desktopAvif = srcset(d.sources, "avif");
+  const desktopWebp = srcset(d.sources, "webp");
   const focal: CSSProperties | undefined = slide.focalPoint
     ? {
         objectPosition: `${slide.focalPoint.x * 100}% ${slide.focalPoint.y * 100}%`,
@@ -35,31 +43,31 @@ function SlidePicture({ slide, first }: { slide: HeroSlide; first: boolean }) {
     : undefined;
   return (
     <picture>
-      <source
-        media="(max-width: 47.99rem)"
-        type="image/avif"
-        srcSet={srcset(m.sources, "avif")}
-        sizes="100vw"
-      />
-      <source
-        media="(max-width: 47.99rem)"
-        type="image/webp"
-        srcSet={srcset(m.sources, "webp")}
-        sizes="100vw"
-      />
-      <source
-        type="image/avif"
-        srcSet={srcset(d.sources, "avif")}
-        sizes="100vw"
-      />
-      <source
-        type="image/webp"
-        srcSet={srcset(d.sources, "webp")}
-        sizes="100vw"
-      />
+      {mobileAvif ? (
+        <source
+          media="(max-width: 47.99rem)"
+          type="image/avif"
+          srcSet={mobileAvif}
+          sizes="100vw"
+        />
+      ) : null}
+      {mobileWebp ? (
+        <source
+          media="(max-width: 47.99rem)"
+          type="image/webp"
+          srcSet={mobileWebp}
+          sizes="100vw"
+        />
+      ) : null}
+      {desktopAvif ? (
+        <source type="image/avif" srcSet={desktopAvif} sizes="100vw" />
+      ) : null}
+      {desktopWebp ? (
+        <source type="image/webp" srcSet={desktopWebp} sizes="100vw" />
+      ) : null}
       <img
         className={s.heroImage}
-        src={d.url ?? ""}
+        src={d.url}
         alt={d.alt}
         width={d.width}
         height={d.height}
@@ -96,11 +104,19 @@ export function Hero({ slides }: { slides: readonly HeroSlide[] }) {
   useHeroHeight(self);
   const [announce, setAnnounce] = useState(false);
   const touch = useRef<number | null>(null);
+  const dots = useRef<(HTMLButtonElement | null)[]>([]);
   const current = carousel.index;
 
   const choose = (i: number) => {
     setAnnounce(true);
     carousel.go(i);
+  };
+
+  /** Keyboard on the indicators: the chosen slide's indicator takes focus. */
+  const step = (to: number) => {
+    const next = ((to % slides.length) + slides.length) % slides.length;
+    choose(next);
+    dots.current[next]?.focus();
   };
 
   if (slides.length === 0)
@@ -170,14 +186,21 @@ export function Hero({ slides }: { slides: readonly HeroSlide[] }) {
             {slides.map((_, i) => (
               <button
                 key={i}
+                ref={(el) => {
+                  dots.current[i] = el;
+                }}
                 type="button"
                 className={s.dot}
                 aria-label={`Show slide ${i + 1} of ${slides.length}`}
                 aria-current={i === current ? "true" : undefined}
                 onClick={() => choose(i)}
                 onKeyDown={(e) => {
-                  if (e.key === "ArrowRight") choose(current + 1);
-                  if (e.key === "ArrowLeft") choose(current - 1);
+                  if (e.key === "ArrowRight") step(current + 1);
+                  else if (e.key === "ArrowLeft") step(current - 1);
+                  else if (e.key === "Home") step(0);
+                  else if (e.key === "End") step(slides.length - 1);
+                  else return;
+                  e.preventDefault();
                 }}
               >
                 <span />

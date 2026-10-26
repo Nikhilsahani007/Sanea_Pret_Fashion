@@ -1,7 +1,9 @@
 // Hero carousel state (phase-12-plan.md §5.1, P12-5). Auto-advance every
 // SLIDE_MS unless paused by the shopper, while hovered or focused, while the
-// tab is hidden, under reduced motion, or with fewer than two slides. The
-// timing is provisional until the reference recording exists (B-03).
+// tab is hidden, under reduced motion (followed live, so changing the system
+// setting with the page open takes effect at once), or with fewer than two
+// slides. The timing is provisional until the reference recording exists
+// (B-03).
 import { useCallback, useEffect, useState, type FocusEvent } from "react";
 
 export const SLIDE_MS = 6000;
@@ -20,7 +22,15 @@ export function useCarousel(count: number) {
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [reduced] = useState(prefersReducedMotion);
+  const [reduced, setReduced] = useState(prefersReducedMotion);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     const onVisibility = () => setHidden(document.hidden);

@@ -1,6 +1,7 @@
 // A product card (design-system.md §6; redesigned, phase-12-plan.md §12): the
 // 4:5 picture leads, square corners; the name and price sit quietly beside
-// each other under it. "Add" opens the size sheet;
+// each other under it. The name is a level-2 heading by default; inside a
+// titled section (a landing row) it is level 3. "Add" opens the size sheet;
 // it never adds a default size. A product without photographs keeps an
 // empty well: no stock photography stands in (D-120).
 import { useRef, useState } from "react";
@@ -13,7 +14,14 @@ import { Picture } from "../ui/Picture.tsx";
 import { SizeSheet } from "./SizeSheet.tsx";
 import s from "./product.module.css";
 
-export function ProductCard({ product }: { product: ProductSummary }) {
+export function ProductCard({
+  product,
+  headingLevel = 2,
+}: {
+  product: ProductSummary;
+  headingLevel?: 2 | 3;
+}) {
+  const Heading = headingLevel === 3 ? "h3" : "h2";
   const [open, setOpen] = useState(false);
   const added = useRef(false);
   const { openDrawer } = useCart();
@@ -38,9 +46,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         ) : null}
       </Link>
       <div className={s.meta}>
-        <h2 id={`p-${product.id}`} className={s.cardName}>
+        <Heading id={`p-${product.id}`} className={s.cardName}>
           <Link to={`/products/${product.slug}`}>{product.name}</Link>
-        </h2>
+        </Heading>
         <p className={`${s.cardPrice} tabular`}>
           {/* The lowest price among the variants on sale. */}
           <span className={s.from}>From </span>

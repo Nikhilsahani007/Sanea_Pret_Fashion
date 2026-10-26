@@ -135,12 +135,18 @@
   text-decoration: none;
   transition:
     background-color var(--sp-duration-base) var(--sp-ease-out),
-    color var(--sp-duration-base) var(--sp-ease-out);
+    color var(--sp-duration-base) var(--sp-ease-out),
+    transform var(--sp-duration-fast) var(--sp-ease-out);
 }
 
 .cta:hover {
   background: var(--sp-paper);
   color: var(--sp-ink);
+}
+
+/* Press feedback; the global reduced-motion rule removes the travel. */
+.cta:active {
+  transform: scale(0.98);
 }
 
 .controls {
@@ -187,6 +193,10 @@
   transition: background-color var(--sp-duration-base) var(--sp-ease-out);
 }
 
+.dot:hover span {
+  background: color-mix(in srgb, var(--sp-paper) 80%, transparent);
+}
+
 .dot[aria-current="true"] span {
   background: var(--sp-paper);
 }
@@ -208,6 +218,23 @@
 
 .hero :focus-visible {
   outline-color: var(--sp-paper);
+}
+
+/* The notice when the page's content could not be loaded. */
+.notice {
+  color: var(--sp-muted);
+  font-size: var(--sp-step-small);
+}
+
+.retry {
+  min-height: var(--sp-target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sp-ink);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
 }
 
 /* ── Product rows ──────────────────────────────────────────────────────── */

@@ -93,7 +93,11 @@ export function Layout() {
   // The shell is drawn once its menus and announcement are known (or have
   // failed), so they never push the page down after the first paint (CLS).
   if (nav.status === "loading" || home.status === "loading")
-    return <div className={s.pending} aria-busy="true" />;
+    return (
+      <div className={s.pending} aria-busy="true">
+        <span className="visually-hidden">Loading</span>
+      </div>
+    );
 
   return (
     <>

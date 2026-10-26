@@ -1,8 +1,9 @@
 // A horizontal product row (phase-12-plan.md §5.2, §12, §13): scroll-snap
 // cards that run past the right-hand gutter to the edge of the screen, so the
 // partly shown card reads as "more this way", not as a clipped box. Arrow
-// buttons on desktop, each disabled at its end. Used for New Ins and the
-// second row.
+// buttons on desktop, each disabled at its end, re-measured when the items
+// change. Product names are level-3 headings under the row's title. Used for
+// New Ins and the second row.
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ProductRow as Row } from "../api/types.ts";
@@ -26,7 +27,7 @@ export function ProductRow({ row, id }: { row: Row; id: string }) {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [measure]);
+  }, [measure, row.items]);
 
   const scroll = (direction: 1 | -1) => {
     const el = track.current;
@@ -72,7 +73,7 @@ export function ProductRow({ row, id }: { row: Row; id: string }) {
       >
         {row.items.map((p) => (
           <li key={p.id} className={s.cell}>
-            <ProductCard product={p} />
+            <ProductCard product={p} headingLevel={3} />
           </li>
         ))}
       </ul>
