@@ -24,6 +24,7 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:seed": "prisma db seed",
+    "demo": "node scripts/demo.ts",
     "demo:seed": "node apps/api/src/db/demo-seed.ts",
     "lighthouse": "node scripts/lighthouse.ts",
     "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",

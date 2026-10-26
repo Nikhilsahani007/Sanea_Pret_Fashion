@@ -423,7 +423,7 @@ function FilterPanel({
       {colours.length ? (
         <fieldset className={s.group}>
           <legend className={s.groupTitle}>Colour</legend>
-          <div className={s.options}>
+          <div className={s.stackOptions}>
             {colours.map((c) => (
               <label key={c.slug} className={s.check}>
                 <input

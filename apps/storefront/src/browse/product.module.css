@@ -108,8 +108,10 @@
   align-content: start;
 }
 
+/* Capped below the page headline size so a three-word name stays on two
+   lines in the narrow column beside the gallery. */
 .name {
-  font-size: var(--sp-step-head);
+  font-size: min(var(--sp-step-head), 2.75rem);
   line-height: var(--sp-leading-tight);
 }
 

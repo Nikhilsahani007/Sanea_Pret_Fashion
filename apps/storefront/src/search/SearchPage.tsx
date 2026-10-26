@@ -2,7 +2,7 @@
 // "Load more" by cursor, empty and error states. The query and the sort stay
 // in the URL. The result count is announced politely.
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { api, toApiError, type ApiError } from "../api/client.ts";
 import type { Listing, ProductSummary } from "../api/types.ts";
@@ -95,7 +95,8 @@ export function SearchPage() {
                   ? "No products match."
                   : `${items.length}${cursor ? "+" : ""} ${items.length === 1 && !cursor ? "product" : "products"}`}
           </p>
-          <label className={s.sort}>
+          {/* Sorting means nothing until there is something to sort. */}
+          <label className={s.sort} hidden={items.length === 0}>
             Sort by{" "}
             <select
               value={sort}
@@ -122,7 +123,10 @@ export function SearchPage() {
         </div>
       ) : null}
       {state === "done" && !error && items.length === 0 && q.length >= 2 ? (
-        <p>Try a different word, or check the spelling.</p>
+        <p>
+          Try a different word, or check the spelling. Or{" "}
+          <Link to="/shop">browse everything in the shop</Link>.
+        </p>
       ) : null}
       {items.length ? (
         <ul className={grid.grid} aria-label="Results">

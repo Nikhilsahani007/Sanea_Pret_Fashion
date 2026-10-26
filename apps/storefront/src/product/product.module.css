@@ -7,16 +7,18 @@
   gap: var(--sp-space-12) var(--sp-space-4);
 }
 
+/* From tablet up the column count follows the grid's own width, so a grid
+   beside the filter panel keeps cards large enough to read (three or four,
+   never a row of thumbnails). */
 @media (min-width: 48rem) {
   .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(max(13rem, 22%), 1fr));
     gap: var(--sp-space-12) var(--sp-space-6);
   }
 }
 
 @media (min-width: 64rem) {
   .grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--sp-space-16) var(--sp-space-8);
   }
 }
