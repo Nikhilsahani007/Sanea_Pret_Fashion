@@ -117,7 +117,7 @@ Implementation starts only after:
 
 ## 10. Built and verified (2026-10-26)
 
-**Gate status: pending your review** (index Phase 13: you review the tests and screenshots). Nothing here is a gate approval.
+**Gate status: passed (D-185, 2026-10-26)** on your approval of the tests and screenshots.
 
 **What was built:**
 - **Database:** migration `20261026120000_enquiries`: tables `enquiry` and `whatsapp_click`, enum `enquiry_status`, six CHECKs (consent, contact, `+91` phone, text lengths, source, page path) registered in `handwritten.ts`. Applied to disposable databases only.

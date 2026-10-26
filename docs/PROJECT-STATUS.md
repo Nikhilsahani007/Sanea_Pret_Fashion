@@ -4,7 +4,7 @@ Last updated: 2026-10-26 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
-**Phase 13 — Browsing, product detail and enquiries: built and tested 2026-10-26; gate pending your review** (`phase-13-plan.md` §10). Listings at `/shop`, `/shop/:slug`, `/new-in`, `/collections/:slug`; product page; enquiry form; WhatsApp link with an anonymous click log; migration `20261026120000_enquiries` (disposable databases only). Evidence: 746 unit, 412 integration and 23 end-to-end tests pass; axe clean at three widths; Lighthouse accessibility 100 and performance 94 to 100. **Next:** your review of the tests and screenshots in `docs/reviews/browsing/2026-10-26/`; then Phase 15 needs the checkout decisions in B-07.
+**Phase 13 — Browsing, product detail and enquiries: gate passed (D-185, 2026-10-26)** (`phase-13-plan.md` §10). Listings at `/shop`, `/shop/:slug`, `/new-in`, `/collections/:slug`; product page; enquiry form; WhatsApp link with an anonymous click log; migration `20261026120000_enquiries` (disposable databases only). Evidence: 746 unit, 412 integration and 23 end-to-end tests pass; axe clean at three widths; Lighthouse accessibility 100 and performance 94 to 100. **Next:** Phase 15 (checkout, orders, COD and mock payments), which needs the checkout decisions in B-07.
 
 **Branch reconciliation, stage 1 (2026-10-26):** `phase-12-landing` is canonical (D-174). `claude/amazing-faraday-21s6uc` is a preserved reference; its work is used only as candidates. Decisions D-174 to D-184; mapping and conflicts in `RECONCILIATION.md`. Dependency audit clean after the lockfile fix (D-184).
 
