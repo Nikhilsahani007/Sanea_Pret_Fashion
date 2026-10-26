@@ -59,6 +59,15 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  animation: picture-in var(--sp-duration-base) var(--sp-ease-out);
+}
+
+/* A new picture settles in when the colour or thumbnail changes. */
+@keyframes picture-in {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
 }
 
 .thumbs {

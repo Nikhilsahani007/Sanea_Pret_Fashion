@@ -5,7 +5,7 @@
 // cursor. The filter panel sits beside the grid on wide screens and in a
 // sheet on narrow ones. The result count is announced politely; results
 // change with a 150 ms crossfade only (design-system.md §8).
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 
 import { api, toApiError, type ApiError } from "../api/client.ts";
@@ -17,6 +17,7 @@ import type {
   ProductSummary,
 } from "../api/types.ts";
 import { rupees } from "../lib/format.ts";
+import { useRise } from "../lib/motion.ts";
 import { useResource } from "../lib/resource.ts";
 import { ProductCard } from "../product/ProductCard.tsx";
 import grid from "../product/product.module.css";
@@ -175,6 +176,9 @@ function Products({
   const [state, setState] = useState<"loading" | "more" | "done">("loading");
   const [error, setError] = useState<ApiError | null>(null);
   const [panel, setPanel] = useState(false);
+  // The first cards of each new result rise in; "Show more" adds quietly.
+  const gridRef = useRef<HTMLUListElement>(null);
+  useRise(gridRef, items[0]?.id ?? null);
   const scopeKey = `${scope.category ?? ""}|${scope.collection ?? ""}`;
 
   useEffect(() => {
@@ -315,7 +319,7 @@ function Products({
             </p>
           ) : null}
           {items.length ? (
-            <ul className={grid.grid} aria-label="Products">
+            <ul className={grid.grid} aria-label="Products" ref={gridRef}>
               {items.map((p) => (
                 <li key={p.id}>
                   <ProductCard product={p} />

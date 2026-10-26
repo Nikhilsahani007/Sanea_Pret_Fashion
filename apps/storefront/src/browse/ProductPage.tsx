@@ -135,6 +135,7 @@ function Product({ p }: { p: ProductDetail }) {
           <div className={s.mainImage}>
             {main ? (
               <Picture
+                key={main.url}
                 image={main}
                 sizes="(min-width: 64rem) 55vw, 100vw"
                 eager

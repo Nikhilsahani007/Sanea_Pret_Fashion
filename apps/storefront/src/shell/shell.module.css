@@ -325,3 +325,15 @@
   width: 100%;
   height: auto;
 }
+
+/* The bag count pops once when it changes (design-system.md §8). */
+.count {
+  display: inline-block;
+  animation: count-pop var(--sp-duration-base) var(--sp-ease-out);
+}
+
+@keyframes count-pop {
+  40% {
+    transform: scale(1.25);
+  }
+}

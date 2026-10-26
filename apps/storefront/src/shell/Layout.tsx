@@ -2,7 +2,7 @@
 // (logo, main links, search, bag), category pills, main and footer. Built
 // from published content only: a menu with no public links is not drawn,
 // and nothing is invented to fill space.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 
 import { api } from "../api/client.ts";
@@ -11,6 +11,7 @@ import { CartDrawer } from "../cart/CartDrawer.tsx";
 import { useCart } from "../cart/CartProvider.tsx";
 import { items } from "../lib/format.ts";
 import { usePageMeta } from "../lib/meta.ts";
+import { useRise } from "../lib/motion.ts";
 import { useResource } from "../lib/resource.ts";
 import { SearchBox } from "../search/SearchBox.tsx";
 import { Sheet } from "../ui/Sheet.tsx";
@@ -55,7 +56,10 @@ function BagButton() {
   return (
     <button type="button" className={s.bag} onClick={openDrawer}>
       <span aria-hidden="true">
-        Bag <span className="tabular">({cart.itemCount})</span>
+        Bag {/* Keyed by the count, so a new item makes the number pop once. */}
+        <span key={cart.itemCount} className={`tabular ${s.count}`}>
+          ({cart.itemCount})
+        </span>
       </span>
       <span className="visually-hidden">Bag, {items(cart.itemCount)}</span>
     </button>
@@ -81,6 +85,9 @@ export function Layout() {
       ? (new URLSearchParams(location.search).get("q") ?? "")
       : "";
   const { announcement } = useCart();
+  // Each new page's content rises in once; the landing runs its own reveal.
+  const mainRef = useRef<HTMLElement>(null);
+  useRise(mainRef, location.pathname === "/" ? null : location.pathname, true);
   const menus = nav.status === "ready" ? nav.data.menus : {};
   const footer = nav.status === "ready" ? nav.data.footer : null;
   const header = menus.HEADER ?? [];
@@ -164,6 +171,7 @@ export function Layout() {
         </div>
       </Sheet>
       <main
+        ref={mainRef}
         id="main"
         tabIndex={-1}
         className={`${s.main} ${location.pathname === "/" ? s.wide : ""}`}
