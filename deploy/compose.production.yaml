@@ -1,19 +1,20 @@
-# Production and staging on one EC2 instance (phase-19-plan.md §3). The
+# One stage on its EC2 instance (phase-19-plan.md §3; deploy/runbook.md). The
 # database is Amazon RDS, not a container. Secrets come from /etc/sanea/api.env,
-# written at boot from AWS Systems Manager Parameter Store (never committed).
-#
-#   docker compose -f deploy/compose.production.yaml run --rm migrate
-#   docker compose -f deploy/compose.production.yaml up -d api web
+# written by `sanea-env` from Parameter Store (never committed). Run by
+# `sanea-release <tag>` on the instance, which sets RELEASE, IMAGE_REGISTRY,
+# STAGE, SHOP_DOMAIN and ADMIN_DOMAIN.
 name: sanea-pret
 
 services:
   migrate:
-    image: ${IMAGE_REGISTRY}/sanea-migrate:${RELEASE}
+    image: ${IMAGE_REGISTRY}/sanea-${STAGE}-migrate:${RELEASE}
     env_file: /etc/sanea/api.env
+    volumes:
+      - /etc/sanea/rds-ca.pem:/etc/sanea/rds-ca.pem:ro
     profiles: ["release"]
 
   api:
-    image: ${IMAGE_REGISTRY}/sanea-api:${RELEASE}
+    image: ${IMAGE_REGISTRY}/sanea-${STAGE}-api:${RELEASE}
     env_file: /etc/sanea/api.env
     environment:
       HOST: 0.0.0.0
@@ -22,6 +23,7 @@ services:
       MEDIA_STORAGE_DIR: /var/lib/sanea/media
     volumes:
       - /var/lib/sanea/media:/var/lib/sanea/media
+      - /etc/sanea/rds-ca.pem:/etc/sanea/rds-ca.pem:ro
     restart: unless-stopped
     logging:
       driver: awslogs
@@ -30,7 +32,7 @@ services:
         awslogs-group: /sanea/${STAGE}/api
 
   web:
-    image: ${IMAGE_REGISTRY}/sanea-web:${RELEASE}
+    image: ${IMAGE_REGISTRY}/sanea-${STAGE}-web:${RELEASE}
     environment:
       SHOP_DOMAIN: ${SHOP_DOMAIN}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN}

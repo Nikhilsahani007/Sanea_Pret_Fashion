@@ -289,3 +289,4 @@ Proposed and approved in principle on 2026-10-19, together with Q8-1 to Q8-10, Q
 | 2026-10-27 | Phase 18 built and tested against a fake PhonePe (`phase-18-plan.md`): adapter, gateway refunds, reconciliation, storefront redirect; no new dependency, no migration. Sandbox run waits for your PhonePe sandbox credentials; no production key configured. |
 | 2026-10-27 | Phase 19 started: infrastructure plan for AWS ap-south-1 written for your approval (`phase-19-plan.md`); deployment files and the restore check added; nothing provisioned. |
 | 2026-10-27 | **Phase 19 infrastructure plan approved (D-197).** Provisioning waits for the AWS account, provisioning role, domain, alert email and budget limit; launch is approved separately. |
+| 2026-10-27 | Phase 19 provisioning prepared without AWS access, at your request: CloudFormation template, first-boot and release scripts, runbook, CI image build. Nothing created on AWS. |

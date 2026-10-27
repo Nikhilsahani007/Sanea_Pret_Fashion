@@ -1,0 +1,630 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Sanéa Pret, one stage (staging or production) in ap-south-1, as approved in
+  docs/phase-19-plan.md (D-197): one EC2 instance running Docker (Caddy and
+  the API) with an encrypted EBS media volume backed up daily, RDS for
+  PostgreSQL 18 in private subnets, ECR repositories, CloudWatch logs and
+  alarms to an email, and a monthly cost budget. Nothing here holds a secret:
+  the application secrets are SecureString parameters under /sanea/<stage>/
+  (deploy/runbook.md §2) and the database password is managed by RDS in
+  Secrets Manager.
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues: [staging, production]
+  ShopDomain:
+    Type: String
+    Description: The storefront host, for example shop.example.in
+  AdminDomain:
+    Type: String
+    Description: The admin host, for example admin.example.in
+  AlertEmail:
+    Type: String
+    Description: Where alarms, backup failures and budget warnings go
+  MonthlyBudgetUsd:
+    Type: Number
+    Description: The monthly cost budget for this stage, in US dollars
+  InstanceType:
+    Type: String
+    Default: t4g.small
+    AllowedValues: [t4g.micro, t4g.small, t4g.medium]
+  DbInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+    AllowedValues: [db.t4g.micro, db.t4g.small, db.t4g.medium]
+  DbEngineVersion:
+    Type: String
+    Default: "18"
+    Description: PostgreSQL 18 or later; the migrations use uuidv7()
+  MultiAz:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+  AmiParameter:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+
+Conditions:
+  IsProduction: !Equals [!Ref Stage, production]
+
+Resources:
+  # ── Network: two public subnets (the instance), two private (the database).
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: !Sub "sanea-${Stage}" }]
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: { VpcId: !Ref Vpc, InternetGatewayId: !Ref InternetGateway }
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.1.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.11.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+  PublicRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref Vpc }
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicRoutesA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      { RouteTableId: !Ref PublicRoutes, SubnetId: !Ref PublicSubnetA }
+  PublicRoutesB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      { RouteTableId: !Ref PublicRoutes, SubnetId: !Ref PublicSubnetB }
+
+  # ── Security groups: the web on 80 and 443 only (no SSH: Session Manager);
+  # the database from the instance only.
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Sanea Pret web (HTTP and HTTPS only)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+        - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0 }
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Sanea Pret database (from the instance only)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref WebSecurityGroup
+
+  # ── Database: RDS manages the password in Secrets Manager; TLS is enforced
+  # by default on PostgreSQL 15 and later (rds.force_ssl).
+  DbSubnets:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub "sanea-${Stage} private subnets"
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub "sanea-${Stage}"
+      Engine: postgres
+      EngineVersion: !Ref DbEngineVersion
+      DBInstanceClass: !Ref DbInstanceClass
+      DBName: sanea
+      MasterUsername: sanea_admin
+      ManageMasterUserPassword: true
+      AllocatedStorage: "20"
+      MaxAllocatedStorage: 100
+      StorageType: gp3
+      StorageEncrypted: true
+      MultiAZ: !Ref MultiAz
+      PubliclyAccessible: false
+      DBSubnetGroupName: !Ref DbSubnets
+      VPCSecurityGroups: [!Ref DbSecurityGroup]
+      BackupRetentionPeriod: 14
+      PreferredBackupWindow: "20:30-21:00" # 02:00–02:30 IST
+      PreferredMaintenanceWindow: "sun:21:30-sun:22:30"
+      CopyTagsToSnapshot: true
+      DeletionProtection: true
+      AutoMinorVersionUpgrade: true
+      EnablePerformanceInsights: false
+
+  # ── Images.
+  ApiRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "sanea-${Stage}-api"
+      ImageScanningConfiguration: { ScanOnPush: true }
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: { EncryptionType: AES256 }
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {"rules":[{"rulePriority":1,"description":"Keep the last 20 releases",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":20},
+          "action":{"type":"expire"}}]}
+  WebRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "sanea-${Stage}-web"
+      ImageScanningConfiguration: { ScanOnPush: true }
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: { EncryptionType: AES256 }
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {"rules":[{"rulePriority":1,"description":"Keep the last 20 releases",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":20},
+          "action":{"type":"expire"}}]}
+  MigrateRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "sanea-${Stage}-migrate"
+      ImageScanningConfiguration: { ScanOnPush: true }
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: { EncryptionType: AES256 }
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {"rules":[{"rulePriority":1,"description":"Keep the last 20 releases",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":20},
+          "action":{"type":"expire"}}]}
+
+  # ── Logs.
+  ApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/sanea/${Stage}/api"
+      RetentionInDays: 30
+  WebLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/sanea/${Stage}/web"
+      RetentionInDays: 30
+
+  # ── The instance's role: Session Manager, its own parameters and database
+  # secret, image pulls, its own log groups. Nothing else.
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: sanea-instance
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [ssm:GetParametersByPath, ssm:GetParameters]
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sanea/${Stage}/*"
+              - Effect: Allow
+                Action: [ssm:GetParametersByPath]
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sanea/${Stage}"
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !GetAtt Database.MasterUserSecret.SecretArn
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchCheckLayerAvailability
+                Resource:
+                  - !GetAtt ApiRepository.Arn
+                  - !GetAtt WebRepository.Arn
+                  - !GetAtt MigrateRepository.Arn
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource:
+                  - !Sub "${ApiLogs.Arn}:*"
+                  - !Sub "${WebLogs.Arn}:*"
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: { Roles: [!Ref InstanceRole] }
+
+  # ── The media volume: separate from the instance so it survives a
+  # replacement; snapshotted on deletion; backed up daily by AWS Backup.
+  MediaVolume:
+    Type: AWS::EC2::Volume
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnetA.AvailabilityZone
+      Size: 30
+      VolumeType: gp3
+      Encrypted: true
+      Tags:
+        - { Key: Name, Value: !Sub "sanea-${Stage}-media" }
+        - { Key: sanea:backup, Value: daily }
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !Ref AmiParameter
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile: { Arn: !GetAtt InstanceProfile.Arn }
+        MetadataOptions: { HttpTokens: required, HttpPutResponseHopLimit: 2 }
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs: { VolumeSize: 20, VolumeType: gp3, Encrypted: true }
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            SubnetId: !Ref PublicSubnetA
+            Groups: [!Ref WebSecurityGroup]
+            AssociatePublicIpAddress: true
+        UserData:
+          Fn::Base64: !Sub
+            - |
+              #!/bin/bash
+              # First boot (deploy/runbook.md §3): Docker and Compose, the media
+              # volume at /var/lib/sanea/media, and two commands:
+              #   sanea-env      writes /etc/sanea/api.env from Parameter Store
+              #                  and the RDS-managed database secret
+              #   sanea-release  <tag>: pulls the release, migrates, starts it
+              set -euo pipefail
+              dnf install -y docker jq
+              systemctl enable --now docker
+              mkdir -p /usr/libexec/docker/cli-plugins
+              COMPOSE=v2.40.0
+              base=https://github.com/docker/compose/releases/download/$COMPOSE
+              curl -fsSLo /tmp/compose "$base/docker-compose-linux-aarch64"
+              curl -fsSLo /tmp/compose.sha256 "$base/docker-compose-linux-aarch64.sha256"
+              (cd /tmp && echo "$(cut -d' ' -f1 compose.sha256)  compose" | sha256sum -c -)
+              install -m 0755 /tmp/compose /usr/libexec/docker/cli-plugins/docker-compose
+
+              # The media volume: found by its ID on the NVMe bus.
+              serial=$(echo "${MediaVolume}" | tr -d '-')
+              for i in $(seq 60); do
+                dev=$(lsblk -dno NAME,SERIAL | awk -v s="$serial" '$2==s{print "/dev/"$1}')
+                [ -n "$dev" ] && break; sleep 5
+              done
+              [ -n "$dev" ] || { echo "media volume not attached" >&2; exit 1; }
+              blkid "$dev" || mkfs.xfs "$dev"
+              mkdir -p /var/lib/sanea/media
+              uuid=$(blkid -s UUID -o value "$dev")
+              grep -q "$uuid" /etc/fstab || echo "UUID=$uuid /var/lib/sanea/media xfs defaults,nofail 0 2" >> /etc/fstab
+              mount -a
+              chown -R 1000:1000 /var/lib/sanea/media
+
+              mkdir -p /etc/sanea /opt/sanea
+              chmod 0700 /etc/sanea
+              cat > /etc/sanea/stage <<STAGE
+              STAGE=${Stage}
+              REGION=${AWS::Region}
+              REGISTRY=${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
+              DB_SECRET=${DbSecret}
+              DB_HOST=${DbHost}
+              DB_PORT=${DbPort}
+              SHOP_DOMAIN=${ShopDomain}
+              ADMIN_DOMAIN=${AdminDomain}
+              STAGE
+
+              cat > /usr/local/bin/sanea-env <<'ENV'
+              #!/bin/bash
+              # Writes /etc/sanea/api.env (root only). Values are never printed.
+              set -euo pipefail
+              . /etc/sanea/stage
+              umask 077
+              tmp=$(mktemp)
+              aws ssm get-parameters-by-path --region "$REGION" --path "/sanea/$STAGE/" \
+                --with-decryption --recursive --output json \
+                | jq -r '.Parameters[] | "\(.Name | split("/") | last)=\(.Value)"' > "$tmp"
+              secret=$(aws secretsmanager get-secret-value --region "$REGION" \
+                --secret-id "$DB_SECRET" --query SecretString --output text)
+              user=$(jq -rn --argjson s "$secret" '$s.username|@uri')
+              pass=$(jq -rn --argjson s "$secret" '$s.password|@uri')
+              {
+                echo "NODE_ENV=production"
+                # TLS with the RDS certificate checked: node-postgres for the API,
+                # Prisma's own parameters for migrations.
+                echo "DATABASE_URL=postgresql://$user:$pass@$DB_HOST:$DB_PORT/sanea?sslmode=verify-full&sslrootcert=/etc/sanea/rds-ca.pem"
+                echo "MIGRATE_DATABASE_URL=postgresql://$user:$pass@$DB_HOST:$DB_PORT/sanea?sslmode=require&sslcert=/etc/sanea/rds-ca.pem&sslaccept=strict"
+                echo "STOREFRONT_ORIGIN=https://$SHOP_DOMAIN"
+                echo "ADMIN_ORIGIN=https://$ADMIN_DOMAIN"
+                echo "MEDIA_PUBLIC_BASE_URL=https://$SHOP_DOMAIN/media/"
+                cat "$tmp"
+              } > /etc/sanea/api.env
+              rm -f "$tmp"
+              curl -fsSLo /etc/sanea/rds-ca.pem https://truststore.pki.rds.amazonaws.com/$REGION/$REGION-bundle.pem
+              chmod 0644 /etc/sanea/rds-ca.pem
+              ENV
+
+              cat > /usr/local/bin/sanea-release <<'RELEASE'
+              #!/bin/bash
+              # sanea-release <tag>: the runbook's release (deploy/runbook.md §4).
+              set -euo pipefail
+              tag=${!1:?usage: sanea-release <tag>}
+              . /etc/sanea/stage
+              aws ecr get-login-password --region "$REGION" \
+                | docker login --username AWS --password-stdin "$REGISTRY"
+              /usr/local/bin/sanea-env
+              # The compose file travels inside the release's migrate image.
+              docker pull "$REGISTRY/sanea-$STAGE-migrate:$tag"
+              docker run --rm --entrypoint cat "$REGISTRY/sanea-$STAGE-migrate:$tag" \
+                deploy/compose.production.yaml > /opt/sanea/compose.yaml
+              export RELEASE=$tag IMAGE_REGISTRY="$REGISTRY" STAGE SHOP_DOMAIN ADMIN_DOMAIN
+              docker compose -f /opt/sanea/compose.yaml pull api web
+              docker compose -f /opt/sanea/compose.yaml --profile release run --rm migrate
+              docker compose -f /opt/sanea/compose.yaml up -d api web
+              echo "$tag" > /opt/sanea/current
+              for i in $(seq 30); do
+                if docker compose -f /opt/sanea/compose.yaml exec -T api node -e \
+                  "fetch('http://127.0.0.1:4000/api/v1/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"; then
+                  echo "release $tag is healthy"; exit 0
+                fi
+                sleep 2
+              done
+              echo "release $tag did not become healthy" >&2; exit 1
+              RELEASE
+              chmod 0700 /usr/local/bin/sanea-env /usr/local/bin/sanea-release
+            - DbSecret: !GetAtt Database.MasterUserSecret.SecretArn
+              DbHost: !GetAtt Database.Endpoint.Address
+              DbPort: !GetAtt Database.Endpoint.Port
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      Tags: [{ Key: Name, Value: !Sub "sanea-${Stage}" }]
+  MediaAttachment:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref Instance
+      VolumeId: !Ref MediaVolume
+      Device: /dev/sdf
+  PublicAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref Instance
+
+  # ── Backups of the media volume.
+  BackupVault:
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: !Sub "sanea-${Stage}"
+      Notifications:
+        BackupVaultEvents: [BACKUP_JOB_FAILED, RESTORE_JOB_FAILED]
+        SNSTopicArn: !Ref Alerts
+  BackupPlan:
+    Type: AWS::Backup::BackupPlan
+    Properties:
+      BackupPlan:
+        BackupPlanName: !Sub "sanea-${Stage}-daily"
+        BackupPlanRule:
+          - RuleName: daily
+            TargetBackupVault: !Ref BackupVault
+            ScheduleExpression: cron(30 20 * * ? *) # 02:00 IST
+            Lifecycle: { DeleteAfterDays: 35 }
+  BackupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: backup.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
+  BackupSelection:
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref BackupPlan
+      BackupSelection:
+        SelectionName: media
+        IamRoleArn: !GetAtt BackupRole.Arn
+        Resources:
+          [
+            !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:volume/${MediaVolume}",
+          ]
+
+  # ── Alerts.
+  Alerts:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "sanea-${Stage}-alerts"
+      Subscription: [{ Protocol: email, Endpoint: !Ref AlertEmail }]
+  AlertsPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [!Ref Alerts]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: backup.amazonaws.com }
+            Action: sns:Publish
+            Resource: !Ref Alerts
+  InstanceStatusAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The instance failed a status check
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed
+      Dimensions: [{ Name: InstanceId, Value: !Ref Instance }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions: [!Ref Alerts]
+  InstanceCpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Instance CPU above 80% for 15 minutes
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions: [{ Name: InstanceId, Value: !Ref Instance }]
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: [!Ref Alerts]
+  DbCpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Database CPU above 80% for 15 minutes
+      Namespace: AWS/RDS
+      MetricName: CPUUtilization
+      Dimensions: [{ Name: DBInstanceIdentifier, Value: !Ref Database }]
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: [!Ref Alerts]
+  DbStorageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Database free storage below 4 GB
+      Namespace: AWS/RDS
+      MetricName: FreeStorageSpace
+      Dimensions: [{ Name: DBInstanceIdentifier, Value: !Ref Database }]
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 4000000000
+      ComparisonOperator: LessThanThreshold
+      AlarmActions: [!Ref Alerts]
+  ApiErrorMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ApiLogs
+      FilterPattern: "{ $.level >= 50 }"
+      MetricTransformations:
+        - {
+            MetricNamespace: !Sub "Sanea/${Stage}",
+            MetricName: ApiErrors,
+            MetricValue: "1",
+            DefaultValue: 0,
+          }
+  ApiErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: More than 5 API errors in 5 minutes
+      Namespace: !Sub "Sanea/${Stage}"
+      MetricName: ApiErrors
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref Alerts]
+  PaymentProblemMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ApiLogs
+      FilterPattern: '{ ($.msg = "payment event not applied") || ($.msg = "gateway refund not processed") }'
+      MetricTransformations:
+        - {
+            MetricNamespace: !Sub "Sanea/${Stage}",
+            MetricName: PaymentProblems,
+            MetricValue: "1",
+            DefaultValue: 0,
+          }
+  PaymentProblemAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: A payment event or gateway refund was not processed
+      Namespace: !Sub "Sanea/${Stage}"
+      MetricName: PaymentProblems
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref Alerts]
+
+  # Route 53 health-check metrics live in us-east-1, so its alarm is created
+  # there (deploy/runbook.md §5); the check itself is defined here.
+  HealthCheck:
+    Type: AWS::Route53::HealthCheck
+    Condition: IsProduction
+    Properties:
+      HealthCheckConfig:
+        Type: HTTPS
+        FullyQualifiedDomainName: !Ref ShopDomain
+        ResourcePath: /api/v1/health
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags: [{ Key: Name, Value: !Sub "sanea-${Stage}" }]
+
+  Budget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub "sanea-${Stage}"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit: { Amount: !Ref MonthlyBudgetUsd, Unit: USD }
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+
+Outputs:
+  PublicIp:
+    Description: Point the shop and admin A records here
+    Value: !Ref PublicAddress
+  InstanceId:
+    Value: !Ref Instance
+  DatabaseEndpoint:
+    Value: !GetAtt Database.Endpoint.Address
+  Registry:
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com"
+  HealthCheckId:
+    Condition: IsProduction
+    Value: !Ref HealthCheck

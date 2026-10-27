@@ -140,11 +140,14 @@ Nothing here is done yet unless marked.
 | UAT sign-off (§8) recorded | You | Open |
 | Your launch approval | You | Open |
 
-## 10. Built so far (2026-10-27, not yet run on AWS)
+## 10. Built so far (not yet run on AWS)
 
-| File | Purpose |
-|------|---------|
-| `deploy/Dockerfile` | `api`, `migrate` and `web` images (Node 24.11.0, Caddy 2.10). **Not built here**: this environment has no Docker daemon; first build on staging after approval |
-| `deploy/compose.production.yaml` | The two services and the one-off migration on the instance, logs to CloudWatch |
-| `deploy/Caddyfile` | TLS, static apps, `/media`, `/api` proxy, robots and sitemap at the root, bot routing to the preview endpoint |
-| `scripts/verify-restore.ts` (`npm run verify:restore`) | The restore check, tested locally (§5) |
+| File | Purpose | Checked |
+|------|---------|---------|
+| `deploy/cloudformation.yaml` | The approved architecture for one stage: VPC with public and private subnets, security groups (80 and 443 in; database from the instance only; no SSH), EC2 from a launch template (IMDSv2 only, encrypted disks), a separate encrypted media volume, RDS for PostgreSQL 18 with a managed password, ECR repositories, log groups, a least-privilege instance role, AWS Backup, alarms to email, the production health check, and the monthly budget | Parsed; every reference, attribute and substitution resolves (43 resources); the first-boot script and the two commands it installs pass `bash -n`. Not validated by AWS (no account access) |
+| `deploy/Dockerfile`, `.dockerignore` | The `api`, `migrate` and `web` images; `.env`, local installs and test output never enter the build | Built by the new CI job `Production images` on the next pull request (no Docker daemon here) |
+| `deploy/compose.production.yaml` | The services on the instance; logs to CloudWatch; the RDS certificate mounted for TLS checks | With the release script, on staging |
+| `deploy/Caddyfile` | TLS, the two apps, `/media`, `/api`, robots and sitemap at the root, bot routing to the preview endpoint | `caddy validate` in the CI job |
+| `deploy/runbook.md` | Secrets, stack creation, release, rollback, the restore test and alarm responses | — |
+| `scripts/verify-restore.ts` (`npm run verify:restore`) | The restore check | Tested locally (§5) |
+| `.github/workflows/ci.yml` job `images` | Builds the three images, validates the Caddyfile, checks that the compose file travels in the migrate image and that no `.env` is in the API image | Runs on pull requests and `main` |

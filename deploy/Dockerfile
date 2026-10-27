@@ -1,8 +1,8 @@
 # Production images (phase-19-plan.md §3). Not used in development or CI.
 # Targets:
 #   api     the Express API (node apps/api/src/main.ts), production dependencies only
-#   migrate the same code with the Prisma CLI, run once per release:
-#           npx prisma migrate deploy
+#   migrate the same code with the Prisma CLI, run once per release
+#           (prisma migrate deploy); it also carries deploy/compose.production.yaml
 #   web     Caddy with the storefront and admin builds and the Caddyfile
 # Build from the repository root:
 #   docker build -f deploy/Dockerfile --target api -t sanea-api .
@@ -23,7 +23,8 @@ RUN npx prisma generate \
 
 FROM build AS migrate
 ENV NODE_ENV=production
-CMD ["npx", "prisma", "migrate", "deploy"]
+# Prisma takes its own TLS parameters (MIGRATE_DATABASE_URL, deploy/runbook.md).
+CMD ["sh", "-c", "DATABASE_URL=\"${MIGRATE_DATABASE_URL:-$DATABASE_URL}\" exec npx prisma migrate deploy"]
 
 FROM build AS prune
 RUN npm prune --omit=dev

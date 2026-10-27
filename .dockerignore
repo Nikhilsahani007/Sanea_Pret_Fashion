@@ -1,0 +1,15 @@
+# Production image builds (deploy/Dockerfile): never send secrets, local
+# installs, build output or test evidence to the build.
+.git
+.env
+.env.*
+!.env.example
+**/node_modules
+**/dist
+coverage
+test-results
+playwright-report
+blob-report
+docs/reviews
+.taste-skill
+.claude
