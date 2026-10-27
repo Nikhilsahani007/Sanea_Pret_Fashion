@@ -45,6 +45,7 @@ export function createMockProvider(options: {
 
   return {
     name: "mock",
+    gatewayRefunds: false,
     sign,
 
     async createPayment({ amountPaise }) {
@@ -125,7 +126,11 @@ export function createMockProvider(options: {
     },
 
     async fetchStatus(providerPaymentId) {
-      return payments.get(providerPaymentId)?.status ?? "CREATED";
+      const stored = payments.get(providerPaymentId);
+      return {
+        status: stored?.status ?? "CREATED",
+        amountPaise: stored?.amountPaise ?? null,
+      };
     },
 
     async refund() {
@@ -134,19 +139,9 @@ export function createMockProvider(options: {
         status: "REFUNDED",
       };
     },
-  };
-}
 
-/** The provider PAYMENT_PROVIDER names: the mock outside production, or none. */
-export function paymentProviderFor(config: {
-  nodeEnv: "development" | "test" | "production";
-  paymentProvider: "none" | "mock";
-  mockPaymentSecret: string | null;
-}): MockProvider | null {
-  return config.paymentProvider === "mock"
-    ? createMockProvider({
-        nodeEnv: config.nodeEnv,
-        secret: config.mockPaymentSecret,
-      })
-    : null;
+    async fetchRefundStatus() {
+      return "REFUNDED";
+    },
+  };
 }

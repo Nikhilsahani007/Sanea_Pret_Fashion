@@ -17,3 +17,35 @@ export function orderToken(orderNumber: string): string | null {
     return null;
   }
 }
+
+/**
+ * Opens the payment page for an order and returns true, or returns false
+ * when there is none. The mock's page is a route here; PhonePe's is on a
+ * phonepe.com host over https, and nothing else is followed.
+ */
+export function openPayment(
+  payload: { payPath?: string; redirectUrl?: string } | null | undefined,
+  orderNumber: string,
+  navigate: (to: string) => void,
+): boolean {
+  if (payload?.payPath?.startsWith("/checkout/pay/")) {
+    navigate(`${payload.payPath}?order=${encodeURIComponent(orderNumber)}`);
+    return true;
+  }
+  if (payload?.redirectUrl) {
+    let url: URL;
+    try {
+      url = new URL(payload.redirectUrl);
+    } catch {
+      return false;
+    }
+    if (
+      url.protocol === "https:" &&
+      (url.hostname === "phonepe.com" || url.hostname.endsWith(".phonepe.com"))
+    ) {
+      window.location.assign(url.href);
+      return true;
+    }
+  }
+  return false;
+}

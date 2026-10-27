@@ -46,6 +46,7 @@ describe("loadConfig()", () => {
       cartMaxLineQuantity: 10,
       paymentProvider: "mock",
       mockPaymentSecret: null,
+      phonePe: null,
     });
   });
 
@@ -182,6 +183,48 @@ describe("loadConfig()", () => {
     );
     expect(problems({ ...valid, MOCK_PAYMENT_SECRET: "short" })).toHaveLength(
       1,
+    );
+  });
+
+  it("needs every PhonePe credential, and live mode only with production and approval (D-195)", () => {
+    const phonepe = {
+      ...valid,
+      PAYMENT_PROVIDER: "phonepe",
+      PHONEPE_CLIENT_ID: "client",
+      PHONEPE_CLIENT_SECRET: "secret",
+      PHONEPE_WEBHOOK_USERNAME: "hook",
+      PHONEPE_WEBHOOK_PASSWORD: "hookpass",
+    };
+    expect(loadConfig(phonepe).phonePe).toEqual({
+      env: "sandbox",
+      clientId: "client",
+      clientSecret: "secret",
+      clientVersion: "1",
+      webhookUsername: "hook",
+      webhookPassword: "hookpass",
+    });
+    expect(problems({ ...phonepe, PHONEPE_CLIENT_SECRET: "" })).toEqual([
+      "PHONEPE_CLIENT_SECRET is required when PAYMENT_PROVIDER is phonepe",
+    ]);
+    // Live money: never outside production, never without the approval flag.
+    expect(problems({ ...phonepe, PHONEPE_ENV: "production" })).toEqual([
+      "PHONEPE_ENV production needs NODE_ENV=production",
+      "PHONEPE_LIVE_APPROVED must be true for PHONEPE_ENV production (owner approval of the live gateway)",
+    ]);
+    const prod = {
+      ...phonepe,
+      NODE_ENV: "production",
+      STOREFRONT_ORIGIN: "https://saneapret.example",
+      ADMIN_ORIGIN: "https://admin.saneapret.example",
+      PHONEPE_ENV: "production",
+    };
+    expect(problems(prod)).toHaveLength(1);
+    expect(
+      loadConfig({ ...prod, PHONEPE_LIVE_APPROVED: "true" }).phonePe?.env,
+    ).toBe("production");
+    // The sandbox may run on a production-mode staging server.
+    expect(loadConfig({ ...prod, PHONEPE_ENV: "sandbox" }).phonePe?.env).toBe(
+      "sandbox",
     );
   });
 

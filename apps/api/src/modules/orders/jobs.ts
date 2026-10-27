@@ -1,13 +1,15 @@
 // In-process order jobs, every minute (one API instance; see inventory/job.ts):
 // prepaid orders whose hold lapsed are cancelled, unconfirmed COD orders are
-// cancelled after the configured window (OD-07), and payments stuck in
-// CREATED are reconciled with the provider (system-design.md §6.3).
+// cancelled after the configured window (OD-07), payments stuck in CREATED
+// are reconciled with the provider (system-design.md §6.3), and pending
+// gateway refunds are sent and settled (Phase 18).
 import type { Logger } from "pino";
 
 import { Prisma } from "../../generated/prisma/client.ts";
 import type { CheckoutDeps } from "../checkout/deps.ts";
 import { readSettings } from "../checkout/settings.ts";
 import { emailForOutcome, notify } from "../notifications/service.ts";
+import { processGatewayRefunds } from "../payments/refunds.ts";
 import { reconcile } from "../payments/service.ts";
 import { lockOrder, transition } from "./service.ts";
 
@@ -113,7 +115,10 @@ export async function runOrderJobs(deps: OrderJobDeps) {
     : [];
   for (const c of changed)
     await notify(deps, c.orderId, emailForOutcome(c.outcome));
-  return { unpaid, cod, reconciled: changed.length };
+  const refunds = deps.payments
+    ? (await processGatewayRefunds(deps.db, deps.payments, deps.logger)).length
+    : 0;
+  return { unpaid, cod, reconciled: changed.length, refunds };
 }
 
 export type OrderJobs = { stop: () => Promise<void> };
@@ -134,7 +139,7 @@ export function startOrderJobs(
   const tick = () => {
     current = runOrderJobs(deps)
       .then((r) => {
-        if (r.unpaid + r.cod + r.reconciled > 0)
+        if (r.unpaid + r.cod + r.reconciled + r.refunds > 0)
           logger.info(r, "order jobs ran");
       })
       .catch((error: unknown) => {

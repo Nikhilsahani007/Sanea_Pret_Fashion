@@ -602,6 +602,7 @@ function Payments({
                 key={r.id}
                 orderNumber={o.orderNumber}
                 refund={r}
+                gateway={p.method === "PREPAID" && p.provider === "phonepe"}
                 canComplete={can("orders.cancelRefund")}
                 onDone={onDone}
               />
@@ -609,7 +610,13 @@ function Payments({
           </Stack>
         ))}
         {canRecord ? (
-          <RecordRefund orderNumber={o.orderNumber} onDone={onDone} />
+          <RecordRefund
+            orderNumber={o.orderNumber}
+            gateway={o.payments.some(
+              (p) => p.method === "PREPAID" && p.provider === "phonepe",
+            )}
+            onDone={onDone}
+          />
         ) : null}
       </Stack>
     </Panel>
@@ -619,11 +626,14 @@ function Payments({
 function RefundRow({
   orderNumber,
   refund: r,
+  gateway,
   canComplete,
   onDone,
 }: {
   orderNumber: string;
   refund: Order["payments"][number]["refunds"][number];
+  /** Paid through PhonePe: it settles from PhonePe's answer (Phase 18). */
+  gateway: boolean;
   canComplete: boolean;
   onDone: (message: string) => void;
 }) {
@@ -656,11 +666,15 @@ function RefundRow({
       <Stack gap="3">
         <p>
           Refund {inr(r.amountPaise)} ·{" "}
-          {r.status === "PENDING" ? "to pay" : r.status.toLowerCase()} ·{" "}
-          {r.reason}
+          {r.status !== "PENDING"
+            ? r.status.toLowerCase()
+            : gateway
+              ? "sent to PhonePe, waiting for its answer"
+              : "to pay"}{" "}
+          · {r.reason}
           {r.reference ? ` · reference ${r.reference}` : ""}
         </p>
-        {r.status === "PENDING" && canComplete ? (
+        {r.status === "PENDING" && canComplete && !gateway ? (
           <>
             {error ? <Notice tone="error" title={error.message} /> : null}
             <TextField
@@ -697,9 +711,11 @@ function RefundRow({
 
 function RecordRefund({
   orderNumber,
+  gateway,
   onDone,
 }: {
   orderNumber: string;
+  gateway: boolean;
   onDone: (message: string) => void;
 }) {
   const [amount, setAmount] = useState("");
@@ -748,8 +764,9 @@ function RecordRefund({
         <legend>Record a refund</legend>
         <Stack>
           <p className={ui.muted}>
-            Pay the refund through the bank or the gateway, then mark it
-            refunded here with its reference.
+            {gateway
+              ? "The refund is sent to PhonePe within a minute and settles when PhonePe confirms it."
+              : "Pay the refund through the bank or the gateway, then mark it refunded here with its reference."}
           </p>
           <ErrorSummary
             error={error}

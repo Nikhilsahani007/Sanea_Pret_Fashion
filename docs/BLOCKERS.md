@@ -1,6 +1,6 @@
 # Sanéa Pret — Blockers
 
-Last updated: 2026-10-19
+Last updated: 2026-10-27
 
 A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEMENTATION-INDEX.md`. A safe default only clears a blocker once you accept it.
 
@@ -14,9 +14,9 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | B-06 | No real product data or photography exists. The landing gate cannot pass on placeholders (D-120). | Phase 12 gate | You or brand team | Build with marked placeholders; the gate waits for real images. |
 | B-07 | Checkout decisions unanswered: COD rules (OD-07), shipping (OD-08), returns policy text (OD-09), launch offer (OD-17). | Phase 15 gate | You | Defaults in `open-decisions.md`; returns text must come from you. |
 | B-08 | Email provider and sender domain (OD-19), deferred to hosting (D-190). | Phase 19 launch (no longer the Phase 16 gate) | You | Log-only provider in development and in Phase 16. |
-| B-09 | Legal review of privacy, terms and retention (OD-12); analytics and consent (OD-20); SEO rendering (OD-14). | Phase 17 gate | You and legal adviser | Placeholder legal pages; no third-party analytics. |
-| B-10 | Gateway choice and approval (OD-06); launch mode (OD-22). | Phase 18 | You | Mock provider only; no launch before the gateway. |
-| B-11 | Hosting approval: provider, region, budget (OD-18); verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
+| B-09 | Legal review of privacy, terms and retention (OD-12) and the returns policy text (OD-09). OD-14 and OD-20 closed (D-194). | Phase 19 launch (no longer the Phase 17 gate, D-194) | You and legal adviser | Placeholder legal pages; no third-party analytics. |
+| B-10 | Gateway chosen: PhonePe (D-195). Still needed: PhonePe sandbox credentials (client ID, secret, version) and webhook username and password for the sandbox tests; your separate approval before any production key; launch mode (OD-22). | Phase 18 gate | You | Mock provider in development; PhonePe sandbox only; no production key. |
+| B-11 | Hosting chosen: AWS ap-south-1 (D-196). Still needed: your approval of the infrastructure plan and budget (`phase-19-plan.md`), an AWS account for Sanéa Pret, the domain; verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
 
 ## Environment risks (not blocking yet)
 

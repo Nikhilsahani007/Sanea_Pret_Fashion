@@ -5,6 +5,13 @@ const ORIGIN = /^https?:\/\/[^/\s?#]+$/;
 const MEDIA_BASE = /^https?:\/\/[^/\s?#]+(\/[^\s?#]*)?\/$/;
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
+function optionalText() {
+  return z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().max(200).optional(),
+  );
+}
+
 function originSchema(name: string) {
   return z.string({ error: `${name} is required` }).regex(ORIGIN, {
     error: `${name} must be an origin such as https://example.com (no path)`,
@@ -91,16 +98,44 @@ const schema = z
           .optional(),
       )
       .transform((v) => (v === undefined ? 10 : Number(v))),
-    // Phase 15 payments (system-design.md §6.1, D-107). `mock` simulates a
-    // gateway in development and tests and is refused in production; `none`
-    // offers no online payment. Live providers arrive in Phase 18 (OD-06).
+    // Payments (system-design.md §6.1). `mock` simulates a gateway in
+    // development and tests and is refused in production (D-107); `phonepe`
+    // is PhonePe Payment Gateway (D-195); `none` offers no online payment.
     PAYMENT_PROVIDER: z.preprocess(
       (v) => (v === "" ? undefined : v),
       z
-        .enum(["none", "mock"], {
-          error: "PAYMENT_PROVIDER must be none or mock",
+        .enum(["none", "mock", "phonepe"], {
+          error: "PAYMENT_PROVIDER must be none, mock or phonepe",
         })
         .optional(),
+    ),
+    // PhonePe (Phase 18). `sandbox` by default; `production` takes live
+    // money and needs NODE_ENV=production and PHONEPE_LIVE_APPROVED=true,
+    // set only after your gateway approval (index Phase 18 gate).
+    PHONEPE_ENV: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z
+        .enum(["sandbox", "production"], {
+          error: "PHONEPE_ENV must be sandbox or production",
+        })
+        .default("sandbox"),
+    ),
+    PHONEPE_CLIENT_ID: optionalText(),
+    PHONEPE_CLIENT_SECRET: optionalText(),
+    PHONEPE_CLIENT_VERSION: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z
+        .string()
+        .regex(/^[0-9]{1,6}$/, {
+          error: "PHONEPE_CLIENT_VERSION must be a whole number",
+        })
+        .default("1"),
+    ),
+    PHONEPE_WEBHOOK_USERNAME: optionalText(),
+    PHONEPE_WEBHOOK_PASSWORD: optionalText(),
+    PHONEPE_LIVE_APPROVED: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.enum(["true", "false"]).default("false"),
     ),
     // Signs mock webhooks. Optional: a random per-process secret is used
     // when absent, which is enough because the mock signs and verifies in
@@ -116,6 +151,36 @@ const schema = z
     ),
   })
   .superRefine((env, ctx) => {
+    if (env.PAYMENT_PROVIDER === "phonepe") {
+      for (const key of [
+        "PHONEPE_CLIENT_ID",
+        "PHONEPE_CLIENT_SECRET",
+        "PHONEPE_WEBHOOK_USERNAME",
+        "PHONEPE_WEBHOOK_PASSWORD",
+      ] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: `${key} is required when PAYMENT_PROVIDER is phonepe`,
+          });
+      }
+      if (env.PHONEPE_ENV === "production") {
+        if (env.NODE_ENV !== "production")
+          ctx.addIssue({
+            code: "custom",
+            path: ["PHONEPE_ENV"],
+            message: "PHONEPE_ENV production needs NODE_ENV=production",
+          });
+        if (env.PHONEPE_LIVE_APPROVED !== "true")
+          ctx.addIssue({
+            code: "custom",
+            path: ["PHONEPE_LIVE_APPROVED"],
+            message:
+              "PHONEPE_LIVE_APPROVED must be true for PHONEPE_ENV production (owner approval of the live gateway)",
+          });
+      }
+    }
     if (env.NODE_ENV !== "production") return;
     if (env.PAYMENT_PROVIDER === "mock") {
       ctx.addIssue({
@@ -153,8 +218,17 @@ export type Config = {
   readonly mediaUploadQueueWaiting: number;
   readonly reservationTtlMinutes: number;
   readonly cartMaxLineQuantity: number;
-  readonly paymentProvider: "none" | "mock";
+  readonly paymentProvider: "none" | "mock" | "phonepe";
   readonly mockPaymentSecret: string | null;
+  /** Set when PAYMENT_PROVIDER is phonepe. */
+  readonly phonePe: {
+    readonly env: "sandbox" | "production";
+    readonly clientId: string;
+    readonly clientSecret: string;
+    readonly clientVersion: string;
+    readonly webhookUsername: string;
+    readonly webhookPassword: string;
+  } | null;
 };
 
 /** Thrown when configuration is invalid. Lists variable names and reasons, never values. */
@@ -206,5 +280,16 @@ export function loadConfig(
     paymentProvider:
       e.PAYMENT_PROVIDER ?? (e.NODE_ENV === "production" ? "none" : "mock"),
     mockPaymentSecret: e.MOCK_PAYMENT_SECRET ?? null,
+    phonePe:
+      e.PAYMENT_PROVIDER === "phonepe"
+        ? {
+            env: e.PHONEPE_ENV,
+            clientId: e.PHONEPE_CLIENT_ID!,
+            clientSecret: e.PHONEPE_CLIENT_SECRET!,
+            clientVersion: e.PHONEPE_CLIENT_VERSION,
+            webhookUsername: e.PHONEPE_WEBHOOK_USERNAME!,
+            webhookPassword: e.PHONEPE_WEBHOOK_PASSWORD!,
+          }
+        : null,
   };
 }

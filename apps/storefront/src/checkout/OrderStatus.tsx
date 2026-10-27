@@ -8,7 +8,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { api, toApiError, type ApiError } from "../api/client.ts";
 import type { OrderView } from "../api/types.ts";
 import { rupees } from "../lib/format.ts";
-import { orderToken } from "./orders.ts";
+import { openPayment, orderToken } from "./orders.ts";
 import s from "./checkout.module.css";
 
 const POLL_MS = 2_000;
@@ -77,9 +77,8 @@ export function OrderStatus() {
           "X-Order-Token": token ?? "",
         },
       );
-      const pay = res.payment?.clientPayload?.payPath;
-      if (pay) navigate(`${pay}?order=${encodeURIComponent(orderNumber)}`);
-      else await load();
+      if (!openPayment(res.payment?.clientPayload, orderNumber, navigate))
+        await load();
     } catch {
       setRetrying(false);
       setRetryError(true);

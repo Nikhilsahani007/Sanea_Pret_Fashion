@@ -6,6 +6,7 @@ import type { Db } from "../../platform/db.ts";
 import { OutOfStock, convert, reserveIn } from "../inventory/service.ts";
 import { flagOrder, lockOrder, transition } from "../orders/service.ts";
 import type { PaymentProvider, WebhookEvent } from "./provider.ts";
+import { settleRefund } from "./refunds.ts";
 
 const { sql } = Prisma;
 type Tx = Prisma.TransactionClient;
@@ -17,7 +18,11 @@ export type Outcome =
   | "AMOUNT_MISMATCH"
   | "UNKNOWN_PAYMENT"
   | "PAID_AFTER_CANCEL"
-  | "PAID_NO_STOCK";
+  | "PAID_NO_STOCK"
+  | "REFUND_COMPLETED"
+  | "REFUND_FAILED"
+  | "UNKNOWN_REFUND"
+  | "IGNORED";
 
 /** How long a re-made hold lasts (SR-3, SR-10); from RESERVATION_TTL_MINUTES. */
 export type HoldOptions = { readonly ttlMinutes: number };
@@ -64,15 +69,52 @@ export async function processEvent(
         },
       },
     });
-    const outcome = payment
-      ? await apply(tx, payment, event, now, hold)
-      : ("UNKNOWN_PAYMENT" as const);
+    const outcome: Outcome =
+      event.type === "ignored"
+        ? "IGNORED"
+        : !payment
+          ? "UNKNOWN_PAYMENT"
+          : event.type === "refund.completed" || event.type === "refund.failed"
+            ? await applyRefund(tx, payment, event)
+            : await apply(tx, payment, event, now, hold);
     await tx.paymentEvent.update({
       where: { id: eventRowId },
       data: { paymentId: payment?.id ?? null, processedAt: now, outcome },
     });
     return outcome;
   });
+}
+
+/** A gateway refund event (Phase 18): settles our refund row once. */
+async function applyRefund(
+  tx: Tx,
+  payment: { id: string; orderId: string },
+  event: WebhookEvent,
+): Promise<Outcome> {
+  const refund = event.providerRefundId
+    ? await tx.refund.findFirst({
+        where: { id: event.providerRefundId, paymentId: payment.id },
+      })
+    : null;
+  if (!refund) return "UNKNOWN_REFUND";
+  await lockOrder(tx, payment.orderId);
+  if (
+    event.type === "refund.completed" &&
+    event.amountPaise !== refund.amountPaise
+  ) {
+    await flagOrder(tx, payment.orderId, "AMOUNT_MISMATCH");
+    return "AMOUNT_MISMATCH";
+  }
+  const done = await settleRefund(
+    tx,
+    refund.id,
+    event.type === "refund.completed" ? "REFUNDED" : "FAILED",
+    refund.id,
+  );
+  if (!done) return "ALREADY_APPLIED";
+  return event.type === "refund.completed"
+    ? "REFUND_COMPLETED"
+    : "REFUND_FAILED";
 }
 
 async function apply(
@@ -232,7 +274,9 @@ export async function reconcile(
   });
   const changed: { orderId: string; outcome: Outcome }[] = [];
   for (const p of stuck) {
-    const status = await provider.fetchStatus(p.providerPaymentId!);
+    const { status, amountPaise } = await provider.fetchStatus(
+      p.providerPaymentId!,
+    );
     if (status !== "CAPTURED" && status !== "FAILED") continue;
     const outcome = await db.$transaction((tx) =>
       apply(
@@ -240,7 +284,8 @@ export async function reconcile(
         p,
         {
           type: status === "CAPTURED" ? "payment.captured" : "payment.failed",
-          amountPaise: p.amountPaise,
+          // The gateway's amount when it reports one, so a mismatch is caught.
+          amountPaise: amountPaise ?? p.amountPaise,
           currency: "INR",
           failureCode: "RECONCILED_FAILED",
         },

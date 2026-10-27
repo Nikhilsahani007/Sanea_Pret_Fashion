@@ -25,6 +25,7 @@ import { requirePermission } from "../auth/middleware.ts";
 import { handle, input, noStore } from "../catalogue/common.ts";
 import type { CheckoutDeps } from "../checkout/deps.ts";
 import { notify, templateFor } from "../notifications/service.ts";
+import { isGatewayRefund, settleRefund } from "../payments/refunds.ts";
 import { lockOrder, transition } from "./service.ts";
 
 export const ORDERS_PATH = "/api/v1/admin/orders";
@@ -440,38 +441,15 @@ export function ordersAdminRouter(deps: CheckoutDeps): Router {
         await lockOrder(tx, o.id);
         const r = await tx.refund.findFirst({
           where: { id: params.refundId, payment: { orderId: o.id } },
-          include: { payment: { include: { refunds: true } } },
+          include: { payment: true },
         });
         if (!r) throw new AppError("NOT_FOUND");
         if (r.status !== "PENDING")
           throw new AppError("CONFLICT", { reason: "ALREADY_COMPLETED" });
-        await tx.refund.update({
-          where: { id: r.id },
-          data: {
-            status: body.outcome,
-            providerRefundId: body.reference ?? null,
-          },
-        });
-        const others = r.payment.refunds.filter((x) => x.id !== r.id);
-        const pending = others.some((x) => x.status === "PENDING");
-        const refunded =
-          others
-            .filter((x) => x.status === "REFUNDED")
-            .reduce((n, x) => n + x.amountPaise, 0) +
-          (body.outcome === "REFUNDED" ? r.amountPaise : 0);
-        const status = pending
-          ? "REFUND_PENDING"
-          : body.outcome === "FAILED" && refunded === 0
-            ? "REFUND_FAILED"
-            : refunded >= r.payment.amountPaise
-              ? "REFUNDED"
-              : r.payment.method === "COD"
-                ? "COLLECTED"
-                : "CAPTURED";
-        await tx.payment.update({
-          where: { id: r.paymentId },
-          data: { status },
-        });
+        // A gateway refund settles from the gateway's answer (Phase 18).
+        if (isGatewayRefund(deps.payments, r.payment))
+          throw new AppError("CONFLICT", { reason: "GATEWAY_REFUND" });
+        await settleRefund(tx, r.id, body.outcome, body.reference ?? null);
         await audit(tx, req.ip, res, {
           action: "order.refund_completed",
           entityId: o.id,

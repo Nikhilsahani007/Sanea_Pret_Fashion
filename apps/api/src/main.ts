@@ -8,7 +8,7 @@ import { startCartCleanupJob } from "./modules/cart/job.ts";
 import { startExpiryJob } from "./modules/inventory/job.ts";
 import { logEmailProvider } from "./modules/notifications/provider.ts";
 import { startOrderJobs } from "./modules/orders/jobs.ts";
-import { paymentProviderFor } from "./modules/payments/mock.ts";
+import { paymentProviderFor } from "./modules/payments/providers.ts";
 import { createLogger } from "./platform/logger.ts";
 
 let config: Config;

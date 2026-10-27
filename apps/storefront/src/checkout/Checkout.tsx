@@ -21,7 +21,7 @@ import { api, toApiError } from "../api/client.ts";
 import type { OrderView, Quote } from "../api/types.ts";
 import { useCart } from "../cart/CartProvider.tsx";
 import { rupees } from "../lib/format.ts";
-import { rememberOrder } from "./orders.ts";
+import { openPayment, rememberOrder } from "./orders.ts";
 import s from "./checkout.module.css";
 
 type Method = "PREPAID" | "COD";
@@ -146,12 +146,14 @@ export function Checkout() {
       );
       rememberOrder(res.order.orderNumber, res.accessToken);
       reload();
-      const pay = res.payment?.clientPayload?.payPath;
-      navigate(
-        pay
-          ? `${pay}?order=${encodeURIComponent(res.order.orderNumber)}`
-          : `/orders/${res.order.orderNumber}`,
-      );
+      if (
+        !openPayment(
+          res.payment?.clientPayload,
+          res.order.orderNumber,
+          navigate,
+        )
+      )
+        navigate(`/orders/${res.order.orderNumber}`);
     } catch (error) {
       setPlacing(false);
       const err = toApiError(error);

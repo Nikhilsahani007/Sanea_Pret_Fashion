@@ -226,6 +226,11 @@ export type OrderView = {
   payment: {
     method: "PREPAID" | "COD";
     status: string;
-    clientPayload: { provider: string; payPath: string } | null;
+    /** The mock's page (`payPath`) or PhonePe's hosted page (`redirectUrl`). */
+    clientPayload: {
+      provider: string;
+      payPath?: string;
+      redirectUrl?: string;
+    } | null;
   } | null;
 };

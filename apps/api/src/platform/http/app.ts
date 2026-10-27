@@ -35,7 +35,7 @@ import {
   logEmailProvider,
   type EmailProvider,
 } from "../../modules/notifications/provider.ts";
-import { paymentProviderFor } from "../../modules/payments/mock.ts";
+import { paymentProviderFor } from "../../modules/payments/providers.ts";
 import type { PaymentProvider } from "../../modules/payments/provider.ts";
 import { webhooksRouter } from "../../modules/payments/router.ts";
 import { healthRouter } from "../../modules/health/router.ts";
