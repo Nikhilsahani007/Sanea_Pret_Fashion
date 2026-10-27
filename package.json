@@ -28,6 +28,7 @@
     "demo:seed": "node apps/api/src/db/demo-seed.ts",
     "lighthouse": "node scripts/lighthouse.ts",
     "phonepe:sandbox": "node scripts/phonepe-sandbox.ts",
+    "verify:restore": "node scripts/verify-restore.ts",
     "admin:create-owner": "node apps/api/src/modules/auth/create-owner.ts",
     "media:serve": "node --env-file-if-exists=.env apps/api/src/modules/media/dev-image-server.ts"
   },

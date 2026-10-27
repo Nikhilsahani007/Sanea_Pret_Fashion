@@ -1,0 +1,53 @@
+# Production and staging on one EC2 instance (phase-19-plan.md §3). The
+# database is Amazon RDS, not a container. Secrets come from /etc/sanea/api.env,
+# written at boot from AWS Systems Manager Parameter Store (never committed).
+#
+#   docker compose -f deploy/compose.production.yaml run --rm migrate
+#   docker compose -f deploy/compose.production.yaml up -d api web
+name: sanea-pret
+
+services:
+  migrate:
+    image: ${IMAGE_REGISTRY}/sanea-migrate:${RELEASE}
+    env_file: /etc/sanea/api.env
+    profiles: ["release"]
+
+  api:
+    image: ${IMAGE_REGISTRY}/sanea-api:${RELEASE}
+    env_file: /etc/sanea/api.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "4000"
+      TRUST_PROXY: "1"
+      MEDIA_STORAGE_DIR: /var/lib/sanea/media
+    volumes:
+      - /var/lib/sanea/media:/var/lib/sanea/media
+    restart: unless-stopped
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ap-south-1
+        awslogs-group: /sanea/${STAGE}/api
+
+  web:
+    image: ${IMAGE_REGISTRY}/sanea-web:${RELEASE}
+    environment:
+      SHOP_DOMAIN: ${SHOP_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/lib/sanea/media/public:/srv/media/public:ro
+      - caddy-data:/data
+    depends_on:
+      - api
+    restart: unless-stopped
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ap-south-1
+        awslogs-group: /sanea/${STAGE}/web
+
+volumes:
+  caddy-data:

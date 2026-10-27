@@ -4,6 +4,8 @@ Last updated: 2026-10-27 · Repository: https://github.com/Nikhilsahani007/Sanea
 
 ## Current phase
 
+**Phase 19 — Infrastructure, acceptance testing and launch (AWS ap-south-1, D-196): infrastructure plan written 2026-10-27 for your approval; nothing provisioned** (`phase-19-plan.md`). One EC2 t4g.small with Docker (Caddy and the API), RDS for PostgreSQL 18, EBS media with AWS Backup, Parameter Store secrets, CloudWatch alarms; estimated USD 40–56 a month for production (to confirm in the AWS Pricing Calculator). Built: `deploy/Dockerfile`, `deploy/compose.production.yaml`, `deploy/Caddyfile` (not built here, no Docker daemon) and `npm run verify:restore` (tested locally). **Next:** your approval of the plan and budget, an AWS account and the domain; then provisioning, the restore test, UAT and the launch checklist (§9), and your launch approval.
+
 **Phase 18 — Live payment gateway (PhonePe, D-195): built and tested against a fake PhonePe 2026-10-27; gate pending** (`phase-18-plan.md`). Adapter without a new dependency, gateway refunds, reconciliation by amount, storefront redirect to PhonePe's page only, admin view of gateway refunds; live mode refused unless `NODE_ENV=production` and `PHONEPE_LIVE_APPROVED=true`. Evidence: 832 unit, 501 integration and 39 end-to-end tests pass. **Next:** your PhonePe sandbox credentials and the sandbox run (`npm run phonepe:sandbox`, webhook replay), then your gateway approval. Phase 19 (AWS ap-south-1, D-196) starts with the infrastructure plan for your approval.
 
 **Phase 17 — Hardening and legal content: gate passed (D-194, 2026-10-27)**; D-193 confirmed (no server rendering; no analytics). Legal and returns text (OD-12, OD-09) now block launch, not the gate.
