@@ -1,10 +1,18 @@
 # Sanéa Pret — Project Status
 
-Last updated: 2026-10-26 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
+Last updated: 2026-10-27 · Repository: https://github.com/Nikhilsahani007/Sanea_Pret_Fashion
 
 ## Current phase
 
 **Phase 17 — Hardening and legal content: engineering work built and tested 2026-10-26; gate pending** (`phase-17-plan.md`). Phase 16 gate passed (D-192). SEO meta, link previews, sitemap and robots; security review (`security-review.md`) with four fixes; Lighthouse mobile median: landing 88, listing 92, product 93, checkout 92, accessibility 100 on all (`docs/reviews/lighthouse/2026-10-26/`). **Next:** your answers on OD-14 and OD-20 (D-193, proposed defaults built) and lawyer-approved privacy policy, terms and returns text (OD-12, OD-09); then Phase 18 (live payment gateway, OD-06) and Phase 19 (hosting, OD-18).
+
+**After the Phase 17 build (2026-10-26 to 2026-10-27, within the approved scope; no gate changed):**
+- Storefront motion beyond the landing (page and grid rise, picture settle, bag-count pop; nothing moves under reduced motion), `da8f2d9`.
+- Listing grid sized to its own width, product names held to two lines, colour filter in one column, empty search without a sort control and with a link to the shop; `npm run demo` for the local demo store (`scripts/demo.ts`), `a657ff7`. Evidence: 823 unit and 39 end-to-end tests pass; axe clean and no horizontal scroll on 12 pages at 360, 390, 768, 1024, 1440 and 1920 px.
+- `npm run start` and `npm run dev` for the API now read the root `.env` (they did not, so the API stopped at once with "Invalid configuration" and the storefront's `/api` requests failed with 502). Verified: health 200 against a disposable database.
+- **Diagnosed for local runs:** a home page with a blank aubergine hero and no rows means a migrated database without the demo seed (`/content/home` returns empty slides and null rows); `npm run demo` loads it.
+
+**Every remaining phase waits on you:** the Phase 17 gate (review, D-193 for OD-14 and OD-20, legal text OD-12 and returns OD-09); Phase 18 needs the gateway choice (OD-06, B-10); Phase 19 needs the hosting decision (OD-18, B-11). No engineering task in the index can start before those.
 
 **Brand and demo store (2026-10-26, D-187):** the Owner's logo (Saniya Abbadi, Instagram @saneapret) is applied to the header, footer, favicon and touch icon. A fictional demo catalogue from the supplied workbook (16 products, 136 variants; XS left out pending your decision) loads only with `npm run demo:seed` against a non-production database; the images are labelled "DEMO IMAGE" placeholders, not real or third-party photographs. Evidence: 794 unit, 450 integration and 28 end-to-end tests pass; axe clean and no overflow at 1440, 768 and 390 px (`docs/reviews/demo/2026-10-26/`). **Open:** XS as a size; real product photographs (B-06).
 
