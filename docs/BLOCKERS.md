@@ -16,7 +16,7 @@ A blocker stops a phase gate from passing. Phase numbers refer to `MASTER-IMPLEM
 | B-08 | Email provider and sender domain (OD-19), deferred to hosting (D-190). | Phase 19 launch (no longer the Phase 16 gate) | You | Log-only provider in development and in Phase 16. |
 | B-09 | Legal review of privacy, terms and retention (OD-12) and the returns policy text (OD-09). OD-14 and OD-20 closed (D-194). | Phase 19 launch (no longer the Phase 17 gate, D-194) | You and legal adviser | Placeholder legal pages; no third-party analytics. |
 | B-10 | Gateway chosen: PhonePe (D-195). Still needed: PhonePe sandbox credentials (client ID, secret, version) and webhook username and password for the sandbox tests; your separate approval before any production key; launch mode (OD-22). | Phase 18 gate | You | Mock provider in development; PhonePe sandbox only; no production key. |
-| B-11 | Hosting chosen: AWS ap-south-1 (D-196). Still needed: your approval of the infrastructure plan and budget (`phase-19-plan.md`), an AWS account for Sanéa Pret, the domain; verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
+| B-11 | Hosting chosen: AWS ap-south-1 (D-196). Plan approved (D-197). Still needed: an AWS account for Sanéa Pret with root MFA and a provisioning role, the domain, the alert email and the monthly budget limit; verified Rehma Foundation content (OD-13). | Phase 19 | You | Nothing provisioned; placeholder Rehma page. |
 
 ## Environment risks (not blocking yet)
 

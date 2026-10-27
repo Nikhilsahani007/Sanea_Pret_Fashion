@@ -1,6 +1,6 @@
 # Phase 19 Plan — Infrastructure, Acceptance Testing and Launch
 
-Status: **Infrastructure plan written 2026-10-27 for your approval; nothing is provisioned or billed.** Hosting is AWS, region ap-south-1 (Mumbai) (D-196). The index gates this phase twice: **you approve this plan (and its budget) before anything is created, and you approve launch separately.** Phase 18's gate (the PhonePe sandbox run and your gateway approval) also comes before launch.
+Status: **Infrastructure plan approved 2026-10-27 (D-197); nothing is provisioned or billed yet.** Provisioning starts when the prerequisites in §9 exist (AWS account and provisioning role, domain, alert email, budget limit). Hosting is AWS, region ap-south-1 (Mumbai) (D-196). The index gates this phase twice: **you approve this plan (and its budget) before anything is created, and you approve launch separately.** Phase 18's gate (the PhonePe sandbox run and your gateway approval) also comes before launch.
 
 ## 1. Scope (index Phase 19)
 
@@ -122,7 +122,8 @@ Nothing here is done yet unless marked.
 
 | Item | Owner | Status |
 |------|-------|--------|
-| This plan and the monthly budget approved | You | Open |
+| This plan approved | You | **Done (D-197)** |
+| Monthly budget limit for the cost alarm | You | Open |
 | AWS account for Sanéa Pret (root MFA, billing alerts) and an IAM role for provisioning | You | Open |
 | Domain and its DNS moved to Route 53 (or records added) | You | Open |
 | PostgreSQL 18 available on RDS ap-south-1 | Engineering, at provisioning | Unverified |
