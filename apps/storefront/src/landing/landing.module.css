@@ -38,10 +38,20 @@
   overflow: hidden;
   background: var(--sp-field-1);
   color: var(--sp-paper);
+  container-type: inline-size;
+  /* The wordmark spans the hero between the gutters; its height follows
+     from the logo's proportions (858 × 134). */
+  --mark-width: calc(100cqi - 2 * var(--gutter));
+  --mark-height: calc(var(--mark-width) * 134 / 858);
+  --mark-foot: clamp(var(--sp-space-4), 2.2cqi, var(--sp-space-12));
+  --above-mark: calc(
+    var(--mark-foot) + var(--mark-height) +
+      clamp(var(--sp-space-6), 3cqi, var(--sp-space-12))
+  );
 }
 
 .field {
-  place-items: center;
+  place-items: end center;
 }
 
 .slides {
@@ -80,34 +90,30 @@
   object-fit: cover;
 }
 
-/* The one allowed gradient: a neutral scrim at the top for the masthead and
-   at the bottom for the headline, so the picture stays clean in between. */
+/* The one allowed gradient: a neutral scrim over the lower part, under the
+   campaign line and the wordmark, so the picture stays clean above. */
 .scrim {
   position: absolute;
   inset: 0;
   /* prettier-ignore */
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--sp-ink) 32%, transparent), transparent 26%, transparent 48%, color-mix(in srgb, var(--sp-ink) 62%, transparent)); /* taste-skill-ignore */
+  background: linear-gradient(to bottom, transparent 38%, color-mix(in srgb, var(--sp-ink) 58%, transparent)); /* taste-skill-ignore */
 }
 
+/* The monument: gutter to gutter, at the foot of the hero. */
 .masthead {
   position: relative;
   z-index: 1;
   justify-self: center;
-  align-self: start;
-  width: clamp(9rem, 24vw, 21rem);
-  margin-block-start: clamp(var(--sp-space-6), 4vw, var(--sp-space-12));
+  align-self: end;
+  width: var(--mark-width);
+  margin-block-end: var(--mark-foot);
   pointer-events: none;
-}
-
-.field .masthead {
-  align-self: center;
-  margin: 0;
 }
 
 .copy {
   position: absolute;
   inset-inline-start: var(--gutter);
-  inset-block-end: calc(var(--sp-space-16) + var(--sp-space-6));
+  inset-block-end: var(--above-mark);
   z-index: 1;
   display: grid;
   gap: var(--sp-space-6);
@@ -116,7 +122,7 @@
 }
 
 .campaign {
-  font-size: clamp(2rem, 1.25rem + 3vw, 3.75rem);
+  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.25rem);
   font-weight: var(--sp-weight-regular);
   line-height: 1.04;
   letter-spacing: var(--sp-tracking-display);
@@ -149,10 +155,12 @@
   transform: scale(0.98);
 }
 
+/* On a phone the indicators and pause sit at the top right, clear of the
+   CTA; from tablet up, level with the CTA above the wordmark. */
 .controls {
   position: absolute;
-  inset-inline: var(--gutter);
-  inset-block-end: var(--sp-space-6);
+  inset-inline-end: var(--gutter);
+  inset-block-start: var(--sp-space-2);
   z-index: 1;
   display: flex;
   justify-content: flex-end;
@@ -160,13 +168,10 @@
   gap: var(--sp-space-4);
 }
 
-@media (min-width: 64rem) {
-  .copy {
-    inset-block-end: var(--sp-space-16);
-  }
-
+@media (min-width: 48rem) {
   .controls {
-    inset-block-end: var(--sp-space-16);
+    inset-block-start: auto;
+    inset-block-end: var(--above-mark);
   }
 }
 

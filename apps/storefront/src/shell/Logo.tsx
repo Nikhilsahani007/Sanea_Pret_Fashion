@@ -7,6 +7,7 @@
 import lockupIvory from "../assets/logo-lockup-ivory.png";
 import wordmark from "../assets/logo-wordmark.png";
 import wordmarkIvory from "../assets/logo-wordmark-ivory.png";
+import wordmarkIvoryHd from "../assets/logo-wordmark-ivory-hd.png";
 import s from "./shell.module.css";
 
 export const BRAND_NAME = "Sanéa Pret";
@@ -39,14 +40,19 @@ export function Lockup() {
 }
 
 /**
- * The monument (phase-12-plan.md P12-1): the wordmark at hero scale, in
- * ivory. It is decorative here, since the page's h1 carries the name.
+ * The monument (phase-12-plan.md P12-1): the wordmark across the hero, in
+ * ivory. It is decorative here, since the page's h1 carries the name. At
+ * this size the supplied 858 px raster is too soft, so wide screens get a
+ * 2574 px version made from it (upscaled, edges re-sharpened; never
+ * retyped) until the vector logo arrives (B-04).
  */
 export function Monument() {
   return (
     <img
       className={s.monument}
       src={wordmarkIvory}
+      srcSet={`${wordmarkIvory} 858w, ${wordmarkIvoryHd} 2574w`}
+      sizes="calc(100vw - 2rem)"
       alt=""
       aria-hidden="true"
       width={858}

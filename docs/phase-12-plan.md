@@ -294,3 +294,19 @@ Kept as approved: the ivory and aubergine direction, the smaller centred masthea
 | Nishorama screen recording | No (`docs/reference/` does not exist) | **B-03 open** |
 
 The live-reference comparison and the motion audit are **not performed**: they wait for the reference evidence (B-03). Phase 12 is **not passed**.
+
+## 14. Nishorama hero, on your request (2026-10-28)
+
+**Your request:** the landing "same as nishorama.in". nishorama.in cannot be reached from the build environment (the network policy refuses the host), and web search returned nothing about its layout, so nothing was copied or measured from it: no code, images, text or measurements. What changed is the one Nishorama feature the index names (Phase 12, item 4) and that §12 had scaled back: **the oversized wordmark overlaid on the hero.**
+
+| Area | Before (§12) | Now |
+|------|--------------|-----|
+| Wordmark | Masthead at the top centre, about a quarter of the width | Across the foot of the photograph from gutter to gutter (about 92 % of the width), its height from the logo's proportions |
+| Campaign line and CTA | Bottom left | Bottom left, just above the wordmark |
+| Indicators and pause | Bottom right | Level with the CTA from tablet up; top right on a phone, clear of the CTA |
+| Scrim | Top and bottom bands | One neutral band over the lower part, under the text and the wordmark |
+| Wordmark image | The supplied 858 px raster | The same, plus a 2574 px version made from it (upscaled, edges re-sharpened, never retyped) served to wide screens by `srcset`; the vector logo (B-04) still replaces both |
+
+**Evidence:** screenshots in `docs/reviews/landing/2026-10-28/` (first screen and full page at 1440, 1024, 768, 390 and 360, demo catalogue); axe clean and no horizontal scroll at each width; format, lint, tokens, typecheck, Taste lint 0 fail; 832 unit and 39 end-to-end tests pass.
+
+**To match the reference more closely:** allow `nishorama.in` in the environment's network settings, or send screenshots or a recording (B-03); layout rhythm can then be compared, as §6.6 describes.

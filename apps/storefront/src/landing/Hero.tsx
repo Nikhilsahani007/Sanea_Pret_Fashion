@@ -1,9 +1,8 @@
-// The landing hero (phase-12-plan.md §5.1, §12; design-system.md §3), redesigned
-// after your first review: campaign first. The photograph fills the frame;
-// the campaign line is the headline, with one quiet CTA, bottom left; the
-// wordmark (the supplied logo, never retyped or enlarged past its raster
-// size) sits above as a masthead, at about a quarter of the width; the slide
-// indicators and pause sit bottom right. WAI-ARIA carousel pattern: arrow
+// The landing hero (phase-12-plan.md §5.1, §13; design-system.md §3) in the
+// Nishorama composition (index Phase 12, item 4): the photograph fills the
+// frame and the oversized wordmark (the supplied logo, never retyped) runs
+// across its foot from gutter to gutter; the campaign line and one quiet CTA
+// sit above it on the left, the slide indicators and pause on the right. WAI-ARIA carousel pattern: arrow
 // keys, Home and End on the indicators choose a slide and take focus with
 // it. With no published slide, the masthead stands on the deep aubergine
 // field (P12-3); a slide whose image is missing shows that field too, never
